@@ -66,6 +66,8 @@ class SystemStateManagerContractTest {
     @Config(sdk = [26, 34])
     fun `supported adapter returns an actually registered receiver`() {
         val app = ApplicationProvider.getApplicationContext<Application>()
+        // JVM tests use Robolectric's bare application rather than the merged AndroidX manifest.
+        shadowOf(app).grantPermissions("${app.packageName}.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION")
         val controller = Robolectric.buildActivity(ComponentActivity::class.java).create()
         val manager = BluetoothStatusManager(controller.get(), app, {}, {})
         val receiver = manager.monitorBluetoothState(app, manager, {})
