@@ -10,6 +10,12 @@ adb shell am start -W -n net.meshstar.app/com.bitchat.android.MainActivity > /tm
 cat /tmp/meshstar-launch.txt
 grep -q 'Status: ok' /tmp/meshstar-launch.txt
 sleep 8
+# Exercise activity disposal/recreation, including devices with no Bluetooth adapter.
+adb shell settings put system accelerometer_rotation 0
+adb shell settings put system user_rotation 1
+sleep 3
+adb shell settings put system user_rotation 0
+sleep 3
 adb shell pidof net.meshstar.app >/dev/null
 adb shell dumpsys activity activities > /tmp/meshstar-activities.txt
 grep -E '(mResumedActivity|topResumedActivity|mFocusedActivity).*net.meshstar.app' /tmp/meshstar-activities.txt
