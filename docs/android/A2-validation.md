@@ -10,6 +10,9 @@ Implementation: `8c05d62`; emulator gate: `c4f7d25`. Build: `0.3.0 (2)`, applica
   credentials, contacts, ciphertext outbox, history, proofs and cursors in
   `noBackupFilesDir`. Writes use `AtomicFile`; filenames are authenticated as AAD.
   No plaintext fallback or silent identity rotation after a missing/invalid key.
+  The encrypted file limit is checked before reading/overwriting, so an oversized
+  write cannot replace readable state. Persisted schema classes have explicit R8
+  keep rules for future minified builds.
   This is wrapped RNS key material, not a claim that Android 26 can natively
   generate both Reticulum asymmetric algorithms in Keystore.
 - My QR, fingerprint, contact paste and CameraX/ML Kit scanner. Address/public-key

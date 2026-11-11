@@ -32,7 +32,10 @@ class EncryptedFiles(context: Context, private val namespace: String = "meshstar
     @Synchronized fun read(name: String): ByteArray? {
         val file = AtomicFile(File(directory, name))
         if (!file.baseFile.exists() && !File(directory, "$name.bak").exists()) return null
-        val bytes = file.readFully()
+        val bytes = file.openRead().use { stream ->
+            check(stream.channel.size() in 29..32_000_000) { "Invalid encrypted storage size" }
+            stream.readBytes()
+        }
         check(bytes.size in 29..32_000_000 && bytes[0] == 1.toByte()) { "Invalid encrypted storage" }
         return Cipher.getInstance("AES/GCM/NoPadding").run {
             init(Cipher.DECRYPT_MODE, key(), GCMParameterSpec(128, bytes.copyOfRange(1, 13)))
@@ -40,6 +43,7 @@ class EncryptedFiles(context: Context, private val namespace: String = "meshstar
         }
     }
     @Synchronized fun write(name: String, plain: ByteArray) {
+        require(plain.size <= 31_999_971) { "Encrypted storage is full" }
         val cipher = Cipher.getInstance("AES/GCM/NoPadding").apply {
             init(Cipher.ENCRYPT_MODE, key()); updateAAD(name.toByteArray(Charsets.UTF_8))
         }
@@ -54,7 +58,9 @@ class EncryptedFiles(context: Context, private val namespace: String = "meshstar
         check(directory.deleteRecursively()) { "Encrypted storage cleanup failed" }
     }
     @Synchronized fun identity(): Identity {
-        read("identity")?.let { return Identity(it) }
+        read("identity")?.let { seed ->
+            try { return Identity(seed) } finally { seed.fill(0) }
+        }
         check(read("state") == null) { "Identity missing; history was not replaced" }
         val identity = Identity()
         val seed = identity.exportPrivateKey()

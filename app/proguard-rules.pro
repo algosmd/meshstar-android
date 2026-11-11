@@ -46,3 +46,13 @@
 -keepclassmembers class * implements android.location.LocationListener {
     public <methods>;
 }
+
+# Persisted RNS state must retain its schema across debug/minified builds.
+-keep class net.meshstar.data.SatState { *; }
+-keep class net.meshstar.data.ChatMessage { *; }
+-keep class net.meshstar.data.PendingProof { *; }
+-keep class net.meshstar.data.BoxCursor { *; }
+-keep enum net.meshstar.data.Route { *; }
+-keep enum net.meshstar.data.Delivery { *; }
+-keep class net.meshstar.box.BoxConfig { *; }
+-keep class net.meshstar.link.Contact { *; }

@@ -24,6 +24,8 @@ class KeystoreInstrumentedTest {
             val reopened = EncryptedFiles(context, namespace)
             assertEquals(qr, Contact.of(reopened.identity(), "Synthetic").qr)
             assertArrayEquals("synthetic state".toByteArray(), reopened.read("state"))
+            assertTrue(runCatching { reopened.write("state", ByteArray(32_000_000)) }.isFailure)
+            assertArrayEquals("synthetic state".toByteArray(), reopened.read("state"))
             val store = KeyStore.getInstance("AndroidKeyStore").apply { load(null) }
             assertNull(store.getKey(alias, null).encoded)
             val stored = File(directory, "identity").readBytes()
