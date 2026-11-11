@@ -157,7 +157,7 @@
         <activity
             android:name=".hotspot.HotspotActivity"
             android:exported="false"
-            android:label="Share BitChat"
+            android:label="@string/share_bitchat_title"
             android:theme="@style/Theme.BitchatAndroid"
             android:launchMode="singleTop" />
 

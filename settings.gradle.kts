@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "bitchat-android"
+rootProject.name = "meshstar-android"
 include(":app")
-include(":wear")
+// Wear is intentionally not part of MeshStar Android A0.
 // Using published Arti AAR; local module not included

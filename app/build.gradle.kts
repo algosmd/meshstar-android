@@ -33,11 +33,11 @@ android {
     if (releaseUiTests) testBuildType = "release"
 
     defaultConfig {
-        applicationId = "com.bitchat.droid"
+        applicationId = "net.meshstar.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 42
-        versionName = "2.2.0"
+        versionCode = 1
+        versionName = "0.3.0"
         buildConfigField(
             "String",
             "GITHUB_RELEASE_CERT_SHA256",

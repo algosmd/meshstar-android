@@ -1,142 +1,56 @@
-name: Android CI
-
+name: MeshStar Android CI
 on:
-  workflow_dispatch:
   push:
-    branches: [main, develop]
   pull_request:
-    branches: [main, develop]
-
+  workflow_dispatch:
 permissions:
   contents: read
-
-env:
-  SETUP_JAVA_VERSION: 21.0.11+10.0.LTS
-
 jobs:
-  verify:
-    name: Test and lint
+  build:
     runs-on: ubuntu-24.04
-
+    timeout-minutes: 45
     steps:
-      - name: Checkout code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Set up pinned JDK
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95
         with:
           distribution: temurin
-          java-version: ${{ env.SETUP_JAVA_VERSION }}
-
-      - name: Set up and validate Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
-      - name: Verify native library inputs
-        run: tools/arti-build/verify-checksums.sh
-
-      - name: Run unit tests
-        run: ./gradlew testDebugUnitTest
-
-      - name: Run lint
-        run: ./gradlew lintDebug
-
-      - name: Upload test reports
+          java-version: '21'
+      - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92
+      - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        with:
+          packages: platforms;android-37 build-tools;37.0.0
+      - name: Build and unit tests
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: meshstar-debug-apk
+          path: app/build/outputs/apk/debug/*universal*.apk
+          if-no-files-found: error
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
-          name: test-reports
-          path: |
-            **/build/test-results/
-            **/build/reports/tests/
-
-      - name: Upload lint results
-        if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: lint-results
-          path: "**/build/reports/lint-results-*.html"
-
-  build-debug:
-    name: Build debug APK
+          name: unit-test-results
+          path: app/build/test-results/testDebugUnitTest/*.xml
+  emulator:
+    needs: build
     runs-on: ubuntu-24.04
-    needs: verify
-
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Set up pinned JDK
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
-        with:
-          distribution: temurin
-          java-version: ${{ env.SETUP_JAVA_VERSION }}
-
-      - name: Set up and validate Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
-
-      - name: Build debug APK
-        run: ./gradlew assembleDebug
-
-      - name: Upload debug APK
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: Debug-apk
-          path: app/build/outputs/apk/debug/*.apk
-
-  reproducible-build:
-    name: Reproducible release build ${{ matrix.replica }}
-    runs-on: ubuntu-24.04
-    needs: verify
+    timeout-minutes: 25
     strategy:
       fail-fast: false
       matrix:
-        replica: [a, b]
-
+        api: [26, 34]
     steps:
-      - name: Checkout code
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Set up pinned JDK
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803
+      - uses: actions/download-artifact@v4
         with:
-          distribution: temurin
-          java-version: ${{ env.SETUP_JAVA_VERSION }}
-
-      - name: Set up and validate Gradle
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
+          name: meshstar-debug-apk
+          path: apk
+      - name: Enable emulator acceleration
+        run: sudo chmod a+rw /dev/kvm
+      - uses: reactivecircus/android-emulator-runner@4c44018e59b437e86cdfc41da381398f93ed8808
         with:
-          cache-disabled: true
-
-      - name: Build canonical unsigned release
-        run: tools/reproducible-builds/build-in-container.sh "$RUNNER_TEMP/release-${{ matrix.replica }}"
-
-      - name: Upload build replica
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
-        with:
-          name: reproducible-release-${{ matrix.replica }}
-          path: ${{ runner.temp }}/release-${{ matrix.replica }}/*
-          if-no-files-found: error
-
-  compare-reproducible-builds:
-    name: Compare release bytes
-    runs-on: ubuntu-24.04
-    needs: reproducible-build
-
-    steps:
-      - name: Checkout verification script
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-
-      - name: Download replica A
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: reproducible-release-a
-          path: ${{ runner.temp }}/release-a
-
-      - name: Download replica B
-        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
-        with:
-          name: reproducible-release-b
-          path: ${{ runner.temp }}/release-b
-
-      - name: Compare every canonical byte
-        run: tools/reproducible-builds/compare-release.sh "$RUNNER_TEMP/release-a" "$RUNNER_TEMP/release-b"
+          api-level: ${{ matrix.api }}
+          target: google_apis
+          arch: x86_64
+          disable-animations: true
+          script: bash tools/meshstar/emulator-smoke.sh

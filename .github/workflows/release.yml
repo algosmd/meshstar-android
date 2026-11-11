@@ -7,9 +7,6 @@ on:
         description: Existing vX.Y.Z tag to build and attest
         required: true
         type: string
-  push:
-    tags:
-      - "v*.*.*"
 
 permissions:
   contents: read

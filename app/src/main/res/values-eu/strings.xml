@@ -29,12 +29,12 @@
     <string name="battery_optimization_not_required">Bateria-optimizazioa ez da beharrezkoa</string>
     <string name="battery_optimization_checking">Bateria-optimizazioa egiaztatzen</string>
     <string name="battery_optimization_why_disable">Zergatik desgaitu bateria-optimizazioa?</string>
-    <string name="battery_optimization_explanation">bitchat atzeko planoan dabil inguruko gailuekiko mesh sareko konexioei eusteko. Bateria-optimizazioak konexio horiek eten ditzake, eta mezuak berandu iritsi edo galdu egin daitezke.\n\nBateria-optimizazioa desgaituz gero, parez pareko mezularitza fidagarria izango da.</string>
+    <string name="battery_optimization_explanation">MeshStar atzeko planoan dabil inguruko gailuekiko mesh sareko konexioei eusteko. Bateria-optimizazioak konexio horiek eten ditzake, eta mezuak berandu iritsi edo galdu egin daitezke.\n\nBateria-optimizazioa desgaituz gero, parez pareko mezularitza fidagarria izango da.</string>
     <string name="battery_optimization_disable_button">Desgaitu bateria-optimizazioa</string>
-    <string name="battery_optimization_note">Oharra: ezarpen hau geroago alda dezakezu Android Ezarpenak > Aplikazioak > bitchat > Bateria atalean</string>
-    <string name="battery_optimization_not_supported_explanation">Zure gailuak ez du bateria-optimizazioko ezarpenik behar. bitchat normal ibiliko da.</string>
-    <string name="battery_optimization_not_supported_message">Zure gailuak ez du bateria-optimizazioko ezarpenik behar. bitchat normal ibiliko da.</string>
-    <string name="battery_optimization_success_message">bitchat atzeko planoan modu fidagarrian ibil daiteke</string>
+    <string name="battery_optimization_note">Oharra: ezarpen hau geroago alda dezakezu Android Ezarpenak > Aplikazioak > MeshStar > Bateria atalean</string>
+    <string name="battery_optimization_not_supported_explanation">Zure gailuak ez du bateria-optimizazioko ezarpenik behar. MeshStar normal ibiliko da.</string>
+    <string name="battery_optimization_not_supported_message">Zure gailuak ez du bateria-optimizazioko ezarpenik behar. MeshStar normal ibiliko da.</string>
+    <string name="battery_optimization_success_message">MeshStar atzeko planoan modu fidagarrian ibil daiteke</string>
     <string name="battery_optimization_benefits">• Mezuak modu fidagarrian entregatzen dira\n• Mesh sareko konexioari eusten zaio\n• Mezuak atzeko planoan birbidal daitezke\n• Konexio-etenak saihesten dira</string>
     <string name="battery_optimization_check_again">Egiaztatu berriro</string>
     <string name="battery_optimization_skip">Saltatu oraingoz</string>
@@ -46,7 +46,7 @@
     <string name="notification_summary_more">eta beste %1$d</string>
     <string name="notification_messages_from_people">%1$d mezu %2$d pertsonarengandik</string>
     <string name="notification_more_conversations">eta beste %1$d elkarrizketa</string>
-    <string name="notification_active_peers_title">bitchat erabiltzaileak inguruan!</string>
+    <string name="notification_active_peers_title">MeshStar erabiltzaileak inguruan!</string>
     <string name="notification_active_peers_one">Pertsona 1 inguruan</string>
     <string name="notification_active_peers_many">%1$d pertsona inguruan</string>
     <string name="notification_new_messages">Mezu berriak</string>
@@ -57,8 +57,8 @@
     <string name="notification_new_activity_in">Jarduera berria hemen: %1$s</string>
     <string name="notification_messages_in">Mezuak hemen: %1$s</string>
     <string name="notification_joined_conversation">%1$s elkarrizketara batu da</string>
-    <string name="notification_geohash_summary_title_mentions">bitchat - %1$d aipamen</string>
-    <string name="notification_geohash_summary_title">bitchat - Kokapeneko txatak</string>
+    <string name="notification_geohash_summary_title_mentions">MeshStar - %1$d aipamen</string>
+    <string name="notification_geohash_summary_title">MeshStar - Kokapeneko txatak</string>
     <string name="notification_geohash_summary_text">%1$d mezu %2$d kokapenetatik</string>
     <string name="notification_mesh_mention_title_singular">Mesh txatean aipatu zaituzte</string>
     <string name="notification_mesh_mention_title_plural">%1$d aipamen mesh txatean</string>
@@ -113,7 +113,7 @@
     <string name="notification_reply">Erantzun</string>
     <string name="notification_mark_read">Markatu irakurrita</string>
     <string name="notification_private_message">Mezu pribatu berria</string>
-    <string name="notification_content_hidden">Ireki bitchat ikusteko</string>
+    <string name="notification_content_hidden">Ireki MeshStar ikusteko</string>
     <string name="notification_channel_direct_messages">Mezu zuzenak</string>
     <string name="notification_channel_direct_messages_description">Beste erabiltzaileen mezu pribatuen jakinarazpenak</string>
     <string name="notification_channel_geohash">Geohash txatak</string>
@@ -222,13 +222,13 @@
     <string name="cancel_lower">Utzi</string>
 
     <!-- APK Sharing -->
-    <string name="share_bitchat_title">Partekatu BitChat</string>
+    <string name="share_bitchat_title">Partekatu MeshStar</string>
     <string name="share_bitchat_subtitle">Partekatu instalazio-fitxategia lineaz kanpo banatzeko</string>
-    <string name="share_apk_title">Partekatu BitChat aplikazioa</string>
-    <string name="share_apk_explanation">BitChat-en instalazio-fitxategiak partekatuko dira, besteek aplikazioa internetik gabe instala dezaten. Ezin hobea mesh sarea zabaltzeko!</string>
-    <string name="share_apk_receiver_instructions">Hartzaileak hau egin beharko du:\n• Gaitu \"Instalatu jatorri ezezagunetatik\" Android ezarpenetan\n• Desinstalatu BitChat lehenik, dagoeneko instalatuta badago (sinadurak desberdinak dira)</string>
+    <string name="share_apk_title">Partekatu MeshStar aplikazioa</string>
+    <string name="share_apk_explanation">MeshStar-en instalazio-fitxategiak partekatuko dira, besteek aplikazioa internetik gabe instala dezaten. Ezin hobea mesh sarea zabaltzeko!</string>
+    <string name="share_apk_receiver_instructions">Hartzaileak hau egin beharko du:\n• Gaitu \"Instalatu jatorri ezezagunetatik\" Android ezarpenetan\n• Desinstalatu MeshStar lehenik, dagoeneko instalatuta badago (sinadurak desberdinak dira)</string>
     <string name="share_apk_confirm">Partekatu aplikazioa</string>
-    <string name="share_apk_chooser_title">Partekatu BitChat honen bidez…</string>
+    <string name="share_apk_chooser_title">Partekatu MeshStar honen bidez…</string>
     <string name="share_apk_error">Ezin izan da aplikazioa partekatzeko prestatu. Saiatu berriro.</string>
 
     <!-- Universal APK Preparation -->
@@ -280,10 +280,10 @@
     <string name="prepare_apk_error_resume_rejected">%1$s iturriak gordetako deskarga-posizioa baztertu du. Hurrengo saiakeran deskarga hasieratik hasiko da.</string>
     <string name="prepare_apk_error_incomplete">%1$s deskarga byte guztiak iritsi aurretik amaitu da. Berrekin daiteke.</string>
     <string name="prepare_apk_error_invalid_resume">%1$s iturriak berrekiteko erantzun baliogabea itzuli du. Hurrengo saiakeran deskarga hasieratik hasiko da.</string>
-    <string name="prepare_apk_error_untrusted_key">%1$s iturriko APKa ez dago BitChat-en bertsio-gako fidagarri batekin sinatuta.</string>
+    <string name="prepare_apk_error_untrusted_key">%1$s iturriko APKa ez dago MeshStar-en bertsio-gako fidagarri batekin sinatuta.</string>
     <string name="prepare_apk_error_not_universal">%1$s iturriak arkitektura jakin baterako APKa itzuli du, ez beharrezkoa den APK unibertsala.</string>
     <string name="prepare_apk_error_apk_unreadable">Ezin izan da deskargatutako APKa irakurri.</string>
-    <string name="prepare_apk_error_not_bitchat">Deskargatutako fitxategia ez da BitChat APK bat.</string>
+    <string name="prepare_apk_error_not_bitchat">Deskargatutako fitxategia ez da MeshStar APK bat.</string>
     <string name="prepare_apk_error_no_version">Deskargatutako APKak ez du bertsio-informaziorik.</string>
     <string name="prepare_apk_error_source_failed">%1$s deskargak huts egin du.</string>
     <string name="prepare_apk_error_all_sources">Konfiguratutako APK iturri guztiek huts egin dute.</string>
@@ -306,11 +306,11 @@
 
     <!-- APK Installation -->
     <string name="install_bitchat_title">Instalatu jasotako APKa</string>
-    <string name="install_bitchat_subtitle">Instalatu BitChat jasotako fitxategietatik</string>
-    <string name="install_apk_dialog_title">Instalatu BitChat-en eguneraketa</string>
-    <string name="install_apk_dialog_message">BitChat instalatu jasotako APK fitxategietatik? Horri esker, aplikazioa lineaz kanpo bana daiteke mesh sareetan.</string>
+    <string name="install_bitchat_subtitle">Instalatu MeshStar jasotako fitxategietatik</string>
+    <string name="install_apk_dialog_title">Instalatu MeshStar-en eguneraketa</string>
+    <string name="install_apk_dialog_message">MeshStar instalatu jasotako APK fitxategietatik? Horri esker, aplikazioa lineaz kanpo bana daiteke mesh sareetan.</string>
     <string name="install_apk_permission_title">Baimena behar da</string>
-    <string name="install_apk_permission_message">BitChat-ek paketeak instalatzeko baimena behar du bere burua banatzeko. Gaitu \"Instalatu aplikazio ezezagunak\" hurrengo pantailan.</string>
+    <string name="install_apk_permission_message">MeshStar-ek paketeak instalatzeko baimena behar du bere burua banatzeko. Gaitu \"Instalatu aplikazio ezezagunak\" hurrengo pantailan.</string>
     <string name="install_apk_confirm">Instalatu</string>
     <string name="install_apk_grant_permission">Eman baimena</string>
     <string name="install_apk_select_files">Hautatu APK fitxategiak</string>
@@ -334,7 +334,7 @@
     <string name="cd_open_map">Ireki mapa</string>
     <string name="cd_remove_bookmark">Kendu laster-marka</string>
     <string name="cd_teleport">Teleportatu</string>
-    <string name="notification_action_quit_bitchat">Irten bitchat-etik</string>
+    <string name="notification_action_quit_bitchat">Irten MeshStar-etik</string>
     <string name="about_background_title">Exekutatu atzeko planoan</string>
     <string name="about_background_desc">Mantendu mesh sarea aktibo aplikazioa itxita dagoenean (aurreko planoko zerbitzua)</string>
     <string name="cd_leave_channel">Irten kanaletik</string>
@@ -509,14 +509,14 @@
     <!-- Onboarding screens -->
     <string name="location_services_required">Kokapen-zerbitzuak behar dira</string>
     <string name="privacy_first">Pribatutasuna lehenik</string>
-    <string name="location_explanation">bitchat-ek EZ du zure kokapenaren jarraipenik egiten.\n\nKokapen-zerbitzuak beharrezkoak dira Bluetooth bidez eskaneatzeko eta Geohash txaterako.</string>
-    <string name="location_needs_for">bitchat-ek kokapen-zerbitzuak behar ditu honetarako:</string>
+    <string name="location_explanation">MeshStar-ek EZ du zure kokapenaren jarraipenik egiten.\n\nKokapen-zerbitzuak beharrezkoak dira Bluetooth bidez eskaneatzeko eta Geohash txaterako.</string>
+    <string name="location_needs_for">MeshStar-ek kokapen-zerbitzuak behar ditu honetarako:</string>
     <string name="location_needs_bullets">• Bluetooth gailuak eskaneatzeko\n• Mesh sarean inguruko erabiltzaileak aurkitzeko\n• Geohash txaterako\n• Ez da jarraipenik ez kokapen-bilketarik egiten</string>
     <string name="background_location_required_title">Atzeko planoko kokapena gomendatzen da</string>
     <string name="background_location_required_subtitle">Aukerakoa, mesh sarearen fidagarritasuna hobetzen du</string>
-    <string name="background_location_explanation">Android-ek atzeko planoko kokapena gomendatzen du, bitchat-ek inguruko gailuak eskanea ditzan aplikazioa irekita ez dagoenean. Horri esker, mesh sarea bizirik mantentzen da gailua berrabiarazi ondoren.</string>
+    <string name="background_location_explanation">Android-ek atzeko planoko kokapena gomendatzen du, MeshStar-ek inguruko gailuak eskanea ditzan aplikazioa irekita ez dagoenean. Horri esker, mesh sarea bizirik mantentzen da gailua berrabiarazi ondoren.</string>
     <string name="background_location_settings_tip">Ezarpenak irekitzean, aukeratu \"Baimendu beti\".</string>
-    <string name="background_location_needs_for">bitchat-ek atzeko planoko kokapena erabiltzen du honetarako:</string>
+    <string name="background_location_needs_for">MeshStar-ek atzeko planoko kokapena erabiltzen du honetarako:</string>
     <string name="background_location_needs_bullets">- Inguruko gailuak eskaneatzeko aplikazioa itxita dagoenean\n- Berrabiarazi ondoren berriro konektatzeko\n- Mesh sarea atzeko planoan martxan mantentzeko</string>
     <string name="background_location_privacy_note">Ez dugu INOIZ zure kokapena biltzen edo gordetzen. Zure pribatutasuna seguru dago.</string>
     <string name="grant_background_location">Baimendu atzeko planoko kokapena</string>
@@ -527,15 +527,15 @@
     <string name="location_unavailable_explanation">Kokapen-zerbitzuak ez daude erabilgarri gailu honetan. Ezohikoa da, kokapen-zerbitzuak Android gailuetan estandarrak baitira.\n\nbitchat-ek kokapen-zerbitzuak behar ditu Bluetooth bidezko eskaneatzeak behar bezala funtziona dezan (Android-en eskakizuna). Hori gabe, aplikazioak ezin ditu inguruko erabiltzaileak aurkitu.</string>
     <string name="checking_location_services">Kokapen-zerbitzuak egiaztatzen...</string>
     <string name="bluetooth_required">Bluetooth behar da</string>
-    <string name="bluetooth_needs_for">bitchat-ek Bluetooth behar du honetarako:</string>
+    <string name="bluetooth_needs_for">MeshStar-ek Bluetooth behar du honetarako:</string>
     <string name="bluetooth_needs_bullets">• Inguruko erabiltzaileak aurkitzeko\n• Mesh sareko konexioak sortzeko\n• Mezuak bidali eta jasotzeko\n• Internetik eta zerbitzaririk gabe funtzionatzeko</string>
     <string name="enable_bluetooth">Gaitu Bluetooth</string>
     <string name="bluetooth_not_supported">Bluetooth ez da onartzen</string>
-    <string name="bluetooth_unsupported_explanation">Gailu honek ez du Bluetooth Low Energy (BLE) onartzen, eta bitchat-ek hori behar du funtzionatzeko.\n\nbitchat-ek BLE behar du mesh sareak sortzeko eta inguruko gailuekin internetik gabe komunikatzeko.</string>
+    <string name="bluetooth_unsupported_explanation">Gailu honek ez du Bluetooth Low Energy (BLE) onartzen, eta MeshStar-ek hori behar du funtzionatzeko.\n\nbitchat-ek BLE behar du mesh sareak sortzeko eta inguruko gailuekin internetik gabe komunikatzeko.</string>
     <string name="checking_bluetooth_status">Bluetooth-en egoera egiaztatzen...</string>
     <string name="battery_optimization_detected_title">Bateria-optimizazioa detektatu da</string>
     <string name="battery_optimization_enabled_title">Bateria-optimizazioa gaituta</string>
-    <string name="battery_optimization_explanation_short">bitchat-ek atzeko planoan ibili behar du mesh sareko konexioei eusteko. Bateria-optimizazioak konexio horiek eten ditzake.</string>
+    <string name="battery_optimization_explanation_short">MeshStar-ek atzeko planoan ibili behar du mesh sareko konexioei eusteko. Bateria-optimizazioak konexio horiek eten ditzake.</string>
     <string name="benefits_of_disabling">Desgaitzearen abantailak</string>
     <string name="battery_benefits_short">• Mezuen entrega fidagarria\n• Mesh sareko konexioari eusten zaio\n• Konexio-etenak saihesten dira</string>
     <string name="disable_battery_optimization">Desgaitu bateria-optimizazioa</string>
@@ -551,7 +551,7 @@
     <string name="privacy_bullets">• Ez da jarraipenik ez datu-bilketarik egiten\n• Bluetooth mesh txatak guztiz lineaz kanpokoak dira\n• Geohash txatek internet erabiltzen dute</string>
     <string name="permissions_header">Baimenak</string>
     <string name="grant_permissions">Eman baimenak</string>
-    <string name="location_tracking_warning">bitchat-ek EZ du zure kokapenaren jarraipenik egiten</string>
+    <string name="location_tracking_warning">MeshStar-ek EZ du zure kokapenaren jarraipenik egiten</string>
     <string name="cd_open_about">Ireki Honi buruz</string>
     <string name="nobody_around">Ez dago inor inguruan…</string>
     <string name="you_suffix"> (zu)</string>
@@ -570,16 +570,16 @@
     <string name="cd_pause_voice">Pausatu</string>
 
     <!-- Permission descriptions -->
-    <string name="perm_nearby_devices_desc">Beharrezkoa bitchat erabiltzaileak Bluetooth bidez aurkitzeko</string>
-    <string name="perm_nearby_devices_system">Baimendu bitchat inguruko gailuekin konektatzea</string>
-    <string name="perm_location_desc">Android-ek eskatzen du inguruko bitchat erabiltzaileak Bluetooth bidez aurkitzeko</string>
-    <string name="perm_location_system">bitchat-ek hau behar du inguruko gailuak eskaneatzeko</string>
+    <string name="perm_nearby_devices_desc">Beharrezkoa MeshStar erabiltzaileak Bluetooth bidez aurkitzeko</string>
+    <string name="perm_nearby_devices_system">Baimendu MeshStar inguruko gailuekin konektatzea</string>
+    <string name="perm_location_desc">Android-ek eskatzen du inguruko MeshStar erabiltzaileak Bluetooth bidez aurkitzeko</string>
+    <string name="perm_location_system">MeshStar-ek hau behar du inguruko gailuak eskaneatzeko</string>
     <string name="perm_background_location_desc">Gomendatua inguruko gailuak eskaneatzeko aplikazioa atzeko planoan dagoenean</string>
     <string name="perm_background_location_system">Baimendu atzeko planoko kokapenerako sarbidea</string>
     <string name="perm_notifications_desc">Jaso jakinarazpenak mezu pribatuak jasotzen dituzunean</string>
-    <string name="perm_notifications_system">Baimendu bitchat-i jakinarazpenak bidaltzea</string>
-    <string name="perm_battery_desc">Desgaitu bateria-optimizazioa bitchat atzeko planoan modu fidagarrian ibil dadin eta mesh sareko konexioei eutsi diezaien</string>
-    <string name="perm_battery_system">Baimendu bitchat bateria-murrizketarik gabe ibiltzea</string>
+    <string name="perm_notifications_system">Baimendu MeshStar-i jakinarazpenak bidaltzea</string>
+    <string name="perm_battery_desc">Desgaitu bateria-optimizazioa MeshStar atzeko planoan modu fidagarrian ibil dadin eta mesh sareko konexioei eutsi diezaien</string>
+    <string name="perm_battery_system">Baimendu MeshStar bateria-murrizketarik gabe ibiltzea</string>
 
     <!-- Permission types -->
     <string name="perm_type_nearby_devices">Inguruko gailuak</string>
@@ -616,7 +616,7 @@
     <string name="about_app_language">Aplikazioaren hizkuntza</string>
     <string name="about_system_default">Sistemaren lehenetsia</string>
     <string name="about_select_language">Hautatu hizkuntza</string>
-    <string name="app_name">bitchat</string>
+    <string name="app_name">MeshStar</string>
     <string name="file_viewer_name">📄 %1$s</string>
     <string name="version_prefix">v%1$s</string>
     <string name="image_star">image/*</string>
