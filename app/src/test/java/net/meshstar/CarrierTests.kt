@@ -48,6 +48,17 @@ class CarrierTests {
         assertTrue(store.load().contacts.isEmpty())
     }
 
+    @Test fun renderedContactQrPreservesUnicodeName() {
+        val contact = Contact.of(alice, "Тест 📡")
+        val bitmap = net.meshstar.ui.contactQrBitmap(contact.qr)
+        val pixels = IntArray(bitmap.width * bitmap.height)
+        bitmap.getPixels(pixels, 0, bitmap.width, 0, 0, bitmap.width, bitmap.height)
+        val image = com.google.zxing.BinaryBitmap(com.google.zxing.common.HybridBinarizer(
+            com.google.zxing.RGBLuminanceSource(bitmap.width, bitmap.height, pixels)))
+        val decoded = com.google.zxing.qrcode.QRCodeReader().decode(image).text
+        assertEquals(contact, Contact.parse(decoded))
+    }
+
     @Test fun contactsRoundTripLegacyAndCurrentLinks() {
         val contact = Contact.of(alice, "Test : + / имя")
         assertEquals(contact, Contact.parse(contact.qr))

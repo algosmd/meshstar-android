@@ -100,7 +100,7 @@ private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, co
                     Field(name, { name = it }, "Name")
                     MeshButton("Save name", enabled = !busy) { run { engine.setName(name) } }
                     val qr = engine.myContact().qr
-                    val bitmap = remember(qr) { qrBitmap(qr) }
+                    val bitmap = remember(qr) { contactQrBitmap(qr) }
                     Image(bitmap.asImageBitmap(), "My contact QR", Modifier.fillMaxWidth().heightIn(max = 280.dp).aspectRatio(1f))
                     Text(engine.identity.lxmfAddress.joinToString("") { "%02x".format(it) }, fontSize = 12.sp)
                     Text("Fingerprint: ${engine.myContact().fingerprint}", fontSize = 12.sp)
@@ -192,8 +192,8 @@ private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, co
 @Composable private fun Field(value: String, change: (String) -> Unit, label: String, singleLine: Boolean = true) {
     OutlinedTextField(value, change, Modifier.fillMaxWidth(), label = { Text(label) }, singleLine = singleLine, shape = RoundedCornerShape(3.dp))
 }
-private fun qrBitmap(text: String): Bitmap {
-    val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, 600, 600)
+internal fun contactQrBitmap(text: String): Bitmap {
+    val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, 600, 600, mapOf(com.google.zxing.EncodeHintType.CHARACTER_SET to "UTF-8"))
     val pixels = IntArray(bits.width * bits.height) { i -> if (bits[i % bits.width, i / bits.width]) android.graphics.Color.BLACK else android.graphics.Color.WHITE }
     return Bitmap.createBitmap(pixels, bits.width, bits.height, Bitmap.Config.ARGB_8888)
 }
