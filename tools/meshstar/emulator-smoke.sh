@@ -6,10 +6,19 @@ adb install -r "$apk"
 # A fresh CI AVD has no personal accounts, contacts, location or messages.
 # Launch diagnostics below are restricted to component state and fatal stack traces.
 trap 'adb logcat -b crash -d -v brief; adb shell dumpsys activity activities | grep -E "ResumedActivity|mFocusedActivity" || true' ERR
-adb shell am start -W -n net.meshstar.app/com.bitchat.android.MainActivity > /tmp/meshstar-launch.txt
-cat /tmp/meshstar-launch.txt
+# Android's am -W has a fixed cold-start timeout on busy shared runners.
+# Allow completion of the same launch, then require real visible UI below.
+for attempt in 1 2 3; do
+  adb shell am start -W -n net.meshstar.app/com.bitchat.android.MainActivity > /tmp/meshstar-launch.txt
+  cat /tmp/meshstar-launch.txt
+  if grep -q 'Status: ok' /tmp/meshstar-launch.txt; then break; fi
+  grep -q 'Status: timeout' /tmp/meshstar-launch.txt
+  sleep 3
+done
 grep -q 'Status: ok' /tmp/meshstar-launch.txt
 sleep 8
+adb shell uiautomator dump /sdcard/meshstar-ui.xml >/dev/null
+adb shell cat /sdcard/meshstar-ui.xml | grep -q 'Satellite / Internet'
 # Exercise activity disposal/recreation, including devices with no Bluetooth adapter.
 adb shell settings put system accelerometer_rotation 0
 adb shell settings put system user_rotation 1
