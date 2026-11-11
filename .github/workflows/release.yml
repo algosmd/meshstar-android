@@ -16,6 +16,8 @@ env:
 
 jobs:
   build:
+    # Upstream maintenance only; MeshStar publishing requires a separate explicit setup.
+    if: github.repository == 'permissionlesstech/bitchat-android'
     name: Build unsigned release ${{ matrix.replica }}
     runs-on: ubuntu-24.04
     strategy:

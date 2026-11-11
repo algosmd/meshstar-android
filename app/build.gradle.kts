@@ -36,7 +36,7 @@ android {
         applicationId = "net.meshstar.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 1
+        versionCode = 2
         versionName = "0.3.0"
         buildConfigField(
             "String",
@@ -147,6 +147,7 @@ kotlin {
 }
 
 dependencies {
+    implementation(project(":rnslite"))
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)

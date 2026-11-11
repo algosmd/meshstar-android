@@ -77,6 +77,7 @@
     <application
         android:name=".BitchatApplication"
         android:allowBackup="false"
+        android:usesCleartextTraffic="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -126,6 +127,21 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="bitchat" android:host="verify" />
+            </intent-filter>
+        </activity>
+
+        <!-- User-entered carrier endpoints only; no automatic pairing from external intents. -->
+        <activity android:name="net.meshstar.ui.SatelliteActivity"
+            android:exported="true" android:theme="@style/Theme.BitchatAndroid"
+            android:windowSoftInputMode="adjustResize" android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="meshstar" android:host="contact" />
+                <data android:scheme="meshsat" android:host="contact" />
+                <data android:scheme="meshstar" android:host="box" />
+                <data android:scheme="meshsat" android:host="box" />
             </intent-filter>
         </activity>
 

@@ -10,6 +10,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.*
@@ -158,7 +159,12 @@ class MainActivity : OrientationAwareActivity() {
             BitchatTheme {
                 Scaffold(
                     modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background
+                    containerColor = MaterialTheme.colorScheme.background,
+                    topBar = {
+                        net.meshstar.ui.MeshButton("Satellite / Internet", Modifier.statusBarsPadding()) {
+                            startActivity(android.content.Intent(this@MainActivity, net.meshstar.ui.SatelliteActivity::class.java))
+                        }
+                    }
                 ) { innerPadding ->
                     OnboardingFlowScreen(modifier = Modifier
                         .fillMaxSize()

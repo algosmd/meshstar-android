@@ -1450,6 +1450,11 @@ class ChatViewModel(
         // Every stage that wipes data at rest reports here. The success message is a
         // security assurance, so it requires all of them, not just the conversation database.
         var wipeComplete = true
+        try {
+            net.meshstar.data.SatRuntime.erase(getApplication())
+        } catch (_: Exception) {
+            wipeComplete = false
+        }
 
         // Clear seen message store and MessageRouter outbox
         try {

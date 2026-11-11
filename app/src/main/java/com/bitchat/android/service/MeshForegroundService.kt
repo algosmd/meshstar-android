@@ -112,6 +112,7 @@ class MeshForegroundService : Service() {
             }
         )
         createChannel()
+        net.meshstar.data.SatRuntime.get(applicationContext).attach(this)
 
         // Ensure mesh service exists in holder (create if needed)
         val existing = MeshServiceHolder.meshService
@@ -367,6 +368,7 @@ class MeshForegroundService : Service() {
     }
 
     override fun onDestroy() {
+        net.meshstar.data.SatRuntime.get(applicationContext).detach(this)
         updateJob?.cancel()
         updateJob = null
         // Cancel the service coroutine scope to prevent leaks
