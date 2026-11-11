@@ -221,8 +221,8 @@ class MainActivity : OrientationAwareActivity() {
 
             onDispose {
                 try {
-                    context.unregisterReceiver(receiver)
-                } catch (e: IllegalStateException) {
+                    receiver?.let { context.unregisterReceiver(it) }
+                } catch (e: IllegalArgumentException) {
                     Log.w("BluetoothStatusUI", "Receiver was not registered")
                 }
             }

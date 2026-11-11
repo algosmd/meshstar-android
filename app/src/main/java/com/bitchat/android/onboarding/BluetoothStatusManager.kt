@@ -209,13 +209,13 @@ class BluetoothStatusManager(
 
     /**
      * Monitors Bluetooth state changes in real-time and invokes the provided callback.
-     * Returns the BroadcastReceiver for manual un-registration.
+     * Returns the registered BroadcastReceiver for manual un-registration, or null without Bluetooth.
      */
     fun monitorBluetoothState(
         context: Context,
         bluetoothStatusManager: BluetoothStatusManager,
         onBluetoothStateChanged: (BluetoothStatus) -> Unit
-    ): BroadcastReceiver {
+    ): BroadcastReceiver? {
 
         Log.d(TAG, "Starting Bluetooth State Monitoring")
 
@@ -223,8 +223,7 @@ class BluetoothStatusManager(
             Log.e(TAG, "Bluetooth is not supported")
             onBluetoothStateChanged(BluetoothStatus.NOT_SUPPORTED)
             bluetoothStatusManager.handleBluetoothStatus(BluetoothStatus.NOT_SUPPORTED)
-            return object : BroadcastReceiver() { override fun onReceive(p0: Context?, p1: Intent?) {}
-            }
+            return null
         }
 
         val receiver = object : BroadcastReceiver() {

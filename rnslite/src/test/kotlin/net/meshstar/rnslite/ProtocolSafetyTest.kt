@@ -94,6 +94,12 @@ class ProtocolSafetyTest {
         rejects { VoiceFrame.create(alice, bob, 1, byteArrayOf(), mode = 999) }
         rejects { VoiceFrame.frames(alice, bob, 1, ByteArray(1197 * 4 + 1)) }
         rejects { VoiceFrame.create(alice, bob, 1, byteArrayOf(), part = VoiceFrame.Part(3, 3)) }
+        // Even correctly signed ciphertext must not smuggle reserved flags or impossible part indices.
+        for (inner in listOf("0000000135".unhex(), "000000014533".unhex())) {
+            val invalid = VoiceFrame.magic + bob.lxmfAddress + alice.lxmfAddress +
+                bob.encrypt(inner + alice.sign(bob.lxmfAddress + alice.lxmfAddress + inner))
+            rejects { VoiceFrame.receive(invalid, bob) { alice } }
+        }
         val frames = VoiceFrame.frames(alice, bob, 1, ByteArray(2500) { it.toByte() })
         val assembler = VoiceFrame.Assembler()
         assertNull(assembler.feed(frames[0])); assertNull(assembler.feed(frames[1]))

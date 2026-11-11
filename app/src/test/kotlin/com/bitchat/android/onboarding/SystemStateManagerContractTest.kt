@@ -3,11 +3,15 @@ package com.bitchat.android.onboarding
 import android.app.Application
 import android.bluetooth.BluetoothManager
 import android.content.Context
+import android.content.ContextWrapper
 import android.location.LocationManager
 import androidx.activity.ComponentActivity
 import androidx.test.core.app.ApplicationProvider
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
+import org.junit.Assert.assertNull
+import org.junit.Assert.assertNotNull
+import org.mockito.kotlin.mock
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.Robolectric
@@ -34,6 +38,39 @@ class SystemStateManagerContractTest {
         assertEquals(BluetoothStatus.DISABLED, manager.checkBluetoothStatus())
         shadowOf(adapter).setEnabled(true)
         assertEquals(BluetoothStatus.ENABLED, manager.checkBluetoothStatus())
+        controller.destroy()
+    }
+
+    @Test
+    @Config(sdk = [26, 34])
+    fun `no adapter returns no receiver to unregister during screen recreation`() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val controller = Robolectric.buildActivity(ComponentActivity::class.java).create()
+        val absentAdapterManager = mock<BluetoothManager>()
+        val context = object : ContextWrapper(app) {
+            override fun getSystemService(name: String): Any? =
+                if (name == Context.BLUETOOTH_SERVICE) absentAdapterManager else super.getSystemService(name)
+        }
+        val statuses = mutableListOf<BluetoothStatus>()
+        var disabled = 0
+        val manager = BluetoothStatusManager(controller.get(), context, {}, { disabled++ })
+        val receiver = manager.monitorBluetoothState(context, manager, statuses::add)
+        assertNull(receiver)
+        assertEquals(listOf(BluetoothStatus.NOT_SUPPORTED), statuses)
+        assertEquals(1, disabled)
+        receiver?.let { context.unregisterReceiver(it) }
+        controller.destroy()
+    }
+
+    @Test
+    @Config(sdk = [26, 34])
+    fun `supported adapter returns an actually registered receiver`() {
+        val app = ApplicationProvider.getApplicationContext<Application>()
+        val controller = Robolectric.buildActivity(ComponentActivity::class.java).create()
+        val manager = BluetoothStatusManager(controller.get(), app, {}, {})
+        val receiver = manager.monitorBluetoothState(app, manager, {})
+        assertNotNull(receiver)
+        app.unregisterReceiver(requireNotNull(receiver))
         controller.destroy()
     }
 
