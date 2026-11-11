@@ -1,0 +1,7 @@
+# Offline protocol oracle; no network interfaces are started by the test.
+rns==1.5.7
+lxmf==0.9.2
+cryptography==50.0.2
+cffi==2.1.1
+pycparser==3.12
+pyserial==3.5

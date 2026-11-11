@@ -17,3 +17,5 @@ rootProject.name = "meshstar-android"
 include(":app")
 // Wear is intentionally not part of MeshStar Android A0.
 // Using published Arti AAR; local module not included
+
+include(":rnslite")

@@ -19,8 +19,13 @@ jobs:
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
         with:
           packages: platforms;android-37.0 build-tools;37.0.0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install offline Python protocol oracle
+        run: python -m pip install -r tools/meshstar/interop-requirements.txt
       - name: Build and unit tests
-        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest
+        run: ./gradlew :app:assembleDebug :app:testDebugUnitTest :rnslite:test
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
         with:
           name: meshstar-debug-apk
@@ -30,7 +35,9 @@ jobs:
         if: always()
         with:
           name: unit-test-results
-          path: app/build/test-results/testDebugUnitTest/*.xml
+          path: |
+            app/build/test-results/testDebugUnitTest/*.xml
+            rnslite/build/test-results/test/*.xml
   emulator:
     needs: build
     runs-on: ubuntu-24.04
