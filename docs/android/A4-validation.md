@@ -1,6 +1,7 @@
 # A4 — Unified chats and design
 
 Build: **0.3.0 (4)**, application ID `net.meshstar.app`.
+Implementation commit: `c373b0a`.
 Specification: read-only meshstar `0fcceb6`, `docs/codex/m11-android.md` and
 `docs/codex/design-base-bitchat.md`; AlGos rules take priority.
 The source specification and iOS checkouts were not modified.
@@ -39,8 +40,9 @@ directions with signed confirmation was accepted before this UI update.
   historical route stability without granting delivery, and catalog parity.
 - Design capture tests: **2/2 passed**, 121 captures per size (240 standard
   combinations plus two Russian route-menu captures with font scale 130%).
-- Updated CI smoke runs the same seven instrumented cases on API 26 and 34.
-  CI result is recorded below after the implementation commit completes.
+- [CI run 43160505815](https://github.com/algosmd/meshstar-android/actions/runs/43160505815)
+  for `c373b0a`: **all jobs passed** — build/JVM tests, API 26 and API 34.
+  Each emulator passed launch, rotation and all seven instrumented cases.
 
 ## Design evidence
 
@@ -77,6 +79,14 @@ python3 tools/meshstar/design-gallery.py
 Use viewport `large` for the second size. Capture output is under the app's
 external `files/a4` directory. Default CI does not run this opt-in snapshot suite.
 
+## Live acceptance — refreshed UI
+
+On 2026-11-12 the tester confirmed **Android 0.3.0 (4) ↔ iPhone through Internet**:
+text arrived in both directions and both senders received ✅. The test used the
+unified Satellite directory and the explicit Internet route selection. Existing
+contacts and carrier settings survived the update. No endpoint, contact identity,
+credential or message contents are recorded.
+
 ## Scope and remaining live checks
 
 - A4 exposes LoRa/Relay controls but does not implement the A5 MeshCore transport.
@@ -89,8 +99,9 @@ external `files/a4` directory. Default CI does not run this opt-in snapshot suit
 - Existing Bluetooth engine is wired into the unified directory/public/DM UI.
   Physical Android↔iOS/upstream Bluetooth regression remains the A5 device gate;
   emulator UI tests cannot establish radio interoperability.
-- Verify the refreshed UI with live A2/A3 peers before release. Offline/restart and
-  server-side mailbox ACK live checks from A3 remain pending; their mock tests pass.
+- The refreshed UI Internet text/proof round trip is accepted above. A box-path
+  repeat on build 4, offline/restart and server-side mailbox ACK live checks remain
+  pending; the A2 live box result is from build 3 and failure-path mock tests pass.
 - No Play publication, deployment endpoint or credential was added. Existing
   release/georelay workflow fork guards remain unchanged.
 
