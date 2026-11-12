@@ -53,6 +53,10 @@ passed on the local ARM64 API 26 emulator. [The repeated run](https://github.com
 is fully green on both API 26 and 34 with the bounded launch gate in `c4f7d25`. Mocks establish failure handling; they do not establish
 live Android↔iPhone service interoperability.
 
+Build 3 (`b8919d7`) also passed [CI](https://github.com/algosmd/meshstar-android/actions/runs/43153859877):
+build/JVM suite and API 26/34, four instrumented tests per API. This adds app-link
+and camera-free contact import validation; live mailbox acceptance remains pending.
+
 ## Live acceptance checklist — pending tester input
 
 1. In Settings enter Internet server on Android; the same service is configured

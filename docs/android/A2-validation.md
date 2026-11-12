@@ -71,6 +71,10 @@ is fully green: build, API 26 and API 34 (both instrumented tests on each).
 
 ## Build 3 — external links and camera-free import
 
+Implementation: `b8919d7`. [Build 3 CI](https://github.com/algosmd/meshstar-android/actions/runs/43153859877)
+passed build/JVM tests and both API 26/34 emulator jobs, including all four
+instrumented tests on each API.
+
 - MainActivity registers VIEW / DEFAULT / BROWSABLE for both `meshstar` and
   `meshsat`, with hosts `verify`, `user`, and `share`.
 - Cold launch and `onNewIntent` reach the same signed QR verification handler
