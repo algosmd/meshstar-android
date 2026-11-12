@@ -51,6 +51,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : OrientationAwareActivity() {
+    private var verificationLink by mutableStateOf<String?>(null)
+    private var linkNotice by mutableStateOf<String?>(null)
+    private var lastHandledLink: String? = null
 
     private lateinit var permissionManager: PermissionManager
     private lateinit var onboardingCoordinator: OnboardingCoordinator
@@ -166,14 +169,24 @@ class MainActivity : OrientationAwareActivity() {
                         }
                     }
                 ) { innerPadding ->
-                    OnboardingFlowScreen(modifier = Modifier
-                        .fillMaxSize()
-                        .padding(innerPadding)
+                    androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().padding(innerPadding)) {
+                        linkNotice?.let { androidx.compose.material3.Text(it, Modifier.padding(androidx.compose.ui.unit.Dp(12f))) }
+                        OnboardingFlowScreen(modifier = Modifier.weight(1f).fillMaxSize())
+                    }
+                }
+                verificationLink?.let { link ->
+                    com.bitchat.android.ui.VerificationSheet(
+                        isPresented = true,
+                        onDismiss = { verificationLink = null },
+                        viewModel = chatViewModel,
+                        initialLink = link
                     )
                 }
             }
         }
-        
+        // External links must work before BLE onboarding, including on an emulator.
+        handleVerificationIntent(intent, force = true)
+
         // Collect state changes in a lifecycle-aware manner
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -739,8 +752,8 @@ class MainActivity : OrientationAwareActivity() {
         // Handle notification intents when app is already running
         if (mainViewModel.onboardingState.value == OnboardingState.COMPLETE) {
             handleNotificationIntent(intent)
-            handleVerificationIntent(intent)
         }
+        handleVerificationIntent(intent, force = true)
     }
 
     override fun onStart() {
@@ -854,14 +867,38 @@ class MainActivity : OrientationAwareActivity() {
         }
     }
 
-    private fun handleVerificationIntent(intent: Intent) {
+    private fun handleVerificationIntent(intent: Intent, force: Boolean = false) {
         val uri = intent.data ?: return
-        if (uri.scheme != "bitchat" || uri.host != "verify") return
-
-        chatViewModel.showVerificationSheet()
-        val qr = VerificationService.verifyScannedQR(uri.toString())
-        if (qr != null) {
-            chatViewModel.beginQRVerification(qr)
+        if (!net.meshstar.link.AppLinks.navigation(uri) || !net.meshstar.link.AppLinks.safe(uri)) return
+        val value = uri.toString()
+        if (!force && value == lastHandledLink) return
+        lastHandledLink = value
+        linkNotice = null
+        when (uri.host) {
+            "verify" -> verificationLink = value // Same signed-QR handler as camera and paste.
+            "user" -> {
+                val peer = net.meshstar.link.AppLinks.peer(uri)
+                if (peer == null) { linkNotice = "Invalid contact link"; return }
+                if (peer.matches(Regex("[a-fA-F0-9]{32}"))) {
+                    startActivity(Intent(this, net.meshstar.ui.SatelliteActivity::class.java)
+                        .putExtra(net.meshstar.ui.SatelliteActivity.EXTRA_PEER, peer.lowercase()))
+                } else {
+                    chatViewModel.showPrivateChatSheet(peer)
+                    if (mainViewModel.onboardingState.value != OnboardingState.COMPLETE) {
+                        linkNotice = "Contact selected. Finish Bluetooth setup to open the conversation."
+                    }
+                }
+            }
+            "share" -> {
+                val next = Intent(this, net.meshstar.ui.SatelliteActivity::class.java)
+                uri.getQueryParameter("qr")?.let { payload ->
+                    next.data = android.net.Uri.Builder().scheme("meshstar").authority("contact")
+                        .appendQueryParameter("qr", payload).build()
+                }
+                val draft = uri.getQueryParameter("text") ?: intent.getStringExtra(Intent.EXTRA_TEXT)
+                draft?.takeIf { it.length <= 4096 }?.let { next.putExtra(net.meshstar.ui.SatelliteActivity.EXTRA_DRAFT, it) }
+                startActivity(next) // Select a contact and tap Send; never automatic sending.
+            }
         }
     }
 

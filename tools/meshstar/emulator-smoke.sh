@@ -31,10 +31,11 @@ grep -E '(mResumedActivity|topResumedActivity|mFocusedActivity).*net.meshstar.ap
 printf 'MeshStar launch passed on API %s\n' "$(adb shell getprop ro.build.version.sdk | tr -d '\r')"
 
 # Only synthetic fixture state; the runner substitutes Application and starts no
-# upstream transports/location services. AndroidKeyStore remains the real provider.
+# application startup services. Link tests exercise MainActivity without granting
+# radio/location permissions; AndroidKeyStore remains the real provider.
 test_apk=$(find test-apk -name '*.apk' -print -quit)
 adb install -r "$test_apk"
-adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest \
+adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest,net.meshstar.AppLinkInstrumentedTest \
   net.meshstar.app.test/com.bitchat.android.ui.PerformanceTestRunner > /tmp/meshstar-instrumentation.txt
 cat /tmp/meshstar-instrumentation.txt
-grep -q 'OK (2 tests)' /tmp/meshstar-instrumentation.txt
+grep -q 'OK (4 tests)' /tmp/meshstar-instrumentation.txt

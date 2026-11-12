@@ -1,7 +1,7 @@
 # A2 — Protected identity, contacts and box text
 
 Protocol/spec source: meshstar `c2c854742af32d95c01090b9193dea327a0b65a5` (read only).
-Implementation: `8c05d62`; emulator gate: `c4f7d25`. Build: `0.3.0 (2)`, application ID `net.meshstar.app`.
+Implementation: `8c05d62`; emulator gate: `c4f7d25`. Build: `0.3.0 (3)`, application ID `net.meshstar.app`.
 
 ## Implemented
 
@@ -51,7 +51,7 @@ existing box/iOS UI. The user reviews it before Save and check.
 
 ## Validation
 
-Local full JVM suite: 867 app tests discovered, 864 passed, 3 upstream skips;
+Local full JVM suite: 869 app tests discovered, 866 passed, 3 upstream skips;
 RNSLite 22/22. The 17 carrier tests include pairing, both contact-link schemes,
 address/key rejection, unsigned/forged delivery, unknown senders, durable receive/
 proof replay, URL change, redirects, reset admission and the A3 cases below.
@@ -68,6 +68,31 @@ visually inspected. The first API 34 CI attempt timed out during cold launch,
 without a crash. `c4f7d25` adds a bounded cold-start wait plus a visible-UI check;
 [the repeated run](https://github.com/algosmd/meshstar-android/actions/runs/43020865478)
 is fully green: build, API 26 and API 34 (both instrumented tests on each).
+
+## Build 3 — external links and camera-free import
+
+- MainActivity registers VIEW / DEFAULT / BROWSABLE for both `meshstar` and
+  `meshsat`, with hosts `verify`, `user`, and `share`.
+- Cold launch and `onNewIntent` reach the same signed QR verification handler
+  used by the camera and paste UI, even before Bluetooth onboarding completes.
+- The verification and RNS scanner screens expose an editable link field,
+  **Paste link**, and **Open link**, without requiring camera permission.
+  Clipboard data is read only after the user's explicit tap.
+- New BLE verification QR links use `meshstar`; legacy schemes are input aliases.
+  Signed canonical bytes and Noise/RNS identities remain separate. A valid QR
+  self-signature alone does not mark a peer mutually verified without the BLE
+  challenge/response. Expired/invalid links show a result instead of silently failing.
+- `user` selects the named contact; `share` imports a draft/contact for review.
+  Neither handler automatically sends messages or credentials.
+- A new instrumented fixture resolves all six scheme/host combinations and opens
+  a complete signed synthetic verification link, then delivers its legacy alias
+  to the same Activity via `onNewIntent`. It also checks manual clipboard paste
+  and the common verification result. The CI gate now runs four instrumented
+  tests on API 26 and 34. Local API 26: **4/4 passed**, including clipboard
+  paste and the cold/warm link flow. No real keys or contacts are used as fixtures.
+- Build 3 was installed as an update (no data clear/uninstall). APK version and
+  signature were checked. APK SHA-256:
+  `6cb35cf79de3237856512b994e6f504c1aa9d144f1b3979b424c38509d7cf807`.
 
 ## Publication and public-source audit
 

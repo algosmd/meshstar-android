@@ -4,7 +4,7 @@ import android.app.Application
 import android.content.Context
 import androidx.test.runner.AndroidJUnitRunner
 
-/** UI fixtures do not start transports, identity persistence, or location services. */
+/** Skip Application startup side effects; each fixture chooses the Activity it exercises. */
 class PerformanceTestRunner : AndroidJUnitRunner() {
     override fun newApplication(
         cl: ClassLoader,

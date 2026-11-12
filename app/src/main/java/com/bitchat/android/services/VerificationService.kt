@@ -57,7 +57,7 @@ object VerificationService {
 
         fun toUrlString(): String {
             val builder = Uri.Builder()
-                .scheme("bitchat")
+                .scheme("meshstar")
                 .authority("verify")
                 .appendQueryParameter("v", v.toString())
                 .appendQueryParameter("noise", noiseKeyHex)
@@ -75,7 +75,8 @@ object VerificationService {
         companion object {
             fun fromUrlString(urlString: String): VerificationQR? {
                 val uri = runCatching { urlString.toUri() }.getOrNull() ?: return null
-                if (uri.scheme != "bitchat" || uri.host != "verify") return null
+                if (!net.meshstar.link.AppLinks.isVerification(uri) || !net.meshstar.link.AppLinks.safe(uri)) return null
+                if (uri.queryParameterNames.any { uri.getQueryParameters(it).size != 1 }) return null
 
                 val vStr = uri.getQueryParameter("v") ?: return null
                 val v = vStr.toIntOrNull() ?: return null

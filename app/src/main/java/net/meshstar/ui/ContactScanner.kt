@@ -21,9 +21,17 @@ import com.google.mlkit.vision.barcode.common.Barcode
 import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
-@androidx.annotation.OptIn(ExperimentalGetImage::class)
 @Composable
 fun ContactScanner(onCode: (String) -> Unit) {
+    Column(Modifier.fillMaxSize()) {
+        PasteLinkPanel(onOpen = onCode)
+        Box(Modifier.weight(1f)) { CameraScanner(onCode) }
+    }
+}
+
+@androidx.annotation.OptIn(ExperimentalGetImage::class)
+@Composable
+private fun CameraScanner(onCode: (String) -> Unit) {
     val context = LocalContext.current
     val lifecycle = LocalLifecycleOwner.current
     var permission by remember { mutableStateOf(ContextCompat.checkSelfPermission(context, Manifest.permission.CAMERA) == PackageManager.PERMISSION_GRANTED) }

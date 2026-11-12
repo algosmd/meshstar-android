@@ -2,7 +2,7 @@
 
 Source: meshstar `docs/mailbox.md` and A1 vectors at
 `c2c854742af32d95c01090b9193dea327a0b65a5`; implementation `8c05d62`.
-Build: `0.3.0 (2)`. No deployed server address is included.
+Build: `0.3.0 (3)`. No deployed server address is included.
 
 ## Implemented
 
@@ -35,7 +35,7 @@ Build: `0.3.0 (2)`. No deployed server address is included.
 
 ## Automated evidence
 
-Local full suite: app 867 discovered / 864 passed / 3 upstream skips; RNSLite 22/22.
+Local full suite: app 869 discovered / 866 passed / 3 upstream skips; RNSLite 22/22.
 17 added carrier tests, including:
 
 - Correct stamp challenge, exact nonce validation and no box credential header.

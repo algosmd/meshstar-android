@@ -128,6 +128,17 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="bitchat" android:host="verify" />
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="meshstar" android:host="verify" />
+                <data android:scheme="meshsat" android:host="verify" />
+                <data android:scheme="meshstar" android:host="user" />
+                <data android:scheme="meshsat" android:host="user" />
+                <data android:scheme="meshstar" android:host="share" />
+                <data android:scheme="meshsat" android:host="share" />
+            </intent-filter>
         </activity>
 
         <!-- User-entered carrier endpoints only; no automatic pairing from external intents. -->

@@ -78,6 +78,17 @@ class VerificationServiceTest {
         assertNull(VerificationService.verifyScannedQR(qr, maxAgeSeconds = 60))
     }
 
+    @Test
+    fun `verification aliases share canonical signatures and reject duplicated fields`() {
+        val current = signedQr(System.currentTimeMillis() / 1000L)
+        org.junit.Assert.assertTrue(current.startsWith("meshstar://verify?"))
+        for (scheme in listOf("meshstar", "meshsat", "bitchat")) {
+            assertNotNull(VerificationService.verifyScannedQR(current.replace("meshstar:", "$scheme:")))
+        }
+        assertNull(VerificationService.verifyScannedQR(current + "&nick=other"))
+        assertNull(VerificationService.verifyScannedQR(current.replace("meshstar:", "https:")))
+    }
+
     private fun signedQr(ts: Long): String {
         val noise = encryptionService.getStaticPublicKey()!!.joinToString("") { "%02x".format(it) }
         val sign = encryptionService.getSigningPublicKey()!!.joinToString("") { "%02x".format(it) }

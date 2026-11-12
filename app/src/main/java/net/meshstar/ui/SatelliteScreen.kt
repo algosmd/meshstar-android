@@ -35,17 +35,17 @@ fun MeshButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = t
 }
 
 @Composable
-fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit) {
+fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit, initialPeer: String = "", initialDraft: String = "") {
     val engine by runtime.engine.collectAsState()
     val startupError by runtime.startupError.collectAsState()
     Surface(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
         if (engine == null) Column(Modifier.padding(12.dp)) { Text(startupError ?: "Opening encrypted storage…"); MeshButton("Back", onClick = close) }
-        else Content(engine!!, runtime, incoming, consumeLink, close)
+        else Content(engine!!, runtime, incoming, consumeLink, close, initialPeer, initialDraft)
     }
 }
 
 @Composable
-private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit) {
+private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit, initialPeer: String, initialDraft: String) {
     val state by engine.state.collectAsState()
     val boxStatus by runtime.boxStatus.collectAsState()
     val mailStatus by runtime.mailStatus.collectAsState()
@@ -77,10 +77,19 @@ private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, co
         feedback = "Copied"
     }
     fun scanResult(text: String) {
+        val uri = runCatching { android.net.Uri.parse(text) }.getOrNull()
+        if (uri != null && net.meshstar.link.AppLinks.navigation(uri) && net.meshstar.link.AppLinks.safe(uri)) {
+            context.startActivity(android.content.Intent(context, com.bitchat.android.MainActivity::class.java)
+                .setAction(android.content.Intent.ACTION_VIEW).setData(uri)
+                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
+            return
+        }
         val box = runCatching { ContactLink.box(text) }.getOrNull()
         if (box != null) { boxUrl = box.first; token = box.second; screen = "settings"; feedback = "Box QR imported. Review and tap Save and check." }
         else { qrInput = text; screen = "add" }
     }
+    LaunchedEffect(initialPeer) { if (initialPeer.isNotBlank()) { selected = initialPeer; screen = "chat" } }
+    LaunchedEffect(initialDraft) { if (initialDraft.isNotEmpty()) { input = initialDraft; feedback = "Select a contact to send the shared draft" } }
     LaunchedEffect(incoming) { if (incoming.isNotEmpty()) { scanResult(incoming); consumeLink() } }
     androidx.activity.compose.BackHandler(screen != "chats") { screen = "chats" }
     CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace, fontSize = 14.sp)) {

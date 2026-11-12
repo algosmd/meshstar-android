@@ -43,6 +43,7 @@ import androidx.compose.material3.TabRowDefaults
 import androidx.compose.material3.TabRowDefaults.tabIndicatorOffset
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -52,6 +53,7 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.Color
@@ -94,13 +96,26 @@ fun VerificationSheet(
     isPresented: Boolean,
     onDismiss: () -> Unit,
     viewModel: ChatViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    initialLink: String? = null
 ) {
     if (!isPresented) return
 
     val accent = MaterialTheme.colorScheme.primary
     
     var selectedTab by remember { mutableStateOf(0) } // 0 = My Code, 1 = Scan
+    var scanFeedback by remember { mutableStateOf<String?>(null) }
+    fun acceptCode(code: String) {
+        val qr = VerificationService.verifyScannedQR(code)
+        scanFeedback = when {
+            qr == null -> "Invalid or expired verification link"
+            viewModel.beginQRVerification(qr) -> "Signature valid · waiting for Bluetooth confirmation"
+            else -> "Signature valid · connect to this Bluetooth peer to finish verification"
+        }
+    }
+    LaunchedEffect(initialLink) {
+        initialLink?.let { selectedTab = 1; acceptCode(it) }
+    }
     val nickname by viewModel.nickname.collectAsStateWithLifecycle()
     val npub = remember { viewModel.getCurrentNpub() }
 
@@ -177,12 +192,9 @@ fun VerificationSheet(
                     )
                     1 -> ScanTabContent(
                         accent = accent,
-                        onScan = { code ->
-                            val qr = VerificationService.verifyScannedQR(code)
-                            if (qr != null && viewModel.beginQRVerification(qr)) {
-                                selectedTab = 0
-                            }
-                        }
+                        onScan = ::acceptCode,
+                        initialLink = initialLink.orEmpty(),
+                        feedback = scanFeedback
                     )
                 }
             }
@@ -318,7 +330,9 @@ private fun MyQrTabContent(
 @Composable
 private fun ScanTabContent(
     accent: Color,
-    onScan: (String) -> Unit
+    onScan: (String) -> Unit,
+    initialLink: String = "",
+    feedback: String? = null
 ) {
     val permissionState = rememberPermissionState(android.Manifest.permission.CAMERA)
     
@@ -329,6 +343,8 @@ private fun ScanTabContent(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
+        net.meshstar.ui.PasteLinkPanel(onOpen = onScan, initialValue = initialLink)
+        feedback?.let { Text(it, Modifier.testTag("meshstar.verify.result"), fontSize = 12.sp) }
         if (permissionState.status.isGranted) {
             Box(
                 modifier = Modifier
