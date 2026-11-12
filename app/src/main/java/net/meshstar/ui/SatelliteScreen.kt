@@ -17,6 +17,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.meshstar.data.*
+import net.meshstar.rnslite.unhex
 import net.meshstar.link.ContactLink
 import java.util.Locale
 
@@ -56,6 +57,12 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     initialPeer: String, initialDraft: String, ble: ChatViewModel?, bleReady: Boolean, language: String, appearance: String,
     onPreferences: (UiAction) -> Unit) {
     val state by engine.state.collectAsState()
+    val nodeRuntime by runtime.node.collectAsState()
+    val node = nodeRuntime?.state?.collectAsState()?.value ?: net.meshstar.meshcore.NodeState()
+    val nodeDevices = nodeRuntime?.devices?.collectAsState()?.value.orEmpty()
+    val nodeStatus = nodeRuntime?.status?.collectAsState()?.value ?: "node_off"
+    val nodeRssi = nodeRuntime?.rssi?.collectAsState()?.value
+    val nodeConflict = nodeRuntime?.conflict?.collectAsState()?.value ?: false
     val point by engine.pointOnline.collectAsState()
     val boxStatus by runtime.boxStatus.collectAsState()
     val mailStatus by runtime.mailStatus.collectAsState()
@@ -79,7 +86,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         UiPeer("rns:${c.address}", c.name, contactFingerprints.getValue(c.address), rns = c.address,
             verified = state.verifiedKeys[c.address] == c.key, preview = history.lastOrNull()?.text.orEmpty(),
             unread = history.count { !it.outgoing && it.at > (state.readThrough[c.address] ?: 0) },
-            paths = setOf(ChatTab.SATELLITE), at = history.lastOrNull()?.at ?: 0, qr = c.qr)
+            paths = setOf(ChatTab.SATELLITE) + if(node.ready) setOf(ChatTab.LORA) else emptySet(), at = history.lastOrNull()?.at ?: 0, qr = c.qr)
     } + state.messages.map { it.peer }.distinct().filter { p -> state.contacts.none { it.address == p } }.map { p ->
         val history = histories[p].orEmpty()
         UiPeer("rns:$p", p.take(12), rns = p, preview = history.lastOrNull()?.text.orEmpty(),
@@ -92,7 +99,16 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
             nearby = peer in connected, verified = fp in verified, preview = history.lastOrNull()?.content.orEmpty(),
             unread = if (peer in unreadBle) 1 else 0, paths = setOf(ChatTab.BLUETOOTH), at = history.lastOrNull()?.timestamp?.time ?: 0)
     }
-    val peers = unifiedPeers(rns, blePeers, state.bluetoothLinks)
+    val channelPeers = (state.channelNames.values+state.channelTexts.filter { it.directKey==null }.map { it.channel }).distinctBy { it.lowercase() }.filterNot { it.equals("MESHSAT",true)||it.startsWith("direct:") }.map { name ->
+        val history=state.channelTexts.filter { it.channel.equals(name,true) }
+        UiPeer("channel:"+name.lowercase(),"#"+name,preview=history.lastOrNull()?.text.orEmpty(),unread=history.count{!it.outgoing&&it.receivedAt>(state.readThrough["channel:"+name.lowercase()]?:0)},paths=setOf(ChatTab.LORA),at=history.lastOrNull()?.receivedAt?:0)
+    }
+    val nativeKeys=state.nativeChats+state.channelTexts.filter { it.channel.startsWith("direct:") }.map { it.channel.removePrefix("direct:") }
+    val nativePeers=nativeKeys.map { key->
+        val history=state.channelTexts.filter { it.channel=="direct:"+key }
+        UiPeer("native:"+key,state.nativeContacts[key]?:key.take(12),preview=history.lastOrNull()?.text.orEmpty(),unread=history.count{!it.outgoing&&it.receivedAt>(state.readThrough["native:"+key]?:0)},paths=setOf(ChatTab.LORA),at=history.lastOrNull()?.receivedAt?:0)
+    }
+    val peers = unifiedPeers(rns, blePeers, state.bluetoothLinks)+channelPeers+nativePeers
     fun bleMessage(m: BitchatMessage): UiMessage = UiMessage(m.id, m.sender, m.content, m.timestamp.time,
         m.senderPeerID == ble?.myPeerID || m.sender == bleNickname, delivery = when (m.deliveryStatus) {
             is DeliveryStatus.Delivered, is DeliveryStatus.Read -> Delivery.DELIVERED
@@ -102,14 +118,19 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     val timelines = peers.associate { peer -> peer.id to (
         histories[peer.rns].orEmpty().map { m -> UiMessage(m.hash, if (m.outgoing) nickname else peer.name,
             m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
-            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id) } +
-            peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty()).sortedBy { it.at } }
+            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops) } +
+            peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty() +
+            (if(peer.id.startsWith("channel:")||peer.id.startsWith("native:"))state.channelTexts.filter { ("channel:"+it.channel.lowercase()==peer.id)||("native:"+it.channel.removePrefix("direct:")==peer.id) }.map {
+                UiMessage(it.id,if(it.outgoing)node.name else peer.name,it.text,it.receivedAt,it.outgoing,Route.LORA,showDelivery=false,snr=it.snr,hops=it.hops,fromBox=it.fromBox)
+            } else emptyList())).sortedBy { it.at } }
     val snapshot = UiSnapshot(nickname, peers, timelines, publicMessages.map(::bleMessage),
         publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != nickname },
         ownContact.qr, ownContact.fingerprint, ownContact.address,
         state.box?.url.orEmpty(), state.box?.token.orEmpty(), state.internet, point, boxStatus, mailStatus, bleReady,
         mapOf(ChatTab.BLUETOOTH to (blePeers.sumOf { it.unread } + publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != bleNickname }),
-            ChatTab.LORA to 0, ChatTab.SATELLITE to rns.sumOf { it.unread }))
+            ChatTab.LORA to (state.messages.count{!it.outgoing&&it.route==Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}+channelPeers.sumOf{it.unread}+nativePeers.sumOf{it.unread}),
+            ChatTab.SATELLITE to state.messages.count{!it.outgoing&&it.route!=Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}),
+        node,nodeDevices,nodeStatus,nodeRssi,state.node,nodeConflict,state.box?.transportId!=null)
     val scope = rememberCoroutineScope()
     var feedback by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -122,6 +143,18 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         try {
             when (event) {
                 is UiAction.Send -> {
+                    if(event.peer.startsWith("native:")) {
+                        val key=event.peer.removePrefix("native:")
+                        val timestamp=nodeRuntime?.sendDirect(event.text,key.unhex())?:error("Node not connected")
+                        withContext(Dispatchers.IO){engine.recordDirectSent(key,event.text,timestamp)}
+                        return true
+                    }
+                    if(event.peer.startsWith("channel:")) {
+                        val channel=node.channels.firstOrNull { "channel:"+it.name.lowercase()==event.peer && !it.transport }?:error("Node not connected")
+                        val timestamp=nodeRuntime?.sendText(event.text,channel.index)?:error("Node not connected")
+                        withContext(Dispatchers.IO){engine.recordChannelSent(channel.name,node.name+": "+event.text,timestamp)}
+                        return true
+                    }
                     val peer = peers.firstOrNull { it.id == event.peer }
                     if (event.peer == "public" || (event.path == PathChoice.AUTO && peer?.rns == null)) {
                         check(ble != null && bleReady)
@@ -131,7 +164,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                             ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null)
+                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null,node.ready,currentState.box?.transportId!=null)
                     if (choice == null) { feedback = context.getString(T.route_unavailable.resource); return false }
                     if (choice == "bluetooth") {
                         check(ble != null); ble.startPrivateChat(peer?.ble ?: error("Unknown peer"))
@@ -139,9 +172,10 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                             ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    withContext(Dispatchers.IO) { engine.send(peer?.rns ?: error("Add RNS contact"), event.text, if (choice == "internet") Route.INTERNET else Route.SATELLITE) }
+                    withContext(Dispatchers.IO) { engine.send(peer?.rns ?: error("Add RNS contact"), event.text, when(choice){"internet"->Route.INTERNET;"lora"->Route.LORA;"relay"->Route.RELAY;else->Route.SATELLITE}) }
                 }
                 is UiAction.Read -> {
+                    if(event.peer.startsWith("channel:")||event.peer.startsWith("native:"))withContext(Dispatchers.IO){engine.markRead(event.peer)}
                     if (event.peer == "public") { publicRead = System.currentTimeMillis(); prefs.edit().putLong("publicRead", publicRead).apply(); ble?.clearMeshMentionNotifications() }
                     peers.firstOrNull { it.id == event.peer }?.let { peer ->
                         if (peer.rns != null && peer.unread > 0) withContext(Dispatchers.IO) { engine.markRead(peer.rns) }
@@ -169,6 +203,12 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                     withContext(Dispatchers.IO) { engine.linkBluetooth(peer.bleFingerprint ?: error("Unknown key"), target.rns ?: error("Unknown contact")) }
                     openedPeer = target.id
                 }
+                is UiAction.OpenNative -> {withContext(Dispatchers.IO){engine.openNative(event.key)};openedPeer="native:"+event.key}
+                UiAction.ScanNode -> { if(!bleReady)onPreferences(UiAction.BluetoothSetup)else nodeRuntime?.scan() }
+                is UiAction.ConfigureNode -> nodeRuntime?.configure(event.id,event.name,event.slot,event.secret,event.replace)
+                UiAction.ForgetNode -> nodeRuntime?.forget()
+                UiAction.AdvertiseNode -> nodeRuntime?.advertise()
+                UiAction.RefreshNode -> nodeRuntime?.refresh()
                 is UiAction.SaveBox -> { busy = true; withContext(Dispatchers.IO) { engine.configureBox(event.url, event.token) }; feedback = context.getString(T.paired.resource) }
                 is UiAction.SaveInternet -> withContext(Dispatchers.IO) { engine.configureInternet(event.url) }
                 UiAction.DisableBox -> withContext(Dispatchers.IO) { engine.disableBox() }
@@ -187,6 +227,10 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
+        status == "Node:SECRET" -> T.node_secret_help
+        status == "Node:OCCUPIED" -> T.node_occupied
+        status == "Node:MTU" -> T.node_mtu
+        status.startsWith("Node:") -> T.node_failed
         status == "Box not configured" -> T.box_off
         status == "Box available" -> T.box_ready
         status == "Internet server disabled" -> T.mail_off

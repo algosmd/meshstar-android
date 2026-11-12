@@ -100,4 +100,34 @@
     <string name="ms_review_draft">select a contact to send the shared draft</string>
     <string name="ms_radio_unavailable">LoRa and Relay require a connected node</string>
     <string name="ms_need_contact">add a contact to receive</string>
+
+    <string name="ms_node_scan">find nodes via Bluetooth</string>
+    <string name="ms_node_slot">slot</string>
+    <string name="ms_node_secret">channel secret or channel QR</string>
+    <string name="ms_more">more</string>
+    <string name="ms_node_secret_help">leave blank to use the existing MESHSAT channel; otherwise paste 32 hex characters or its channel QR</string>
+    <string name="ms_node_connect">connect</string>
+    <string name="ms_node_occupied">slot occupied; the existing channel was preserved</string>
+    <string name="ms_node_replace">replace channel</string>
+    <string name="ms_node_replace_warning">this replaces the selected slot with MESHSAT using the supplied secret</string>
+    <string name="ms_node_replace_confirm">confirm replacement</string>
+    <string name="ms_node_forget">forget node</string>
+    <string name="ms_node_channel_ready">MeshStar channel · configured</string>
+    <string name="ms_node_refresh">refresh contacts</string>
+    <string name="ms_node_advertise">send advert</string>
+    <string name="ms_node_contacts">node contacts</string>
+    <string name="ms_node_adverts">heard adverts</string>
+    <string name="ms_node_scanning">looking for nodes…</string>
+    <string name="ms_node_connecting">connecting to node…</string>
+    <string name="ms_node_reading">reading channels…</string>
+    <string name="ms_node_ready">node connected · MESHSAT ready</string>
+    <string name="ms_node_text_only">node connected · text channels only</string>
+    <string name="ms_node_mtu">BLE frame is too large; reconnect the node</string>
+    <string name="ms_node_permission">allow Bluetooth permissions to search for nodes</string>
+    <string name="ms_node_failed">node unavailable; reconnecting…</string>
+    <string name="ms_from_box">from box history</string>
+
+    <string name="ms_miui_hint">if background messages stop on MIUI, check autostart and battery “no restrictions” for MeshStar. these settings are optional when reception already works.</string>
+    <string name="ms_app_settings">app settings</string>
+    <string name="ms_hops_format">%1$d hops</string>
 </resources>

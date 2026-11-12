@@ -19,3 +19,5 @@ include(":app")
 // Using published Arti AAR; local module not included
 
 include(":rnslite")
+
+include(":meshcore")

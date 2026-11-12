@@ -100,4 +100,34 @@
     <string name="ms_review_draft">выберите контакт для отправки черновика</string>
     <string name="ms_radio_unavailable">для LoRa и Релея нужна подключённая нода</string>
     <string name="ms_need_contact">добавьте контакт для приёма</string>
+
+    <string name="ms_node_scan">найти ноды по Bluetooth</string>
+    <string name="ms_node_slot">слот</string>
+    <string name="ms_node_secret">секрет канала или QR канала</string>
+    <string name="ms_more">подробнее</string>
+    <string name="ms_node_secret_help">оставьте пустым для существующего канала MESHSAT; иначе вставьте 32 hex-символа или QR канала</string>
+    <string name="ms_node_connect">подключить</string>
+    <string name="ms_node_occupied">слот занят; существующий канал сохранён</string>
+    <string name="ms_node_replace">заменить канал</string>
+    <string name="ms_node_replace_warning">выбранный слот будет заменён на MESHSAT с указанным секретом</string>
+    <string name="ms_node_replace_confirm">подтвердить замену</string>
+    <string name="ms_node_forget">забыть ноду</string>
+    <string name="ms_node_channel_ready">канал MeshStar · настроен</string>
+    <string name="ms_node_refresh">обновить контакты</string>
+    <string name="ms_node_advertise">отправить анонс</string>
+    <string name="ms_node_contacts">контакты ноды</string>
+    <string name="ms_node_adverts">услышанные анонсы</string>
+    <string name="ms_node_scanning">поиск нод…</string>
+    <string name="ms_node_connecting">подключение к ноде…</string>
+    <string name="ms_node_reading">чтение каналов…</string>
+    <string name="ms_node_ready">нода подключена · MESHSAT готов</string>
+    <string name="ms_node_text_only">нода подключена · только текстовые каналы</string>
+    <string name="ms_node_mtu">слишком большой BLE-кадр; переподключите ноду</string>
+    <string name="ms_node_permission">разрешите Bluetooth для поиска нод</string>
+    <string name="ms_node_failed">нода недоступна; переподключение…</string>
+    <string name="ms_from_box">из истории бокса</string>
+
+    <string name="ms_miui_hint">если сообщения в фоне перестанут приходить на MIUI, проверьте автозапуск и батарею «без ограничений» для MeshStar. если приём работает, менять настройки не требуется.</string>
+    <string name="ms_app_settings">настройки приложения</string>
+    <string name="ms_hops_format">%1$d переходов</string>
 </resources>

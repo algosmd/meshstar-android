@@ -7,6 +7,7 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import net.meshstar.box.*
 import net.meshstar.link.Contact
+import net.meshstar.meshcore.*
 import net.meshstar.mailbox.MailboxTransport
 import net.meshstar.rnslite.*
 import java.time.Instant
@@ -28,7 +29,10 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         val config = state.value.box ?: run { point.value = false; return }
         val status = try { BoxTransport(config, http).statusDetails() } catch (e: Exception) { point.value = false; throw e }
         if (status.address != config.address) { point.value = false; error("Box identity changed") }
-        if (state.value.box == config) point.value = status.pointOnline
+        if (state.value.box == config) {
+            point.value = status.pointOnline
+            if(status.transportId!=null && status.transportId!=config.transportId) change { if(it.box==config)it.box=config.copy(transportId=status.transportId) }
+        }
     }
     suspend fun initializeReadTracking() {
         if (!state.value.readTrackingInitialized) change { next ->
@@ -74,8 +78,10 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         val provisional = BoxConfig(endpoint, token)
         val status = BoxTransport(provisional, http).statusDetails()
         val address = status.address
-        val config = provisional.copy(address = address)
-        val boxContact = BoxTransport(config, http).pair(myContact())
+        val candidate = provisional.copy(address = address, transportId = status.transportId)
+        val (boxContact, pairingId) = BoxTransport(candidate, http).pairDetails(myContact())
+        require(pairingId == null || status.transportId == null || pairingId == status.transportId) { "Box identity changed" }
+        val config = candidate.copy(transportId = pairingId ?: status.transportId)
         change { it.box = config; addContact(it, boxContact); it.boxCursors.putIfAbsent(address, BoxCursor()) }
         point.value = status.pointOnline
         address
@@ -90,15 +96,18 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         val s = state.value
         val contact = s.contacts.firstOrNull { it.address == peer } ?: error("Add the contact first")
         val carrier = when (route) {
+            Route.LORA, Route.RELAY -> s.node?.publicKey ?: error("Configure the node first")
             Route.SATELLITE -> s.box?.address?.takeIf { it.isNotEmpty() } ?: error("Configure the box first")
             Route.INTERNET -> s.internet.takeIf { it.isNotEmpty() }?.let(::carrierId) ?: error("Configure the internet server first")
         }
         require(route != Route.SATELLITE || peer != carrier) { "A box cannot send to itself through satellite" }
         val packet = LXMessage.create(identity, contact.identity, text.toByteArray(Charsets.UTF_8), now().toEpochMilli() / 1000.0).packet(contact.identity)
+        val relayId = if(route==Route.RELAY)s.box?.transportId?:error("Configure the relay identity first") else null
+        if(relayId!=null)packet.via(relayId.unhex()) // Validate HEADER_2 size before durable admission.
         change {
             require(it.messages.count { m -> m.outgoing && !m.submitted } < 1000) { "Outbox is full" }
             require(it.messages.size < 10_000) { "History is full" }
-            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli(), viaPoint = route == Route.SATELLITE && point.value))
+            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli(), viaPoint = route in setOf(Route.SATELLITE,Route.RELAY) && point.value, relayTransportId=relayId))
         }
         return packet.hash.hex()
     }
@@ -184,7 +193,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             change { it.proofs.remove(proof) }
         }
     }
-    private fun consume(state: SatState, hex: String, kind: String, route: Route, carrier: String) {
+    private fun consume(state: SatState, hex: String, kind: String, route: Route, carrier: String, reception: Reception? = null) {
         // Invalid carrier rows are consumed without confirmation, not retried forever.
         val raw = runCatching { hex.unhex() }.getOrNull() ?: return
         if (kind == "voice") {
@@ -199,7 +208,15 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         if (packet.type == Packet.PROOF) {
             for (message in state.messages.filter { it.outgoing && Packet(it.raw.unhex()).truncatedHash.contentEquals(packet.destination) }) {
                 val contact = state.contacts.firstOrNull { it.address == message.peer } ?: continue
-                if (Packet(message.raw.unhex()).validateProof(packet, contact.identity)) message.delivery = Delivery.DELIVERED
+                if (Packet(message.raw.unhex()).validateProof(packet, contact.identity)) {
+                    if(message.delivery!=Delivery.DELIVERED && route==Route.LORA && message.route==Route.LORA) {
+                        val recent=state.radioObservations[message.peer].orEmpty()
+                        message.viaPoint=point.value && recent.none { (hash,at)->hash!=packet.hash.hex()&&at<=now().toEpochMilli()&&now().toEpochMilli()-at<300000 }
+                        if(!message.viaPoint)observeRadio(state,message.peer,packet.hash.hex(),reception)
+                    }
+                    if(route==Route.LORA){message.radioSnr=reception?.snr;message.radioHops=reception?.hops}
+                    message.delivery = Delivery.DELIVERED
+                }
             }
             return
         }
@@ -215,13 +232,14 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             }.getOrNull() ?: return
         }
         val hash = packet.hash.hex()
+        if(decoded.third && route==Route.LORA)observeRadio(state,decoded.first,hash,reception)
         if (hash !in state.seen && state.messages.none { it.hash == hash }) {
             val text = runCatching {
                 if (decoded.second.isNotEmpty() && (decoded.second[0].toInt() and 255) < 8) TextCodec.decode(decoded.second)
                 else decoded.second.toString(Charsets.UTF_8)
             }.getOrDefault("[Invalid text encoding]")
             require(state.messages.size < 10_000) { "History is full" }
-            state.messages.add(ChatMessage(hash, decoded.first, false, text, hex, route, carrier, now().toEpochMilli(), Delivery.DELIVERED, decoded.third, true, viaPoint = route == Route.SATELLITE && point.value))
+            state.messages.add(ChatMessage(hash, decoded.first, false, text, hex, route, carrier, now().toEpochMilli(), Delivery.DELIVERED, decoded.third, true, viaPoint = route == Route.SATELLITE && point.value, radioSnr=reception?.snr, radioHops=reception?.hops))
             state.seen.add(hash)
             while (state.seen.size > 5000) state.seen.removeAt(0)
         }
@@ -231,6 +249,73 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             val proof = PendingProof(packet.prove(identity).raw.hex(), decoded.first, route, carrier)
             require(state.proofs.size < 1000 || proof in state.proofs) { "Confirmation queue is full" }
             if (proof !in state.proofs) state.proofs.add(proof)
+        }
+    }
+    suspend fun saveNode(config:NodeConfiguration?) { change { it.node=config } }
+    suspend fun saveChannels(channels:List<net.meshstar.meshcore.Channel>) { change { it.channelNames.clear();channels.filterNot { c->c.transport || c.name.isBlank() }.forEach { c->it.channelNames[c.index]=c.name } } }
+    suspend fun receiveRadio(raw:ByteArray,reception:Reception,carrier:String?=state.value.node?.publicKey) {
+        val node=carrier?:return
+        val kind=if(raw.take(5).toByteArray().contentEquals(VoiceFrame.magic))"voice" else "data"
+        change { consume(it,raw.hex(),kind,Route.LORA,node,reception) }
+    }
+    suspend fun flushRadio(send:suspend(ByteArray)->Unit) {
+        val node=state.value.node?.publicKey?:return
+        for(m in state.value.messages.filter { it.outgoing&&!it.submitted&&it.route in setOf(Route.LORA,Route.RELAY)&&it.carrier==node }) {
+            val packet=Packet(m.raw.unhex());val wire=if(m.route==Route.RELAY)packet.via(m.relayTransportId?.unhex()?:error("Missing relay identity"))else packet
+            send(wire.raw)
+            change { next->next.messages.firstOrNull { it.hash==m.hash }?.let { it.submitted=true;if(it.delivery!=Delivery.DELIVERED)it.delivery=Delivery.SENT } }
+        }
+        for(p in state.value.proofs.filter { it.route==Route.LORA&&it.carrier==node }) {send(p.raw.unhex());change { it.proofs.remove(p) }}
+    }
+    private fun observeRadio(s:SatState,peer:String,hash:String,reception:Reception?) {
+        if(reception==null||!reception.snr.isFinite())return
+        val at=now().toEpochMilli();val recent=s.radioObservations.getOrPut(peer){mutableMapOf()}
+        recent.entries.removeAll { it.value>at||at-it.value>=300000 };recent[hash]=at
+        while(recent.size>32)recent.remove(recent.minBy { it.value }.key)
+        s.radioObservations.keys.retainAll(s.contacts.map { it.address }.toSet())
+    }
+    suspend fun saveNativeContacts(contacts:List<NodeContact>) {
+        val next=contacts.associate { it.key.hex() to it.name }
+        if(state.value.nativeContacts==next)return
+        change { state->
+            state.nativeContacts.clear();state.nativeContacts.putAll(next)
+            for(i in state.channelTexts.indices){
+                val text=state.channelTexts[i]
+                if(text.directKey==null&&text.channel.startsWith("direct:")){
+                    val prefix=text.channel.removePrefix("direct:")
+                    next.keys.filter { it.startsWith(prefix) }.singleOrNull()?.let { key->state.channelTexts[i]=text.copy(channel="direct:"+key,directKey=key) }
+                }
+            }
+        }
+    }
+    suspend fun openNative(key:String){require(key.unhex().size==32);change { it.nativeChats.add(key) }}
+    suspend fun recordDirectSent(key:String,text:String,timestamp:Long){change { s->
+        appendChannel(s,"direct:"+key,text,timestamp,now().toEpochMilli(),false,null,null,true,key)
+        s.nativeChats.add(key)
+    }}
+    suspend fun receiveForeign(text:ForeignText) { change { s->
+        val prefix=text.prefix?.hex()
+        val directKey=prefix?.let { p->s.nativeContacts.keys.filter { it.startsWith(p) }.singleOrNull() }
+        val name=text.channel?.let { s.channelNames[it] }?:if(prefix!=null)"direct:"+(directKey?:prefix)else "channel:${text.channel}"
+        if(name.trim().equals("MESHSAT",true))return@change
+        appendChannel(s,name,text.text,text.timestamp,now().toEpochMilli(),false,text.reception?.snr,text.reception?.hops,directKey=directKey)
+    } }
+    private fun appendChannel(s:SatState,name:String,text:String,timestamp:Long,receivedAt:Long,fromBox:Boolean,snr:Double?,hops:Int?,outgoing:Boolean=false,directKey:String?=null) {
+        val id=Hash.sha256((name.lowercase()+"\u0000"+timestamp+"\u0000"+text).toByteArray()).hex()
+        if(s.channelTexts.none { it.id==id || (it.channel.equals(name,true)&&it.timestamp==timestamp&&it.text==text) })s.channelTexts.add(ChannelText(id,name,text,timestamp,receivedAt,fromBox,snr,hops,outgoing,directKey))
+        while(s.channelTexts.size>5000)s.channelTexts.removeAt(0)
+    }
+    suspend fun recordChannelSent(name:String,text:String,timestamp:Long){change{appendChannel(it,name,text,timestamp,now().toEpochMilli(),false,null,null,true)}}
+    suspend fun pollChannelHistory() {
+        val config=state.value.box?:return;val transport=BoxTransport(config,http)
+        for((index,name) in transport.channels().filterNot { it.second.trim().equals("MESHSAT",true) }) {
+            val key=config.address+":"+name.lowercase()
+            for(page in 0 until 10) {
+                val since=state.value.channelCursors[key]?:0.0
+                val rows=transport.channelHistory(index,since)
+                change { s->rows.forEach { r->appendChannel(s,name,r.text,r.timestamp,(r.ts*1000).toLong(),true,r.snr,r.hops) };s.channelCursors[key]=maxOf(since,rows.maxOfOrNull{it.ts}?:since) }
+                if(rows.size<200)break
+            }
         }
     }
     companion object { fun carrierId(url: String): String = Hash.sha256(url.toByteArray(Charsets.UTF_8)).hex() }

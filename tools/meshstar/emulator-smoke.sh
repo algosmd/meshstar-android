@@ -35,7 +35,7 @@ printf 'MeshStar launch passed on API %s\n' "$(adb shell getprop ro.build.versio
 # radio/location permissions; AndroidKeyStore remains the real provider.
 test_apk=$(find test-apk -name '*.apk' -print -quit)
 adb install -r "$test_apk"
-adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest,net.meshstar.AppLinkInstrumentedTest,net.meshstar.UnifiedUiInstrumentedTest \
+adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest,net.meshstar.AppLinkInstrumentedTest,net.meshstar.UnifiedUiInstrumentedTest,net.meshstar.MeshCoreUiInstrumentedTest \
   net.meshstar.app.test/com.bitchat.android.ui.PerformanceTestRunner > /tmp/meshstar-instrumentation.txt
 cat /tmp/meshstar-instrumentation.txt
-grep -q 'OK (7 tests)' /tmp/meshstar-instrumentation.txt
+grep -q 'OK (9 tests)' /tmp/meshstar-instrumentation.txt

@@ -7,18 +7,21 @@ The original project documentation is preserved in [README.upstream.md](README.u
 
 Current scope: A0/A1 bootstrap and protocol library, A2 encrypted RNS identity,
 contacts/QR and text through a box, A3 Internet mailbox text with signed delivery,
-and A4 unified chats with English, Russian, Romanian, German and French UI.
+A4 unified chats with English, Russian, Romanian, German and French UI, and
+A5 MeshCore companion BLE with LoRa/Relay text and ordinary channel history.
 The main screen has **Bluetooth / LoRa / Satellite** tabs; use the header QR or
 **+** for contacts/settings, or tap **MeshStar/@nickname** to open settings.
-This is **not yet** the complete MeshStar iOS feature set: MeshCore integration
-is A5 and recording/media/notification work is A6. LoRa and Relay are visible
-route choices but remain unavailable until a MeshCore transport is implemented.
+This is **not yet** the complete MeshStar iOS feature set: recording/media and
+remaining notification work are A6. Physical LoRa/Relay acceptance is tracked in
+the A5 report; a passing JVM/emulator suite is not radio interoperability proof.
 The application keeps the upstream Bluetooth protocol and Kotlin package names.
 
 - Application ID: `net.meshstar.app`; source namespace: `com.bitchat.android`.
-- Display name: MeshStar; version: `0.3.0` (code `4`).
+- Display name: MeshStar; version: `0.3.0` (code `5`).
 - Wear is excluded from Gradle settings.
 - MeshStar protocol code is isolated in pure JVM module [`:rnslite`](rnslite/README.md).
+- MeshCore command/framing logic is in JVM module [`:meshcore`](meshcore/README.md);
+  the Android GATT adapter is in `net.meshstar.meshcore`.
 - No MeshStar deployment endpoints or credentials are configured or bundled.
 
 ## Build and test
@@ -30,17 +33,17 @@ Set `sdk.dir` in your ignored `local.properties` or use `ANDROID_HOME`.
 python3 -m venv .venv
 . .venv/bin/activate
 python -m pip install -r tools/meshstar/interop-requirements.txt
-./gradlew :app:assembleDebug :app:testDebugUnitTest :rnslite:test
+./gradlew :app:assembleDebug :app:testDebugUnitTest :rnslite:test :meshcore:test
 ```
 
 The GitHub Actions workflow builds a universal debug APK, runs app/JVM tests and
 launches the APK on API 26 and 34 emulators. APK and JUnit XML are CI artifacts.
-Debug APKs are test builds, not signed Play releases. BLE interoperability must
-still be tested on physical devices in A5; emulators cannot establish that result.
+Debug APKs are test builds, not signed Play releases. Physical BLE and background reception results, and outstanding radio checks,
+are listed in the A5 report; emulators cannot establish those results.
 
 Validation reports: [A0](docs/android/A0-validation.md), [A1](docs/android/A1-validation.md),
 [A2](docs/android/A2-validation.md), [A3](docs/android/A3-validation.md),
-[A4](docs/android/A4-validation.md).
+[A4](docs/android/A4-validation.md), [A5](docs/android/A5-validation.md).
 
 Carrier URLs default to empty and are entered by the tester in the app. Credentials
 and history are encrypted using a non-exportable Android Keystore wrapping key;

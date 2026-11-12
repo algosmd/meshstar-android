@@ -56,3 +56,8 @@
 -keep enum net.meshstar.data.Delivery { *; }
 -keep class net.meshstar.box.BoxConfig { *; }
 -keep class net.meshstar.link.Contact { *; }
+
+# Persisted MeshCore configuration is encrypted JSON; preserve migration field names.
+-keep class net.meshstar.meshcore.NodeConfiguration { *; }
+
+-keep class net.meshstar.data.ChannelText { *; }

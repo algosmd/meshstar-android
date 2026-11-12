@@ -19,6 +19,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.asImageBitmap
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.semantics.*
 import androidx.compose.ui.text.buildAnnotatedString
@@ -31,6 +33,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.launch
 import net.meshstar.data.*
+import net.meshstar.rnslite.hex
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -54,14 +57,26 @@ import java.util.Locale
     var token by remember { mutableStateOf(model.boxToken) }
     var internet by remember { mutableStateOf(model.internet) }
     var copied by remember { mutableStateOf(false) }
+    var nodeSlot by remember { mutableStateOf(model.nodeConfig?.slot?.toString() ?: "7") }
+    var nodeSecret by remember { mutableStateOf("") }
+    var nodeSelected by remember { mutableStateOf(model.nodeConfig?.let { it.device to it.name }) }
+    var replaceConfirm by remember { mutableStateOf(false) }
+    var scanningSecret by remember { mutableStateOf(false) }
+    var secretDetails by remember { mutableStateOf(false) }
     var linkMode by remember { mutableStateOf(false) }
     val context = LocalContext.current
+    val keyboardController=LocalSoftwareKeyboardController.current
+    val keyboardVisible=WindowInsets.ime.getBottom(LocalDensity.current)>0
     val scope = rememberCoroutineScope()
+    val uiPrefs=remember { context.getSharedPreferences("meshstar.ui",Context.MODE_PRIVATE) }
+    var showPowerHint by remember { mutableStateOf(!uiPrefs.getBoolean("miuiHintSeen",false)) }
+    val miuiDevice=android.os.Build.MANUFACTURER.equals("Xiaomi",true)
+    fun appSettings(){context.startActivity(Intent(android.provider.Settings.ACTION_APPLICATION_DETAILS_SETTINGS,android.net.Uri.parse("package:"+context.packageName)))}
     val peer = model.peers.firstOrNull { it.id == selected }
     val timeline = if (selected == "public") model.publicMessages else model.messages[selected].orEmpty()
     fun act(action: UiAction) { scope.launch { onAction(action) } }
     fun open(id: String) { selected = id; page = "chat"; routes = false; plus = false; path = PathChoice.AUTO }
-    fun navigate(value: String) { page = value; plus = false; routes = false; copied = false }
+    fun navigate(value: String) { keyboardController?.hide();page = value; plus = false; routes = false; copied = false }
     fun copy(value: String) {
         (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("MeshStar QR", value)); copied = true
     }
@@ -78,13 +93,17 @@ import java.util.Locale
                 Text("MeshStar/@${model.name}", Modifier.weight(1f).heightIn(min = 44.dp).clickable { navigate("settings") }.padding(vertical = 12.dp),
                     maxLines = 1, overflow = TextOverflow.Ellipsis, fontSize = 14.sp)
                 MeshIconButton(tr(T.my_qr), Icons.Outlined.QrCode, paintOffset = 5) { navigate("qr") }
-                MeshIconButton(tr(T.add), Icons.Outlined.Add, paintOffset = -5) { plus = !plus }
+                MeshIconButton(tr(T.add), Icons.Outlined.Add, paintOffset = -5) { keyboardController?.hide();plus = !plus }
             }
             if (plus) MeshCard {
                 MeshButton(tr(T.add_contact)) { navigate("scan") }
                 MeshButton(tr(T.box_settings)) { navigate("box") }
                 MeshButton(tr(T.node)) { navigate("node") }
                 MeshButton(tr(T.settings)) { navigate("settings") }
+            }
+            if(page=="chats"&&miuiDevice&&showPowerHint&&!keyboardVisible)MeshCard{
+                Secondary(tr(T.miui_hint),size=10)
+                Row{MeshButton(tr(T.app_settings)){appSettings()};MeshButton(tr(T.done)){showPowerHint=false;uiPrefs.edit().putBoolean("miuiHintSeen",true).apply()}}
             }
             if (feedback != null) Secondary(feedback, size = 12)
             if (copied) Secondary(tr(T.copied))
@@ -116,7 +135,7 @@ import java.util.Locale
                         }
                         if (!model.bleReady) MeshButton(tr(T.bluetooth_setup)) { act(UiAction.BluetoothSetup) }
                     }
-                    if (tab == ChatTab.LORA) MeshButton(tr(T.node_unavailable)) { navigate("node") }
+                    if (tab == ChatTab.LORA) MeshButton(if(model.node.companion) model.node.name + " · #" + model.node.slot else nodeStatusText(model.nodeStatus)) { navigate("node") }
                     if (tab == ChatTab.SATELLITE) {
                         Secondary(localizedFailure(context, model.boxStatus), size = 10)
                         if (model.pointOnline) Secondary("🌐 " + tr(T.via_point), size = 10)
@@ -158,7 +177,8 @@ import java.util.Locale
                         Text(if (selected == "public") tr(T.public_chat) else peer?.name ?: tr(T.unknown), Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (selected != "public") MeshIconButton(tr(T.contact), Icons.Outlined.VerifiedUser) { navigate("contact") }
                     }
-                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty()) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
+                    if(model.node.companion) MeshButton(model.node.name + " · LoRa · " + (model.nodeRssi?.let { "$it dBm · " } ?: "") + "#${model.node.slot}") { navigate("node") }
+                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
                     LazyColumn(Modifier.weight(1f).testTag("meshstar.timeline"), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message) }
                     }
@@ -172,15 +192,15 @@ import java.util.Locale
                                     if (choice == path) Text("✓", fontSize = 12.sp)
                                 }
                             }
-                            Secondary(tr(T.radio_unavailable), size = 10)
+                            if(!model.node.ready)Secondary(tr(T.radio_unavailable), size = 10)
                         }
-                        Row(Modifier.heightIn(min = 44.dp).clickable(role = Role.Button) { routes = !routes }.testTag("meshstar.route"), verticalAlignment = Alignment.CenterVertically) {
+                        Row(Modifier.heightIn(min = 44.dp).clickable(role = Role.Button) { keyboardController?.hide();routes = !routes }.testTag("meshstar.route"), verticalAlignment = Alignment.CenterVertically) {
                             PathIcon(path); Text(tr(path.title), Modifier.padding(horizontal = 6.dp), fontSize = 12.sp); Icon(Icons.Outlined.ExpandMore, null, Modifier.size(14.dp))
                         }
                     }
-                    if (path == PathChoice.LORA || path == PathChoice.RELAY) Secondary(tr(T.radio_unavailable), size = 10)
-                    val enabled = !busy && input.isNotBlank() && if (selected == "public" || peer?.rns == null) model.bleReady else
-                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty()) != null
+                    if ((path == PathChoice.LORA || path == PathChoice.RELAY) && !model.node.ready) Secondary(tr(T.radio_unavailable), size = 10)
+                    val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { "channel:"+it.name.lowercase()==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
+                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) != null
                     Composer(input, { input = it }, enabled) {
                         val draft = input
                         scope.launch { if (onAction(UiAction.Send(selected, draft, path)) && input == draft) input = "" }
@@ -249,7 +269,35 @@ import java.util.Locale
                     }
                     Secondary(tr(T.background_hint), size = 10)
                 }
-                "node" -> ScrollPage { Text(tr(T.node)); MeshCard { Secondary(tr(T.node_unavailable)); Secondary(tr(T.node_stage), size = 10) } }
+                "node" -> ScrollPage {
+                    Text(tr(T.node));Secondary(nodeStatusText(model.nodeStatus))
+                    if(model.node.companion)Secondary(model.node.name+" · "+(model.nodeRssi?.let { "$it dBm · " }?:"")+"#${model.node.slot}")
+                    MeshCard {
+                        MeshButton(tr(T.node_scan)){act(UiAction.ScanNode)}
+                        model.nodeDevices.forEach { device->MeshButton(device.name+" · ${device.rssi} dBm"+if(nodeSelected?.first==device.id)" ✓" else ""){nodeSelected=device.id to device.name} }
+                        nodeSelected?.let { Secondary(it.second) }
+                        CompactField(nodeSlot,{nodeSlot=it.filter(Char::isDigit).take(2)},tr(T.node_slot))
+                        CompactField(nodeSecret,{nodeSecret=it},tr(T.node_secret),password=true,tag="meshstar.node.secret")
+                        MeshButton(tr(T.scan)){scanningSecret=!scanningSecret}
+                        if(scanningSecret)ContactScanner(onCode={nodeSecret=it;scanningSecret=false})
+                        MeshButton(tr(T.more)){secretDetails=!secretDetails}
+                        if(secretDetails)Secondary(tr(T.node_secret_help),size=10)
+                        MeshButton(tr(T.node_connect),enabled=nodeSelected!=null && nodeSlot.toIntOrNull() in 0..39){nodeSelected?.let{act(UiAction.ConfigureNode(it.first,it.second,nodeSlot.toIntOrNull()?:7,nodeSecret))}}
+                        if(model.nodeConflict){
+                            Secondary(tr(T.node_occupied),size=10)
+                            MeshButton(tr(T.node_replace)){replaceConfirm=true}
+                            if(replaceConfirm){Secondary(tr(T.node_replace_warning),size=10);MeshButton(tr(T.node_replace_confirm),enabled=nodeSecret.isNotBlank() && nodeSlot.toIntOrNull() in 0..39){nodeSelected?.let{act(UiAction.ConfigureNode(it.first,it.second,nodeSlot.toIntOrNull()?:7,nodeSecret,true));replaceConfirm=false}}}
+                        }
+                        MeshButton(tr(T.node_forget)){act(UiAction.ForgetNode)}
+                    }
+                    if(model.node.ready)Secondary(tr(T.node_channel_ready))
+                    if(model.node.companion){
+                        MeshCard { MeshButton(tr(T.node_refresh)){act(UiAction.RefreshNode)};MeshButton(tr(T.node_advertise)){act(UiAction.AdvertiseNode)} }
+                        Secondary(tr(T.node_contacts));model.node.contacts.forEach { contact->MeshButton(contact.name){act(UiAction.OpenNative(contact.key.hex()));open("native:"+contact.key.hex())} }
+                        Secondary(tr(T.node_adverts));model.node.advertisements.forEach { Secondary(it.name,size=12) }
+                        model.node.channels.filterNot{it.transport || it.name.isBlank()}.forEach{channel->MeshButton("#"+channel.name){open("channel:"+channel.name.lowercase())}}
+                    }
+                }
                 "language" -> ScrollPage {
                     Text(tr(T.language))
                     listOf("" to T.system, "en" to null, "ru" to null, "ro" to null, "de" to null, "fr" to null).forEach { (code, key) ->
@@ -270,6 +318,7 @@ import java.util.Locale
                         MeshButton(tr(T.language), Modifier.fillMaxWidth()) { navigate("language") }
                     }
                     MeshCard { MeshButton(tr(T.bluetooth_setup)) { act(UiAction.BluetoothSetup) }; Secondary(tr(T.background_hint), size = 10) }
+                    if(miuiDevice)MeshCard { Secondary(tr(T.miui_hint),size=10);MeshButton(tr(T.app_settings)){appSettings()} }
                     Secondary(tr(T.version) + " " + com.bitchat.android.BuildConfig.VERSION_NAME + " (" + com.bitchat.android.BuildConfig.VERSION_CODE + ")", size = 10)
                 }
             }
@@ -319,11 +368,15 @@ import java.util.Locale
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     if (message.viaPoint) { Icon(Icons.Outlined.SettingsInputAntenna, null, Modifier.size(10.dp)); Secondary("→🌐 " + tr(T.via_point), size = 10, maxLines = 1) }
-                    else Secondary(if (message.route == Route.INTERNET) "🌐 " + tr(T.internet) else "🛰 " + tr(T.satellite), size = 10, maxLines = 1)
+                    else if(message.route in setOf(Route.LORA,Route.RELAY)){
+                        Icon(Icons.Outlined.SettingsInputAntenna,null,Modifier.size(10.dp))
+                        Secondary(" "+tr(if(message.route==Route.RELAY)T.relay else T.lora)+(message.hops?.let{" · "+LocalContext.current.getString(T.hops_format.resource,it)}?:"")+(message.snr?.let{" · SNR $it dB"}?:""),size=10,maxLines=1)
+                    } else Secondary(if (message.route == Route.INTERNET) "🌐 " + tr(T.internet) else "🛰 " + tr(T.satellite), size = 10, maxLines = 1)
                 }
                 message.signature?.let { Secondary(tr(if (it) T.signature_ok else T.signature_bad), size = 10, maxLines = 1) }
             }
         }
+        if(message.fromBox)Secondary(tr(T.from_box),size=10)
         if (message.outgoing && message.showDelivery) Secondary(tr(when (message.delivery) { Delivery.QUEUED -> T.queued; Delivery.SENT -> T.sent; Delivery.DELIVERED -> T.delivered }), size = 10)
     }
 }
@@ -335,3 +388,10 @@ private fun time(at: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault
         MeshIconButton(tr(T.send), Icons.Outlined.ArrowUpward, composer = true, enabled = enabled, onClick = send)
     }
 }
+
+@Composable private fun nodeStatusText(value:String):String = tr(when(value){
+    "node_scanning"->T.node_scanning;"node_connecting"->T.node_connecting;"node_reading"->T.node_reading;
+    "node_ready"->T.node_ready;"node_text_only"->T.node_text_only;"node_occupied"->T.node_occupied;
+    "node_secret"->T.node_secret_help;"node_mtu"->T.node_mtu;"node_permission"->T.node_permission;
+    "node_failed"->T.node_failed;else->T.node_unavailable
+})

@@ -100,4 +100,34 @@
     <string name="ms_review_draft">choisissez un contact pour envoyer le brouillon</string>
     <string name="ms_radio_unavailable">LoRa et Relais nécessitent un nœud connecté</string>
     <string name="ms_need_contact">ajoutez un contact pour recevoir</string>
+
+    <string name="ms_node_scan">chercher des nœuds via Bluetooth</string>
+    <string name="ms_node_slot">emplacement</string>
+    <string name="ms_node_secret">secret du canal ou QR</string>
+    <string name="ms_more">plus</string>
+    <string name="ms_node_secret_help">laisser vide pour le canal MESHSAT existant ; sinon coller 32 caractères hex ou son QR</string>
+    <string name="ms_node_connect">connecter</string>
+    <string name="ms_node_occupied">emplacement occupé ; canal existant conservé</string>
+    <string name="ms_node_replace">remplacer le canal</string>
+    <string name="ms_node_replace_warning">remplace le canal choisi par MESHSAT avec le secret fourni</string>
+    <string name="ms_node_replace_confirm">confirmer le remplacement</string>
+    <string name="ms_node_forget">oublier le nœud</string>
+    <string name="ms_node_channel_ready">canal MeshStar · configuré</string>
+    <string name="ms_node_refresh">actualiser les contacts</string>
+    <string name="ms_node_advertise">envoyer une annonce</string>
+    <string name="ms_node_contacts">contacts du nœud</string>
+    <string name="ms_node_adverts">annonces reçues</string>
+    <string name="ms_node_scanning">recherche de nœuds…</string>
+    <string name="ms_node_connecting">connexion au nœud…</string>
+    <string name="ms_node_reading">lecture des canaux…</string>
+    <string name="ms_node_ready">nœud connecté · MESHSAT prêt</string>
+    <string name="ms_node_text_only">nœud connecté · canaux texte uniquement</string>
+    <string name="ms_node_mtu">trame BLE trop grande ; reconnecter le nœud</string>
+    <string name="ms_node_permission">autoriser Bluetooth pour chercher des nœuds</string>
+    <string name="ms_node_failed">nœud indisponible ; reconnexion…</string>
+    <string name="ms_from_box">depuis l’historique du boîtier</string>
+
+    <string name="ms_miui_hint">si les messages en arrière-plan cessent sur MIUI, vérifier le démarrage automatique et la batterie « sans restriction » pour MeshStar. aucun changement nécessaire si la réception fonctionne.</string>
+    <string name="ms_app_settings">réglages de l’application</string>
+    <string name="ms_hops_format">%1$d sauts</string>
 </resources>

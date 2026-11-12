@@ -100,4 +100,34 @@
     <string name="ms_review_draft">Kontakt zum Senden des Entwurfs auswählen</string>
     <string name="ms_radio_unavailable">LoRa und Relais benötigen einen verbundenen Knoten</string>
     <string name="ms_need_contact">Kontakt für Empfang hinzufügen</string>
+
+    <string name="ms_node_scan">Knoten über Bluetooth suchen</string>
+    <string name="ms_node_slot">Slot</string>
+    <string name="ms_node_secret">Kanalschlüssel oder Kanal-QR</string>
+    <string name="ms_more">mehr</string>
+    <string name="ms_node_secret_help">leer lassen für den vorhandenen MESHSAT-Kanal; sonst 32 Hex-Zeichen oder Kanal-QR einfügen</string>
+    <string name="ms_node_connect">verbinden</string>
+    <string name="ms_node_occupied">Slot belegt; vorhandener Kanal bleibt erhalten</string>
+    <string name="ms_node_replace">Kanal ersetzen</string>
+    <string name="ms_node_replace_warning">ersetzt den gewählten Slot durch MESHSAT mit dem eingegebenen Schlüssel</string>
+    <string name="ms_node_replace_confirm">Ersetzen bestätigen</string>
+    <string name="ms_node_forget">Knoten vergessen</string>
+    <string name="ms_node_channel_ready">MeshStar-Kanal · eingerichtet</string>
+    <string name="ms_node_refresh">Kontakte aktualisieren</string>
+    <string name="ms_node_advertise">Ankündigung senden</string>
+    <string name="ms_node_contacts">Knotenkontakte</string>
+    <string name="ms_node_adverts">empfangene Ankündigungen</string>
+    <string name="ms_node_scanning">Knoten werden gesucht…</string>
+    <string name="ms_node_connecting">Verbindung zum Knoten…</string>
+    <string name="ms_node_reading">Kanäle werden gelesen…</string>
+    <string name="ms_node_ready">Knoten verbunden · MESHSAT bereit</string>
+    <string name="ms_node_text_only">Knoten verbunden · nur Textkanäle</string>
+    <string name="ms_node_mtu">BLE-Rahmen zu groß; Knoten erneut verbinden</string>
+    <string name="ms_node_permission">Bluetooth-Berechtigungen für Knotensuche erlauben</string>
+    <string name="ms_node_failed">Knoten nicht erreichbar; erneute Verbindung…</string>
+    <string name="ms_from_box">aus dem Box-Verlauf</string>
+
+    <string name="ms_miui_hint">wenn Hintergrundnachrichten unter MIUI ausbleiben, Autostart und Akku „keine Einschränkungen“ für MeshStar prüfen. bei funktionierendem Empfang ist keine Änderung nötig.</string>
+    <string name="ms_app_settings">App-Einstellungen</string>
+    <string name="ms_hops_format">%1$d Hops</string>
 </resources>

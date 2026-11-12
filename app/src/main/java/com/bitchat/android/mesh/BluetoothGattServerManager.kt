@@ -40,7 +40,8 @@ class BluetoothGattServerManager(
     private val bluetoothManager: BluetoothManager = 
         context.getSystemService(Context.BLUETOOTH_SERVICE) as BluetoothManager
     private val bluetoothAdapter: BluetoothAdapter? = bluetoothManager.adapter
-    private val bleAdvertiser: BluetoothLeAdvertiser? = bluetoothAdapter?.bluetoothLeAdvertiser
+    // Permission/power may change after construction during first-run onboarding.
+    private val bleAdvertiser: BluetoothLeAdvertiser? get() = bluetoothAdapter?.bluetoothLeAdvertiser
     
     // GATT server for peripheral mode
     private var gattServer: BluetoothGattServer? = null
@@ -356,6 +357,7 @@ class BluetoothGattServerManager(
      */
     @Suppress("DEPRECATION")
     private fun startAdvertising() {
+        val bleAdvertiser = bleAdvertiser
         // Respect debug setting
         val enabled = isServerRoleEnabled()
 
@@ -450,6 +452,7 @@ class BluetoothGattServerManager(
      */
     @Suppress("DEPRECATION")
     private fun stopAdvertising() {
+        val bleAdvertiser = bleAdvertiser
         if (!permissionManager.hasBluetoothPermissions() || bleAdvertiser == null) return
         try {
             advertiseCallback?.let { cb -> bleAdvertiser.stopAdvertising(cb) }

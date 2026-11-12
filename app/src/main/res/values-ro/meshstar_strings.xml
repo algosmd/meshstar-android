@@ -100,4 +100,34 @@
     <string name="ms_review_draft">alege un contact pentru a trimite ciorna</string>
     <string name="ms_radio_unavailable">LoRa și Releu necesită un nod conectat</string>
     <string name="ms_need_contact">adaugă un contact pentru primire</string>
+
+    <string name="ms_node_scan">caută noduri prin Bluetooth</string>
+    <string name="ms_node_slot">slot</string>
+    <string name="ms_node_secret">secretul canalului sau QR</string>
+    <string name="ms_more">mai mult</string>
+    <string name="ms_node_secret_help">lăsați gol pentru canalul MESHSAT existent; altfel introduceți 32 de caractere hex sau QR-ul canalului</string>
+    <string name="ms_node_connect">conectare</string>
+    <string name="ms_node_occupied">slot ocupat; canalul existent a fost păstrat</string>
+    <string name="ms_node_replace">înlocuiește canalul</string>
+    <string name="ms_node_replace_warning">slotul selectat va fi înlocuit cu MESHSAT folosind secretul introdus</string>
+    <string name="ms_node_replace_confirm">confirmă înlocuirea</string>
+    <string name="ms_node_forget">uită nodul</string>
+    <string name="ms_node_channel_ready">canal MeshStar · configurat</string>
+    <string name="ms_node_refresh">actualizează contactele</string>
+    <string name="ms_node_advertise">trimite anunț</string>
+    <string name="ms_node_contacts">contactele nodului</string>
+    <string name="ms_node_adverts">anunțuri recepționate</string>
+    <string name="ms_node_scanning">căutare noduri…</string>
+    <string name="ms_node_connecting">conectare la nod…</string>
+    <string name="ms_node_reading">citire canale…</string>
+    <string name="ms_node_ready">nod conectat · MESHSAT pregătit</string>
+    <string name="ms_node_text_only">nod conectat · doar canale text</string>
+    <string name="ms_node_mtu">cadru BLE prea mare; reconectați nodul</string>
+    <string name="ms_node_permission">permiteți Bluetooth pentru căutarea nodurilor</string>
+    <string name="ms_node_failed">nod indisponibil; reconectare…</string>
+    <string name="ms_from_box">din istoricul boxului</string>
+
+    <string name="ms_miui_hint">dacă mesajele în fundal se opresc pe MIUI, verificați pornirea automată și bateria „fără restricții” pentru MeshStar. nu schimbați setările dacă recepția funcționează.</string>
+    <string name="ms_app_settings">setările aplicației</string>
+    <string name="ms_hops_format">%1$d salturi</string>
 </resources>
