@@ -30,7 +30,7 @@ class SatRuntime private constructor(context: Context) {
     private val initialized = scope.async {
         try {
             val files = EncryptedFiles(context.applicationContext)
-            SatEngine(files.identity(), EncryptedStateStore(files)).also { engineValue.value = it }
+            SatEngine(files.identity(), EncryptedStateStore(files)).also { it.initializeReadTracking(); engineValue.value = it }
         } catch (e: Exception) { startupError.value = "Keystore / storage unavailable. Identity was not replaced."; throw e }
     }
     @Synchronized fun attach(owner: Any) {
@@ -43,7 +43,7 @@ class SatRuntime private constructor(context: Context) {
               supervisorScope {
                 launch { loop(boxStatus, 5_000) {
                     if (engine.state.value.box == null) { boxStatus.value = "Box not configured"; return@loop }
-                    engine.flushOutgoing(Route.SATELLITE); engine.pollBox(); boxStatus.value = "Box available"
+                    engine.refreshBoxStatus(); engine.flushOutgoing(Route.SATELLITE); engine.pollBox(); boxStatus.value = "Box available"
                 } }
                 launch { loop(mailStatus, 2_000) { engine.flushOutgoing(Route.INTERNET) } }
                 launch { loop(mailStatus, 500) {

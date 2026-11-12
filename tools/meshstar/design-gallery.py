@@ -1,0 +1,29 @@
+#!/usr/bin/env python3
+"""Build an offline viewer for synthetic Android captures and reviewed iOS references."""
+from pathlib import Path
+root = Path(__file__).resolve().parents[2] / 'docs/android/screenshots/A4'
+root.mkdir(parents=True, exist_ok=True)
+(root/'index.html').write_text('''<!doctype html><meta charset="utf-8"><title>MeshStar A4 · design review</title>
+<style>
+body{font:14px ui-monospace,monospace;margin:24px;background:#eee;color:#222}h1{font-size:20px;font-weight:400}
+label{display:inline-flex;gap:8px;align-items:center;margin:4px 12px 12px 0}select{font:inherit;padding:8px;border:1px solid #aaa;border-radius:3px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,460px));gap:24px;align-items:start}figure{margin:0}img{width:100%;height:auto;border:1px solid #bbb}figcaption{margin:10px 0}
+p{max-width:940px;line-height:1.5}a{color:#080}@media(max-width:700px){.grid{grid-template-columns:1fr}}
+</style><h1>MeshStar · Android 0.3.0 (4) / iOS 0.2.0 (21)</h1>
+<p>Android: both themes, 360×640 / 432×936 dp, en/ru/ro/de/fr. All captures use synthetic fixtures.
+iOS: original build 21 English simulator captures, medium/large. These are layout references, not claims of identical feature availability:
+MeshCore and media are later Android stages. Some Android screens have no matching iOS capture in this archive; the nearest reference is shown and named.</p>
+<label>Language<select id="lang"><option>en</option><option>ru</option><option>ro</option><option>de</option><option>fr</option></select></label>
+<label>Theme<select id="theme"><option>light</option><option>dark</option></select></label>
+<label>Screen size<select id="size"><option>small</option><option>large</option></select></label>
+<label>Page<select id="page"><option>bluetooth</option><option>lora</option><option>satellite</option><option>chat</option><option>routes</option><option>qr</option><option>contact</option><option>settings</option><option>box</option><option>node</option><option>language</option><option>scan</option></select></label>
+<div class="grid"><figure><figcaption id="androidCaption"></figcaption><a id="androidLink"><img id="android" alt="Android synthetic screen"></a></figure>
+<figure><figcaption id="iosCaption"></figcaption><a id="iosLink"><img id="ios" alt="iOS build 21 reference"></a></figure></div>
+<p><a id="font130">Additional Russian route menu at 130% font size</a> · <a href="../../A4-validation.md">Validation report</a></p>
+<script>
+const el=id=>document.getElementById(id);function update(){const l=el('lang').value,t=el('theme').value,s=el('size').value,p=el('page').value;
+const a=`${s}/${l}-${t}-${p}.png`;el('android').src=a;el('androidLink').href=a;el('androidCaption').textContent=`Android · ${s} · ${l} · ${t} · ${p}`;
+let r=['chat','routes'].includes(p)?`m6-chat-${t}`:['contact','qr','scan'].includes(p)?'m6-contact-keys-light':['settings','box','node','language'].includes(p)?`m6-settings-node-${t}`:`m6-list-${t}`;
+let i=`ios-0.2.0-21/${s}/${r}.png`;el('ios').src=i;el('iosLink').href=i;el('iosCaption').textContent=`iOS 0.2.0 (21) · English · ${r}`;el('font130').href=`${s}/ru-light-routes-font130.png`;
+}for(const id of ['lang','theme','size','page'])el(id).onchange=update;update();
+</script>''')

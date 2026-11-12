@@ -1,23 +1,16 @@
 package net.meshstar.ui
 
-import android.content.ClipData
-import android.content.ClipboardManager
 import android.content.Context
+import android.content.Intent
+import android.content.res.Configuration
 import android.graphics.Bitmap
-import androidx.compose.foundation.*
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalConfiguration
+import com.bitchat.android.ui.ChatViewModel
+import com.bitchat.android.model.BitchatMessage
+import com.bitchat.android.model.DeliveryStatus
 import com.google.zxing.BarcodeFormat
 import com.google.zxing.qrcode.QRCodeWriter
 import kotlinx.coroutines.Dispatchers
@@ -25,181 +18,194 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.meshstar.data.*
 import net.meshstar.link.ContactLink
+import java.util.Locale
 
 @Composable
-fun MeshButton(text: String, modifier: Modifier = Modifier, enabled: Boolean = true, onClick: () -> Unit) {
-    OutlinedButton(onClick, modifier.heightIn(min = 44.dp), enabled = enabled,
-        shape = RoundedCornerShape(3.dp), contentPadding = PaddingValues(horizontal = 10.dp, vertical = 3.dp)) {
-        Text(text, fontFamily = FontFamily.Monospace, fontSize = 12.sp)
+fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit,
+                    initialPeer: String = "", initialDraft: String = "", bluetooth: ChatViewModel? = null,
+                    bluetoothSetup: () -> Unit = {}, bleReady: Boolean = false) {
+    val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("meshstar.ui", Context.MODE_PRIVATE) }
+    var language by remember { mutableStateOf(prefs.getString("language", "").orEmpty()) }
+    var appearance by remember { mutableStateOf(prefs.getString("appearance", "system").orEmpty()) }
+    val configuration = LocalConfiguration.current
+    val localized = remember(language, configuration) {
+        localizedContext(context, language)
     }
-}
-
-@Composable
-fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit, initialPeer: String = "", initialDraft: String = "") {
+    val dark = when (appearance) { "dark" -> true; "light" -> false; else -> isSystemInDarkTheme() }
     val engine by runtime.engine.collectAsState()
     val startupError by runtime.startupError.collectAsState()
-    Surface(Modifier.fillMaxSize().safeDrawingPadding().imePadding()) {
-        if (engine == null) Column(Modifier.padding(12.dp)) { Text(startupError ?: "Opening encrypted storage…"); MeshButton("Back", onClick = close) }
-        else Content(engine!!, runtime, incoming, consumeLink, close, initialPeer, initialDraft)
+    DisposableEffect(runtime) { val owner = Any(); runtime.attach(owner); onDispose { runtime.detach(owner) } }
+    CompositionLocalProvider(LocalContext provides localized) {
+        MeshTheme(dark) {
+            if (engine == null) androidx.compose.material3.Text(tr(if (startupError == null) T.opening else T.storage_error))
+            else ConnectedScreen(engine!!, runtime, incoming, consumeLink, initialPeer, initialDraft, bluetooth, bleReady,
+                language, appearance, onPreferences = { action ->
+                    when (action) {
+                        is UiAction.Language -> { language = action.value; prefs.edit().putString("language", language).apply() }
+                        is UiAction.Appearance -> { appearance = action.value; prefs.edit().putString("appearance", appearance).apply() }
+                        UiAction.BluetoothSetup -> bluetoothSetup()
+                        else -> Unit
+                    }
+                })
+        }
     }
 }
 
-@Composable
-private fun Content(engine: SatEngine, runtime: SatRuntime, incoming: String, consumeLink: () -> Unit, close: () -> Unit, initialPeer: String, initialDraft: String) {
+@Composable private fun ConnectedScreen(engine: SatEngine, runtime: SatRuntime, incoming: String, consumeLink: () -> Unit,
+    initialPeer: String, initialDraft: String, ble: ChatViewModel?, bleReady: Boolean, language: String, appearance: String,
+    onPreferences: (UiAction) -> Unit) {
     val state by engine.state.collectAsState()
+    val point by engine.pointOnline.collectAsState()
     val boxStatus by runtime.boxStatus.collectAsState()
     val mailStatus by runtime.mailStatus.collectAsState()
-    var screen by remember { mutableStateOf("chats") }
-    var selected by remember { mutableStateOf("") }
-    var route by remember { mutableStateOf(Route.SATELLITE) }
-    var input by remember { mutableStateOf("") }
-    var qrInput by remember { mutableStateOf("") }
-    var boxUrl by remember { mutableStateOf(state.box?.url.orEmpty()) }
-    var token by remember { mutableStateOf(state.box?.token.orEmpty()) }
-    var internet by remember { mutableStateOf(state.internet) }
-    var name by remember { mutableStateOf(state.name) }
-    var busy by remember { mutableStateOf(false) }
-    var feedback by remember { mutableStateOf<String?>(null) }
+    val bleNickname = ble?.nickname?.collectAsState()?.value
+    val nickname = state.name.takeUnless { it == "MeshStar" } ?: bleNickname ?: state.name
+    val connected = ble?.connectedPeers?.collectAsState()?.value.orEmpty()
+    val names = ble?.peerNicknames?.collectAsState()?.value.orEmpty()
+    val fingerprints = ble?.peerFingerprints?.collectAsState()?.value.orEmpty()
+    val verified = ble?.verifiedFingerprints?.collectAsState()?.value.orEmpty()
+    val privateChats = ble?.privateChats?.collectAsState()?.value.orEmpty()
+    val unreadBle = ble?.unreadPrivateMessages?.collectAsState()?.value.orEmpty()
+    val publicMessages = ble?.messages?.collectAsState()?.value.orEmpty()
     val context = LocalContext.current
+    val prefs = remember { context.getSharedPreferences("meshstar.ui", Context.MODE_PRIVATE) }
+    var publicRead by remember { mutableLongStateOf(prefs.getLong("publicRead", System.currentTimeMillis())) }
+    val histories = remember(state.messages) { state.messages.groupBy { it.peer } }
+    val contactFingerprints = remember(state.contacts) { state.contacts.associate { it.address to it.fingerprint } }
+    val ownContact = remember(engine.identity, nickname) { net.meshstar.link.Contact.of(engine.identity, nickname) }
+    val rns = state.contacts.map { c ->
+        val history = histories[c.address].orEmpty()
+        UiPeer("rns:${c.address}", c.name, contactFingerprints.getValue(c.address), rns = c.address,
+            verified = state.verifiedKeys[c.address] == c.key, preview = history.lastOrNull()?.text.orEmpty(),
+            unread = history.count { !it.outgoing && it.at > (state.readThrough[c.address] ?: 0) },
+            paths = setOf(ChatTab.SATELLITE), at = history.lastOrNull()?.at ?: 0, qr = c.qr)
+    } + state.messages.map { it.peer }.distinct().filter { p -> state.contacts.none { it.address == p } }.map { p ->
+        val history = histories[p].orEmpty()
+        UiPeer("rns:$p", p.take(12), rns = p, preview = history.lastOrNull()?.text.orEmpty(),
+            unread = history.count { !it.outgoing && it.at > (state.readThrough[p] ?: 0) }, paths = setOf(ChatTab.SATELLITE), at = history.lastOrNull()?.at ?: 0)
+    }
+    val blePeers = (connected + privateChats.keys).distinct().filterNot { it.startsWith("nostr_") }.map { peer ->
+        val fp = fingerprints[peer] ?: ble?.getPeerFingerprintForDisplay(peer).orEmpty()
+        val history = privateChats[peer].orEmpty()
+        UiPeer("ble:$peer", names[peer] ?: peer.take(12), fp, ble = peer, bleFingerprint = fp.takeIf { it.isNotEmpty() },
+            nearby = peer in connected, verified = fp in verified, preview = history.lastOrNull()?.content.orEmpty(),
+            unread = if (peer in unreadBle) 1 else 0, paths = setOf(ChatTab.BLUETOOTH), at = history.lastOrNull()?.timestamp?.time ?: 0)
+    }
+    val peers = unifiedPeers(rns, blePeers, state.bluetoothLinks)
+    fun bleMessage(m: BitchatMessage): UiMessage = UiMessage(m.id, m.sender, m.content, m.timestamp.time,
+        m.senderPeerID == ble?.myPeerID || m.sender == bleNickname, delivery = when (m.deliveryStatus) {
+            is DeliveryStatus.Delivered, is DeliveryStatus.Read -> Delivery.DELIVERED
+            is DeliveryStatus.Sending -> Delivery.QUEUED
+            else -> Delivery.SENT
+        }, peer = peers.firstOrNull { it.ble == m.senderPeerID }?.id ?: "ble:${m.senderPeerID ?: m.sender}", showDelivery = m.isPrivate && m.deliveryStatus != null)
+    val timelines = peers.associate { peer -> peer.id to (
+        histories[peer.rns].orEmpty().map { m -> UiMessage(m.hash, if (m.outgoing) nickname else peer.name,
+            m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
+            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id) } +
+            peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty()).sortedBy { it.at } }
+    val snapshot = UiSnapshot(nickname, peers, timelines, publicMessages.map(::bleMessage),
+        publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != nickname },
+        ownContact.qr, ownContact.fingerprint, ownContact.address,
+        state.box?.url.orEmpty(), state.box?.token.orEmpty(), state.internet, point, boxStatus, mailStatus, bleReady,
+        mapOf(ChatTab.BLUETOOTH to (blePeers.sumOf { it.unread } + publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != bleNickname }),
+            ChatTab.LORA to 0, ChatTab.SATELLITE to rns.sumOf { it.unread }))
     val scope = rememberCoroutineScope()
-    fun run(action: suspend () -> Unit) {
-        if (busy) return
-        busy = true; feedback = null
-        scope.launch {
-            try { withContext(Dispatchers.IO) { action() } }
-            catch (e: kotlinx.coroutines.CancellationException) { throw e }
-            catch (e: Exception) { feedback = safeFailure(e) }
-            finally { busy = false }
-        }
-    }
-    fun copy(text: String) {
-        (context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager).setPrimaryClip(ClipData.newPlainText("MeshStar contact", text))
-        feedback = "Copied"
-    }
-    fun scanResult(text: String) {
-        val uri = runCatching { android.net.Uri.parse(text) }.getOrNull()
-        if (uri != null && net.meshstar.link.AppLinks.navigation(uri) && net.meshstar.link.AppLinks.safe(uri)) {
-            context.startActivity(android.content.Intent(context, com.bitchat.android.MainActivity::class.java)
-                .setAction(android.content.Intent.ACTION_VIEW).setData(uri)
-                .addFlags(android.content.Intent.FLAG_ACTIVITY_CLEAR_TOP or android.content.Intent.FLAG_ACTIVITY_SINGLE_TOP))
-            return
-        }
-        val box = runCatching { ContactLink.box(text) }.getOrNull()
-        if (box != null) { boxUrl = box.first; token = box.second; screen = "settings"; feedback = "Box QR imported. Review and tap Save and check." }
-        else { qrInput = text; screen = "add" }
-    }
-    LaunchedEffect(initialPeer) { if (initialPeer.isNotBlank()) { selected = initialPeer; screen = "chat" } }
-    LaunchedEffect(initialDraft) { if (initialDraft.isNotEmpty()) { input = initialDraft; feedback = "Select a contact to send the shared draft" } }
-    LaunchedEffect(incoming) { if (incoming.isNotEmpty()) { scanResult(incoming); consumeLink() } }
-    androidx.activity.compose.BackHandler(screen != "chats") { screen = "chats" }
-    CompositionLocalProvider(LocalTextStyle provides LocalTextStyle.current.copy(fontFamily = FontFamily.Monospace, fontSize = 14.sp)) {
-        Column(Modifier.fillMaxSize().padding(horizontal = 10.dp)) {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                MeshButton("Back") { if (screen == "chats") close() else screen = "chats" }
-                Text("MeshStar", Modifier.weight(1f).padding(top = 12.dp))
-                MeshButton("My QR") { screen = "qr" }
-                MeshButton("Settings") { screen = "settings" }
-            }
-            feedback?.let { Text(it, Modifier.padding(vertical = 6.dp), fontSize = 12.sp) }
-            if (busy) LinearProgressIndicator(Modifier.fillMaxWidth())
-            when (screen) {
-                "scan" -> ContactScanner(::scanResult)
-                "qr" -> Column(Modifier.verticalScroll(rememberScrollState()).weight(1f), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("My RNS contact")
-                    Field(name, { name = it }, "Name")
-                    MeshButton("Save name", enabled = !busy) { run { engine.setName(name) } }
-                    val qr = engine.myContact().qr
-                    val bitmap = remember(qr) { contactQrBitmap(qr) }
-                    Image(bitmap.asImageBitmap(), "My contact QR", Modifier.fillMaxWidth().heightIn(max = 280.dp).aspectRatio(1f))
-                    Text(engine.identity.lxmfAddress.joinToString("") { "%02x".format(it) }, fontSize = 12.sp)
-                    Text("Fingerprint: ${engine.myContact().fingerprint}", fontSize = 12.sp)
-                    Text("RNS contact QR is compatible with iOS and boxes.", fontSize = 12.sp)
-                    MeshButton("Copy contact for iOS / box") { copy(qr) }
-                    MeshButton("Copy MeshStar link") { copy(engine.myContact().link) }
-                }
-                "add" -> Column(Modifier.verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Add contact")
-                    Field(qrInput, { qrInput = it }, "QR text or MeshStar contact link", singleLine = false)
-                    MeshButton("Scan QR") { screen = "scan" }
-                    MeshButton("Add contact", enabled = !busy) { run {
-                        val contact = engine.addContact(qrInput)
-                        withContext(Dispatchers.Main) { selected = contact.address; screen = "chat"; qrInput = "" }
-                    } }
-                }
-                "settings" -> Column(Modifier.weight(1f).verticalScroll(rememberScrollState()), verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    Text("Box settings")
-                    Text(boxStatus, fontSize = 12.sp)
-                    Field(boxUrl, { boxUrl = it }, "Box URL")
-                    OutlinedTextField(token, { token = it }, Modifier.fillMaxWidth(), label = { Text("Box token") }, singleLine = true,
-                        visualTransformation = PasswordVisualTransformation(), shape = RoundedCornerShape(3.dp))
-                    MeshButton("Scan box setup QR") { screen = "scan" }
-                    MeshButton("Save and check", enabled = !busy) { run {
-                        engine.configureBox(boxUrl, token)
-                        withContext(Dispatchers.Main) { feedback = "Box paired ✓" }
-                    } }
-                    MeshButton("Disable box", enabled = !busy) { run { engine.disableBox(); withContext(Dispatchers.Main) { token = ""; boxUrl = "" } } }
-                    HorizontalDivider()
-                    Text("Internet server")
-                    Text(mailStatus, fontSize = 12.sp)
-                    Field(internet, { internet = it }, "Internet server URL")
-                    Text("Empty = disabled. Polling runs while this screen or the mesh foreground service is active.", fontSize = 12.sp)
-                    MeshButton("Save internet server", enabled = !busy) { run {
-                        engine.configureInternet(internet)
-                        withContext(Dispatchers.Main) { feedback = "Saved" }
-                    } }
-                }
-                "chat" -> {
-                    val contact = state.contacts.firstOrNull { it.address == selected }
-                    Text(contact?.name ?: selected.take(12), Modifier.padding(vertical = 8.dp))
-                    Text(contact?.let { "Fingerprint: ${it.fingerprint}" } ?: "Unknown sender · add QR to verify future messages", fontSize = 12.sp)
-                    LazyColumn(Modifier.weight(1f), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                        items(state.messages.filter { it.peer == selected }.asReversed(), key = { it.hash }) { message ->
-                            Column {
-                                Text("<${if (message.outgoing) state.name else contact?.name ?: "unknown"}> ${message.text}")
-                                Text((if (message.route == Route.INTERNET) "🌐 Internet" else "🛰 Satellite") + " · " +
-                                    (if (message.outgoing) when (message.delivery) {
-                                        Delivery.QUEUED -> "queued"
-                                        Delivery.SENT -> "sent · waiting for confirmation"
-                                        Delivery.DELIVERED -> "✅ delivered"
-                                    } else if (message.verified) "signature OK ✓" else "signature not verified ✗"), fontSize = 10.sp)
-                            }
+    var feedback by remember { mutableStateOf<String?>(null) }
+    var busy by remember { mutableStateOf(false) }
+    var openedPeer by remember { mutableStateOf(initialPeer.takeIf { it.isNotEmpty() }?.let { if (it.contains(":")) it else "rns:$it" }.orEmpty()) }
+    var pendingImport by remember { mutableStateOf("") }
+    var pendingBox by remember { mutableStateOf<Pair<String,String>?>(null) }
+    val currentState by rememberUpdatedState(state)
+    suspend fun action(event: UiAction): Boolean {
+        feedback = null
+        try {
+            when (event) {
+                is UiAction.Send -> {
+                    val peer = peers.firstOrNull { it.id == event.peer }
+                    if (event.peer == "public" || (event.path == PathChoice.AUTO && peer?.rns == null)) {
+                        check(ble != null && bleReady)
+                        if (event.peer == "public") { ble.endPrivateChat(); ble.selectLocationChannel(com.bitchat.android.geohash.ChannelID.Mesh); ble.switchToChannel(null) }
+                        else { ble.startPrivateChat(peer?.ble ?: error("Unknown peer")) }
+                        return kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+                            ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        MeshButton(if (route == Route.SATELLITE) "✓ Satellite" else "Satellite") { route = Route.SATELLITE }
-                        MeshButton(if (route == Route.INTERNET) "✓ Internet" else "Internet") { route = Route.INTERNET }
-                    }
-                    Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-                        OutlinedTextField(input, { input = it }, Modifier.weight(1f), placeholder = { Text("Message") }, maxLines = 4, shape = RoundedCornerShape(3.dp))
-                        MeshButton("Send", enabled = !busy && input.isNotBlank() && contact != null) { run {
-                            engine.send(selected, input, route)
-                            withContext(Dispatchers.Main) { input = "" }
-                        } }
-                    }
-                }
-                else -> {
-                    Text("Satellite / Internet", Modifier.padding(vertical = 8.dp))
-                    Text(boxStatus, fontSize = 12.sp); Text(mailStatus, fontSize = 12.sp)
-                    MeshButton("Add contact / Scan QR") { screen = "add" }
-                    LazyColumn(Modifier.weight(1f)) {
-                        val peers = (state.contacts.map { it.address } + state.messages.map { it.peer }).distinct()
-                        items(peers, key = { it }) { address ->
-                            val contact = state.contacts.firstOrNull { it.address == address }
-                            Column(Modifier.fillMaxWidth().clickable { selected = address; screen = "chat" }.padding(vertical = 12.dp)) {
-                                Text(contact?.name ?: "Unknown sender")
-                                Text(contact?.fingerprint ?: address.take(12), fontSize = 12.sp)
-                                state.messages.lastOrNull { it.peer == address }?.let { Text(it.text, maxLines = 1, fontSize = 12.sp) }
-                            }
-                            HorizontalDivider()
+                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null)
+                    if (choice == null) { feedback = context.getString(T.route_unavailable.resource); return false }
+                    if (choice == "bluetooth") {
+                        check(ble != null); ble.startPrivateChat(peer?.ble ?: error("Unknown peer"))
+                        return kotlinx.coroutines.suspendCancellableCoroutine { continuation ->
+                            ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
+                    withContext(Dispatchers.IO) { engine.send(peer?.rns ?: error("Add RNS contact"), event.text, if (choice == "internet") Route.INTERNET else Route.SATELLITE) }
                 }
+                is UiAction.Read -> {
+                    if (event.peer == "public") { publicRead = System.currentTimeMillis(); prefs.edit().putLong("publicRead", publicRead).apply(); ble?.clearMeshMentionNotifications() }
+                    peers.firstOrNull { it.id == event.peer }?.let { peer ->
+                        if (peer.rns != null && peer.unread > 0) withContext(Dispatchers.IO) { engine.markRead(peer.rns) }
+                        if (peer.ble != null && ble?.selectedPrivateChatPeer?.value != peer.ble) ble?.startPrivateChat(peer.ble)
+                    }
+                }
+                is UiAction.Import -> {
+                    val uri = runCatching { android.net.Uri.parse(event.text) }.getOrNull()
+                    if (uri != null && net.meshstar.link.AppLinks.navigation(uri)) {
+                        context.startActivity(Intent(context, com.bitchat.android.MainActivity::class.java).setAction(Intent.ACTION_VIEW).setData(uri)
+                            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+                    } else {
+                        val box = runCatching { ContactLink.box(event.text) }.getOrNull()
+                        if (box != null) { pendingBox = box; feedback = context.getString(T.review_box.resource) }
+                        else { val contact = withContext(Dispatchers.IO) { engine.addContact(event.text) }; openedPeer = "rns:${contact.address}" }
+                    }
+                    pendingImport = ""
+                }
+                is UiAction.Verify -> peers.firstOrNull { it.id == event.peer }?.let { peer ->
+                    if (peer.rns != null) withContext(Dispatchers.IO) { engine.verifyContact(peer.rns, event.value) }
+                    else peer.bleFingerprint?.let { if (event.value) ble?.verifyFingerprintValue(it) else ble?.unverifyFingerprintValue(it) }
+                }
+                is UiAction.Link -> {
+                    val peer = peers.first { it.id == event.blePeer }; val target = peers.first { it.id == event.rnsPeer }
+                    withContext(Dispatchers.IO) { engine.linkBluetooth(peer.bleFingerprint ?: error("Unknown key"), target.rns ?: error("Unknown contact")) }
+                    openedPeer = target.id
+                }
+                is UiAction.SaveBox -> { busy = true; withContext(Dispatchers.IO) { engine.configureBox(event.url, event.token) }; feedback = context.getString(T.paired.resource) }
+                is UiAction.SaveInternet -> withContext(Dispatchers.IO) { engine.configureInternet(event.url) }
+                UiAction.DisableBox -> withContext(Dispatchers.IO) { engine.disableBox() }
+                is UiAction.Rename -> { withContext(Dispatchers.IO) { engine.setName(event.name) }; ble?.setNickname(event.name) }
+                else -> onPreferences(event)
             }
-        }
+            return true
+        } catch (e: kotlinx.coroutines.CancellationException) { throw e }
+        catch (e: Exception) { feedback = localizedFailure(context, safeFailure(e)); return false }
+        finally { busy = false }
     }
+    LaunchedEffect(initialPeer) { if (initialPeer.isNotEmpty()) openedPeer = if (initialPeer.contains(":")) initialPeer else "rns:$initialPeer" }
+    LaunchedEffect(incoming) { if (incoming.isNotEmpty()) { pendingImport = incoming; consumeLink() } }
+    UnifiedScreen(snapshot, ::action, language, appearance, feedback, busy, openedPeer, initialDraft, pendingImport, pendingBox)
 }
-@Composable private fun Field(value: String, change: (String) -> Unit, label: String, singleLine: Boolean = true) {
-    OutlinedTextField(value, change, Modifier.fillMaxWidth(), label = { Text(label) }, singleLine = singleLine, shape = RoundedCornerShape(3.dp))
+
+fun localizedFailure(context: Context, status: String): String {
+    val key = when {
+        status == "Box not configured" -> T.box_off
+        status == "Box available" -> T.box_ready
+        status == "Internet server disabled" -> T.mail_off
+        status == "Internet server available" -> T.mail_ready
+        status == "Add a contact to receive" -> T.need_contact
+        status.startsWith("HTTP 401") -> T.http_401
+        status.startsWith("HTTP 403") -> T.http_403
+        status.startsWith("HTTP 429") -> T.http_429
+        status.startsWith("HTTP 507") -> T.http_507
+        status.startsWith("HTTP 3") -> T.http_redirect
+        status.startsWith("HTTP ") -> return status.take(8)
+        status.startsWith("Network timeout") -> T.timeout
+        status.startsWith("DNS") -> T.dns_error
+        status.startsWith("Keystore") -> T.storage_error
+        status.startsWith("Network or storage") -> T.network_error
+        status.startsWith("RNS:") || status.startsWith("Invalid") -> T.invalid
+        else -> T.failed
+    }
+    return context.getString(key.resource)
 }
 internal fun contactQrBitmap(text: String): Bitmap {
     val bits = QRCodeWriter().encode(text, BarcodeFormat.QR_CODE, 600, 600, mapOf(com.google.zxing.EncodeHintType.CHARACTER_SET to "UTF-8"))

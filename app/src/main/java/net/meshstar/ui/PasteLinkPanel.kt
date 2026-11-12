@@ -20,17 +20,16 @@ fun PasteLinkPanel(onOpen: (String) -> Unit, initialValue: String = "") {
     var error by remember { mutableStateOf(false) }
     LaunchedEffect(initialValue) { value = initialValue }
     Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-        OutlinedTextField(value, { if (it.length <= 4096) { value = it; error = false } else error = true },
-            Modifier.fillMaxWidth().testTag("meshstar.link.input"), label = { Text("Link or QR text") },
-            maxLines = 3, shape = RoundedCornerShape(3.dp))
+        CompactField(value, { if (it.length <= 4096) { value = it; error = false } else error = true },
+            tr(T.link_text), Modifier.fillMaxWidth(), singleLine = false, tag = "meshstar.link.input")
         Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-            MeshButton("Paste link") {
+            MeshButton(tr(T.paste)) {
                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                 val text = clipboard.primaryClip?.takeIf { it.itemCount > 0 }?.getItemAt(0)?.coerceToText(context)?.toString().orEmpty().trim()
                 if (text.length <= 4096) { value = text; error = false } else error = true
             }
-            MeshButton("Open link", enabled = value.isNotBlank()) { onOpen(value.trim()) }
+            MeshButton(tr(T.open_link), enabled = value.isNotBlank()) { onOpen(value.trim()) }
         }
-        if (error) Text("Link is too long")
+        if (error) Text(tr(T.link_long))
     }
 }

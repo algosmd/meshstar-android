@@ -13,21 +13,17 @@ class SatelliteActivity : ComponentActivity() {
         const val EXTRA_PEER = "net.meshstar.extra.PEER"
         const val EXTRA_DRAFT = "net.meshstar.extra.DRAFT"
     }
-    private var initialPeer by mutableStateOf("")
-    private var initialDraft by mutableStateOf("")
-    private val runtime by lazy { SatRuntime.get(applicationContext) }
-    private var incoming by mutableStateOf("")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        applyLink(intent)
-        setContent { BitchatTheme { SatelliteScreen(runtime, incoming, { incoming = "" }, { finish() }, initialPeer, initialDraft) } }
+        forward(intent)
     }
-    private fun applyLink(intent: Intent) {
-        incoming = intent.dataString.orEmpty().take(4096)
-        initialPeer = intent.getStringExtra(EXTRA_PEER).orEmpty().take(128)
-        initialDraft = intent.getStringExtra(EXTRA_DRAFT).orEmpty().take(4096)
+    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); forward(intent) }
+    private fun forward(source: Intent) {
+        startActivity(Intent(this, com.bitchat.android.MainActivity::class.java)
+            .setAction(source.action).setData(source.data)
+            .putExtra(EXTRA_PEER, source.getStringExtra(EXTRA_PEER))
+            .putExtra(EXTRA_DRAFT, source.getStringExtra(EXTRA_DRAFT))
+            .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP))
+        finish()
     }
-    override fun onNewIntent(intent: Intent) { super.onNewIntent(intent); setIntent(intent); applyLink(intent) }
-    override fun onStart() { super.onStart(); runtime.attach(this) }
-    override fun onStop() { runtime.detach(this); super.onStop() }
 }

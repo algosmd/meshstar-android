@@ -22,6 +22,32 @@ class SatEngine(val identity: Identity, private val store: StateStore,
     private var closed = false
     private val mutable = MutableStateFlow(store.load())
     val state = mutable.asStateFlow()
+    private val point = MutableStateFlow(false)
+    val pointOnline = point.asStateFlow()
+    suspend fun refreshBoxStatus() {
+        val config = state.value.box ?: run { point.value = false; return }
+        val status = try { BoxTransport(config, http).statusDetails() } catch (e: Exception) { point.value = false; throw e }
+        if (status.address != config.address) { point.value = false; error("Box identity changed") }
+        if (state.value.box == config) point.value = status.pointOnline
+    }
+    suspend fun initializeReadTracking() {
+        if (!state.value.readTrackingInitialized) change { next ->
+            next.messages.filter { !it.outgoing }.groupBy { it.peer }.forEach { (peer, messages) ->
+                next.readThrough[peer] = messages.maxOf { it.at }
+            }
+            next.readTrackingInitialized = true
+        }
+    }
+    suspend fun markRead(peer: String) { change { it.readThrough[peer] = now().toEpochMilli() } }
+    suspend fun verifyContact(address: String, verified: Boolean) { change { next ->
+        val contact = next.contacts.firstOrNull { it.address == address } ?: error("Unknown contact")
+        if (verified) next.verifiedKeys[address] = contact.key else next.verifiedKeys.remove(address)
+    } }
+    suspend fun linkBluetooth(fingerprint: String, address: String) { change { next ->
+        require(fingerprint.isNotBlank() && next.contacts.any { it.address == address })
+        next.bluetoothLinks[fingerprint] = address
+    } }
+
     private fun copy(state: SatState) = gson.fromJson(gson.toJson(state), SatState::class.java)
     private suspend fun change(block: (SatState) -> Unit) = mutex.withLock {
         check(!closed) { "Restart after data reset" }
@@ -46,13 +72,15 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         val token = credential.trim()
         require(token.isNotEmpty() && token.length <= 4096 && token.all { it.code in 32..126 }) { "Enter a valid box token" }
         val provisional = BoxConfig(endpoint, token)
-        val address = BoxTransport(provisional, http).status()
+        val status = BoxTransport(provisional, http).statusDetails()
+        val address = status.address
         val config = provisional.copy(address = address)
         val boxContact = BoxTransport(config, http).pair(myContact())
         change { it.box = config; addContact(it, boxContact); it.boxCursors.putIfAbsent(address, BoxCursor()) }
+        point.value = status.pointOnline
         address
     }
-    suspend fun disableBox() { change { it.box = null } }
+    suspend fun disableBox() { change { it.box = null }; point.value = false }
     suspend fun configureInternet(url: String) {
         val endpoint = if (url.isBlank()) "" else CarrierHttp.endpoint(url).toString().trimEnd('/')
         change { it.internet = endpoint }
@@ -70,7 +98,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         change {
             require(it.messages.count { m -> m.outgoing && !m.submitted } < 1000) { "Outbox is full" }
             require(it.messages.size < 10_000) { "History is full" }
-            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli()))
+            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli(), viaPoint = route == Route.SATELLITE && point.value))
         }
         return packet.hash.hex()
     }
@@ -85,6 +113,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             }
             change { next -> next.messages.firstOrNull { it.hash == message.hash }?.let {
                 it.submitted = true; it.serverId = id
+                if (route == Route.SATELLITE) it.viaPoint = point.value
                 if (route == Route.INTERNET && it.delivery != Delivery.DELIVERED) it.delivery = Delivery.SENT
             } }
         }
@@ -192,7 +221,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
                 else decoded.second.toString(Charsets.UTF_8)
             }.getOrDefault("[Invalid text encoding]")
             require(state.messages.size < 10_000) { "History is full" }
-            state.messages.add(ChatMessage(hash, decoded.first, false, text, hex, route, carrier, now().toEpochMilli(), Delivery.DELIVERED, decoded.third, true))
+            state.messages.add(ChatMessage(hash, decoded.first, false, text, hex, route, carrier, now().toEpochMilli(), Delivery.DELIVERED, decoded.third, true, viaPoint = route == Route.SATELLITE && point.value))
             state.seen.add(hash)
             while (state.seen.size > 5000) state.seen.removeAt(0)
         }

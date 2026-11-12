@@ -110,7 +110,7 @@ new MeshStar runtime/test sources. No deployment addresses, credentials, device
 identifiers or private logs are committed. SDK/local properties/build products
 remain ignored. No writes were made to meshstar or iOS sources.
 
-## Live acceptance — partial
+## Live acceptance — accepted
 
 The tester enters real addresses/credentials only in the emulator UI. No endpoint
 is requested in chat or added to tests. The local API 34 image could not be
@@ -118,9 +118,11 @@ unpacked within available disk space. A smaller API 26 image with an existing
 userdata image successfully boots; build 0.3.0 (2) is installed and open for the
 tester. No user files were deleted to make room.
 
-The tester confirmed **Box paired** in the emulator on this build. Cross-device
-text/proofs and airplane-mode recovery have not yet been confirmed and are not
-claimed as complete.
+The tester accepted A2 on 2026-11-12: Android ↔ iPhone text through two configured
+boxes, with signed delivery confirmations in both directions (4 s and 9 s).
+This establishes the box path, not an independent claim of orbital delivery:
+boxes may forward over their online link. Offline recovery remains a separate
+live check. No endpoint, credential or contact data is recorded here.
 
 1. Open Satellite / Internet → My QR. Exchange canonical RNS QR contacts with iOS.
 2. Settings → enter box URL/token → Save and check. Confirm paired/available.

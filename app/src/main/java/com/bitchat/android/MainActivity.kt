@@ -51,6 +51,11 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class MainActivity : OrientationAwareActivity() {
+    private var showBluetoothSetup by mutableStateOf(false)
+    private var rnsIncoming by mutableStateOf("")
+    private var rnsPeer by mutableStateOf("")
+    private var sharedDraft by mutableStateOf("")
+    private val satRuntime by lazy { net.meshstar.data.SatRuntime.get(applicationContext) }
     private var verificationLink by mutableStateOf<String?>(null)
     private var linkNotice by mutableStateOf<String?>(null)
     private var lastHandledLink: String? = null
@@ -160,22 +165,23 @@ class MainActivity : OrientationAwareActivity() {
         
         setContent {
             BitchatTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(),
-                    containerColor = MaterialTheme.colorScheme.background,
-                    topBar = {
-                        net.meshstar.ui.MeshButton("Satellite / Internet", Modifier.statusBarsPadding()) {
-                            startActivity(android.content.Intent(this@MainActivity, net.meshstar.ui.SatelliteActivity::class.java))
+                val onboarding by mainViewModel.onboardingState.collectAsState()
+                if (showBluetoothSetup && onboarding != OnboardingState.COMPLETE) {
+                    androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().statusBarsPadding()) {
+                        net.meshstar.ui.MeshTheme {
+                            net.meshstar.ui.MeshButton(net.meshstar.ui.tr(net.meshstar.ui.T.close)) { showBluetoothSetup = false }
                         }
+                        OnboardingFlowScreen(Modifier.weight(1f))
                     }
-                ) { innerPadding ->
-                    androidx.compose.foundation.layout.Column(Modifier.fillMaxSize().padding(innerPadding)) {
-                        linkNotice?.let { androidx.compose.material3.Text(it, Modifier.padding(androidx.compose.ui.unit.Dp(12f))) }
-                        OnboardingFlowScreen(modifier = Modifier.weight(1f).fillMaxSize())
-                    }
+                } else {
+                    net.meshstar.ui.SatelliteScreen(satRuntime, rnsIncoming, { rnsIncoming = "" }, { finish() },
+                        rnsPeer, sharedDraft, chatViewModel, {
+                            showBluetoothSetup = true
+                            checkOnboardingStatus()
+                        }, onboarding == OnboardingState.COMPLETE)
                 }
                 verificationLink?.let { link ->
-                    com.bitchat.android.ui.VerificationSheet(
+                    net.meshstar.ui.MeshVerificationSheet(
                         isPresented = true,
                         onDismiss = { verificationLink = null },
                         viewModel = chatViewModel,
@@ -185,6 +191,8 @@ class MainActivity : OrientationAwareActivity() {
             }
         }
         // External links must work before BLE onboarding, including on an emulator.
+        rnsPeer = intent.getStringExtra(net.meshstar.ui.SatelliteActivity.EXTRA_PEER).orEmpty()
+        sharedDraft = intent.getStringExtra(net.meshstar.ui.SatelliteActivity.EXTRA_DRAFT).orEmpty()
         handleVerificationIntent(intent, force = true)
 
         // Collect state changes in a lifecycle-aware manner
@@ -753,6 +761,8 @@ class MainActivity : OrientationAwareActivity() {
         if (mainViewModel.onboardingState.value == OnboardingState.COMPLETE) {
             handleNotificationIntent(intent)
         }
+        intent.getStringExtra(net.meshstar.ui.SatelliteActivity.EXTRA_PEER)?.let { rnsPeer = it }
+        intent.getStringExtra(net.meshstar.ui.SatelliteActivity.EXTRA_DRAFT)?.let { sharedDraft = it }
         handleVerificationIntent(intent, force = true)
     }
 
@@ -869,6 +879,9 @@ class MainActivity : OrientationAwareActivity() {
 
     private fun handleVerificationIntent(intent: Intent, force: Boolean = false) {
         val uri = intent.data ?: return
+        if (net.meshstar.link.AppLinks.accepts(uri) && uri.host in setOf("contact", "box") && net.meshstar.link.AppLinks.safe(uri)) {
+            rnsIncoming = uri.toString(); return
+        }
         if (!net.meshstar.link.AppLinks.navigation(uri) || !net.meshstar.link.AppLinks.safe(uri)) return
         val value = uri.toString()
         if (!force && value == lastHandledLink) return
@@ -880,24 +893,18 @@ class MainActivity : OrientationAwareActivity() {
                 val peer = net.meshstar.link.AppLinks.peer(uri)
                 if (peer == null) { linkNotice = "Invalid contact link"; return }
                 if (peer.matches(Regex("[a-fA-F0-9]{32}"))) {
-                    startActivity(Intent(this, net.meshstar.ui.SatelliteActivity::class.java)
-                        .putExtra(net.meshstar.ui.SatelliteActivity.EXTRA_PEER, peer.lowercase()))
+                    rnsPeer = peer.lowercase()
                 } else {
-                    chatViewModel.showPrivateChatSheet(peer)
-                    if (mainViewModel.onboardingState.value != OnboardingState.COMPLETE) {
-                        linkNotice = "Contact selected. Finish Bluetooth setup to open the conversation."
-                    }
+                    rnsPeer = "ble:$peer"
                 }
             }
             "share" -> {
-                val next = Intent(this, net.meshstar.ui.SatelliteActivity::class.java)
                 uri.getQueryParameter("qr")?.let { payload ->
-                    next.data = android.net.Uri.Builder().scheme("meshstar").authority("contact")
-                        .appendQueryParameter("qr", payload).build()
+                    rnsIncoming = android.net.Uri.Builder().scheme("meshstar").authority("contact")
+                        .appendQueryParameter("qr", payload).build().toString()
                 }
                 val draft = uri.getQueryParameter("text") ?: intent.getStringExtra(Intent.EXTRA_TEXT)
-                draft?.takeIf { it.length <= 4096 }?.let { next.putExtra(net.meshstar.ui.SatelliteActivity.EXTRA_DRAFT, it) }
-                startActivity(next) // Select a contact and tap Send; never automatic sending.
+                draft?.takeIf { it.length <= 4096 }?.let { sharedDraft = it }
             }
         }
     }

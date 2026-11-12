@@ -26,18 +26,18 @@ class AppLinkInstrumentedTest {
         assertEquals(MainActivity::class.java.name, context.packageManager.resolveActivity(intent, PackageManager.MATCH_DEFAULT_ONLY)?.activityInfo?.name)
         ActivityScenario.launch<MainActivity>(intent).use { scenario ->
             compose.waitUntil(20_000) { compose.onAllNodesWithTag("meshstar.verify.result").fetchSemanticsNodes().isNotEmpty() }
-            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("Signature valid", substring = true)
+            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("signature valid", substring = true)
             compose.onNodeWithTag("meshstar.link.input").assertTextContains(signed, substring = true)
-            compose.onNodeWithText("Paste link").assertIsDisplayed()
+            compose.onNodeWithText("paste link").assertIsDisplayed()
             scenario.onActivity {
                 val clipboard = it.getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 clipboard.setPrimaryClip(android.content.ClipData.newPlainText("Synthetic link", signed))
             }
             compose.onNodeWithTag("meshstar.link.input").performTextClearance()
-            compose.onNodeWithText("Paste link").performClick()
+            compose.onNodeWithText("paste link").performClick()
             compose.onNodeWithTag("meshstar.link.input").assertTextContains(signed, substring = true)
-            compose.onNodeWithText("Open link").performClick()
-            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("Signature valid", substring = true)
+            compose.onNodeWithText("open link").performClick()
+            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("signature valid", substring = true)
             var original: MainActivity? = null
             scenario.onActivity { original = it }
             val legacy = signed.replace("meshstar:", "meshsat:")
@@ -48,11 +48,11 @@ class AppLinkInstrumentedTest {
                 compose.onAllNodesWithText(legacy, substring = true).fetchSemanticsNodes().isNotEmpty()
             }
             scenario.onActivity { assertSame(original, it); assertEquals(legacy, it.intent.dataString) }
-            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("Signature valid", substring = true)
+            compose.onNodeWithTag("meshstar.verify.result").assertTextContains("signature valid", substring = true)
             // No peer radio exists on this fixture; URL self-signature is not mutual trust.
             compose.onNodeWithTag("meshstar.verify.result").assertTextContains("connect", substring = true)
             // Dismiss the modal before ActivityScenario teardown so its window lifecycle settles.
-            compose.onNodeWithContentDescription(context.getString(com.bitchat.android.R.string.close_plain)).performClick()
+            compose.onNodeWithContentDescription(context.getString(com.bitchat.android.R.string.ms_close)).performClick()
             compose.waitUntil(10_000) { compose.onAllNodesWithTag("meshstar.verify.result").fetchSemanticsNodes().isEmpty() }
             // ActivityScenario matches lifecycle callbacks against the original launch Intent.
             // onNewIntent correctly replaced Activity.intent; restore the fixture's launch

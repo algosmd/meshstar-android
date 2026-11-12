@@ -6,14 +6,17 @@ See [NOTICE](NOTICE.md) for provenance and [LICENSE](LICENSE) for the license.
 The original project documentation is preserved in [README.upstream.md](README.upstream.md).
 
 Current scope: A0/A1 bootstrap and protocol library, A2 encrypted RNS identity,
-contacts/QR and text through a box, A3 Internet mailbox text with signed delivery.
-Open **Satellite / Internet** from the main screen, including before BLE onboarding.
-This is **not yet** the complete MeshStar iOS feature set: MeshCore integration,
-unified chat UI, full localization and Codec2 recording are later stages.
+contacts/QR and text through a box, A3 Internet mailbox text with signed delivery,
+and A4 unified chats with English, Russian, Romanian, German and French UI.
+The main screen has **Bluetooth / LoRa / Satellite** tabs; use the header QR or
+**+** for contacts/settings, or tap **MeshStar/@nickname** to open settings.
+This is **not yet** the complete MeshStar iOS feature set: MeshCore integration
+is A5 and recording/media/notification work is A6. LoRa and Relay are visible
+route choices but remain unavailable until a MeshCore transport is implemented.
 The application keeps the upstream Bluetooth protocol and Kotlin package names.
 
 - Application ID: `net.meshstar.app`; source namespace: `com.bitchat.android`.
-- Display name: MeshStar; version: `0.3.0` (code `2`).
+- Display name: MeshStar; version: `0.3.0` (code `4`).
 - Wear is excluded from Gradle settings.
 - MeshStar protocol code is isolated in pure JVM module [`:rnslite`](rnslite/README.md).
 - No MeshStar deployment endpoints or credentials are configured or bundled.
@@ -36,7 +39,8 @@ Debug APKs are test builds, not signed Play releases. BLE interoperability must
 still be tested on physical devices in A5; emulators cannot establish that result.
 
 Validation reports: [A0](docs/android/A0-validation.md), [A1](docs/android/A1-validation.md),
-[A2](docs/android/A2-validation.md), [A3](docs/android/A3-validation.md).
+[A2](docs/android/A2-validation.md), [A3](docs/android/A3-validation.md),
+[A4](docs/android/A4-validation.md).
 
 Carrier URLs default to empty and are entered by the tester in the app. Credentials
 and history are encrypted using a non-exportable Android Keystore wrapping key;
@@ -45,8 +49,8 @@ for explicitly configured boxes; HTTPS uses normal platform trust. Redirects are
 rejected. The app never logs carrier requests or embeds deployment addresses.
 
 **My QR** shows the existing `meshsat1:` RNS contact payload for iOS/box compatibility.
-**Copy MeshStar link** emits `meshstar://contact` with that payload. Input accepts
-the current link, legacy `meshsat://contact`, and raw RNS contacts. Box credentials
+**Copy QR** and **Share** export that contact payload. Input accepts
+`meshstar://contact`, legacy `meshsat://contact`, and raw RNS contacts. Box credentials
 can be entered manually or imported from a `meshstar://box` setup link and must be
 explicitly saved before use. Existing iOS box-contact QR payloads contain a public
 identity, not a server URL or bearer credential.

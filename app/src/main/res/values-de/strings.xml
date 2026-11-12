@@ -46,7 +46,7 @@
     <string name="notification_summary_more">und %1$d weitere</string>
     <string name="notification_messages_from_people">%1$d Nachrichten von %2$d Personen</string>
     <string name="notification_more_conversations">und %1$d weitere Unterhaltungen</string>
-    <string name="notification_active_peers_title">bitchatter in der Nähe!</string>
+    <string name="notification_active_peers_title">Personen in der Nähe!</string>
     <string name="notification_active_peers_one">1 Person in der Nähe</string>
     <string name="notification_active_peers_many">%1$d Personen in der Nähe</string>
     <string name="notification_new_messages">Neue Nachrichten</string>
@@ -250,14 +250,14 @@
     <string name="open_location_settings">Standorteinstellungen öffnen</string>
     <string name="check_again">Erneut prüfen</string>
     <string name="location_services_unavailable">Standortdienste nicht verfügbar</string>
-    <string name="location_unavailable_explanation">Standortdienste sind auf diesem Gerät nicht verfügbar. Das ist ungewöhnlich, da Standortdienste bei Android‑Geräten Standard sind.\n\nbitchat benötigt Standortdienste für das ordnungsgemäße Funktionieren des Bluetooth‑Scannings (Android‑Anforderung). Ohne diese kann die App keine nahegelegenen Benutzer entdecken.</string>
+    <string name="location_unavailable_explanation">Standortdienste sind auf diesem Gerät nicht verfügbar. Das ist ungewöhnlich, da Standortdienste bei Android‑Geräten Standard sind.\n\nMeshStar benötigt Standortdienste für das ordnungsgemäße Funktionieren des Bluetooth‑Scannings (Android‑Anforderung). Ohne diese kann die App keine nahegelegenen Benutzer entdecken.</string>
     <string name="checking_location_services">Standortdienste werden geprüft …</string>
     <string name="bluetooth_required">Bluetooth erforderlich</string>
     <string name="bluetooth_needs_for">MeshStar benötigt Bluetooth für:</string>
     <string name="bluetooth_needs_bullets">• Entdecken nahegelegener Benutzer\n• Erstellen von Mesh‑Netzwerkverbindungen\n• Senden und Empfangen von Nachrichten\n• Funktionieren ohne Internet oder Server</string>
     <string name="enable_bluetooth">Bluetooth aktivieren</string>
     <string name="bluetooth_not_supported">Bluetooth nicht unterstützt</string>
-    <string name="bluetooth_unsupported_explanation">Dieses Gerät unterstützt kein Bluetooth Low Energy (BLE), das für das Funktionieren von MeshStar erforderlich ist.\n\nbitchat benötigt BLE, um Mesh‑Netzwerke zu erstellen und ohne Internet mit nahegelegenen Geräten zu kommunizieren.</string>
+    <string name="bluetooth_unsupported_explanation">Dieses Gerät unterstützt kein Bluetooth Low Energy (BLE), das für das Funktionieren von MeshStar erforderlich ist.\n\nMeshStar benötigt BLE, um Mesh‑Netzwerke zu erstellen und ohne Internet mit nahegelegenen Geräten zu kommunizieren.</string>
     <string name="checking_bluetooth_status">Bluetooth‑Status wird geprüft …</string>
     <string name="battery_optimization_detected_title">Akku‑Optimierung erkannt</string>
     <string name="battery_optimization_enabled_title">Akku‑Optimierung aktiviert</string>

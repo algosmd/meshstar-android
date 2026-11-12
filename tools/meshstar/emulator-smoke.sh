@@ -18,7 +18,7 @@ done
 grep -q 'Status: ok' /tmp/meshstar-launch.txt
 sleep 8
 adb shell uiautomator dump /sdcard/meshstar-ui.xml >/dev/null
-adb shell cat /sdcard/meshstar-ui.xml | grep -q 'Satellite / Internet'
+adb shell cat /sdcard/meshstar-ui.xml | grep -q 'MeshStar/'
 # Exercise activity disposal/recreation, including devices with no Bluetooth adapter.
 adb shell settings put system accelerometer_rotation 0
 adb shell settings put system user_rotation 1
@@ -35,7 +35,7 @@ printf 'MeshStar launch passed on API %s\n' "$(adb shell getprop ro.build.versio
 # radio/location permissions; AndroidKeyStore remains the real provider.
 test_apk=$(find test-apk -name '*.apk' -print -quit)
 adb install -r "$test_apk"
-adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest,net.meshstar.AppLinkInstrumentedTest \
+adb shell am instrument -w -e class net.meshstar.KeystoreInstrumentedTest,net.meshstar.SatelliteUiInstrumentedTest,net.meshstar.AppLinkInstrumentedTest,net.meshstar.UnifiedUiInstrumentedTest \
   net.meshstar.app.test/com.bitchat.android.ui.PerformanceTestRunner > /tmp/meshstar-instrumentation.txt
 cat /tmp/meshstar-instrumentation.txt
-grep -q 'OK (4 tests)' /tmp/meshstar-instrumentation.txt
+grep -q 'OK (7 tests)' /tmp/meshstar-instrumentation.txt

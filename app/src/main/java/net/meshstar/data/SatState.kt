@@ -12,6 +12,7 @@ data class ChatMessage(
     val raw: String, val route: Route, val carrier: String, val at: Long,
     var delivery: Delivery = Delivery.QUEUED, val verified: Boolean = true,
     var submitted: Boolean = false, var serverId: Long = 0,
+    var viaPoint: Boolean = false,
 )
 data class PendingProof(val raw: String, val peer: String, val route: Route, val carrier: String)
 data class BoxCursor(var inbox: Long = 0, var sent: Long = 0)
@@ -23,6 +24,11 @@ data class SatState(
     val mailCursors: MutableMap<String, Long> = mutableMapOf(),
     val seen: MutableList<String> = mutableListOf(),
     val pendingVoice: MutableMap<String, String> = mutableMapOf(),
+    val verifiedKeys: MutableMap<String, String> = mutableMapOf(),
+    val bluetoothLinks: MutableMap<String, String> = mutableMapOf(),
+    val readThrough: MutableMap<String, Long> = mutableMapOf(),
+    var readTrackingInitialized: Boolean = false,
+
 )
 interface StateStore { fun load(): SatState; fun save(state: SatState) }
 class EncryptedStateStore(private val files: EncryptedFiles) : StateStore {

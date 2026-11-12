@@ -6,12 +6,16 @@ import net.meshstar.link.Contact
 import net.meshstar.rnslite.*
 
 data class BoxConfig(val url: String, val token: String, val address: String = "")
+data class BoxStatus(val address: String, val pointOnline: Boolean)
 data class SentRow(val id: Long, val hash: String, val status: String)
 data class InboxRow(val id: Long, val raw: String, val kind: String)
 class BoxTransport(val config: BoxConfig, private val http: CarrierHttp = CarrierHttp()) {
-    suspend fun status(): String {
+    suspend fun status(): String = statusDetails().address
+    suspend fun statusDetails(): BoxStatus {
         val root = JsonParser.parseString(http.request(config.url, "api/status", config.token)).asJsonObject
-        return root["addr"].asString.lowercase().also { require(it.unhex().size == 16) { "Invalid box address" } }
+        val address = root["addr"].asString.lowercase().also { require(it.unhex().size == 16) { "Invalid box address" } }
+        val online = runCatching { root.getAsJsonObject("link")?.get("online")?.asBoolean == true }.getOrDefault(false)
+        return BoxStatus(address, online)
     }
     suspend fun pair(me: Contact): Contact {
         val root = JsonParser.parseString(http.request(config.url, "api/pair", config.token)).asJsonObject

@@ -22,9 +22,9 @@ import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
 @Composable
-fun ContactScanner(onCode: (String) -> Unit) {
+fun ContactScanner(onCode: (String) -> Unit, initialValue: String = "") {
     Column(Modifier.fillMaxSize()) {
-        PasteLinkPanel(onOpen = onCode)
+        PasteLinkPanel(onOpen = onCode, initialValue = initialValue)
         Box(Modifier.weight(1f)) { CameraScanner(onCode) }
     }
 }
@@ -40,7 +40,7 @@ private fun CameraScanner(onCode: (String) -> Unit) {
     var failure by remember { mutableStateOf(false) }
     val callback by rememberUpdatedState(onCode)
     if (!permission) {
-        Column { Text("Camera access is needed only for scanning QR codes. You can also paste a contact."); MeshButton("Allow camera") { launcher.launch(Manifest.permission.CAMERA) } }
+        Column { Text(tr(T.camera_hint)); MeshButton(tr(T.allow_camera)) { launcher.launch(Manifest.permission.CAMERA) } }
         return
     }
     DisposableEffect(lifecycle) {
@@ -70,6 +70,6 @@ private fun CameraScanner(onCode: (String) -> Unit) {
         }, ContextCompat.getMainExecutor(context))
         onDispose { disposed = true; analysis.clearAnalyzer(); provider?.unbind(preview, analysis); executor.shutdown(); scanner.close(); surface = null }
     }
-    if (failure) Text("Camera unavailable. Paste the QR text instead.")
+    if (failure) Text(tr(T.camera_unavailable))
     surface?.let { CameraXViewfinder(it, Modifier.fillMaxSize(), implementationMode = ImplementationMode.EMBEDDED) }
 }

@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="about_language">limbă</string>
+    <string name="about_app_language">limba aplicației</string>
+    <string name="about_system_default">implicită a sistemului</string>
+    <string name="about_select_language">alege limba</string>
+    <string name="notification_active_peers_title">persoane în apropiere!</string>
+</resources>
