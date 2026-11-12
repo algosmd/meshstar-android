@@ -1,9 +1,9 @@
 # A5 — Bluetooth regression and MeshCore companion
 
 Build: **0.3.0 (5)**, application ID `net.meshstar.app`.
-Status: implementation and local automated validation complete; physical
-LoRa/Relay delivery acceptance still pending. Companion connection and the
-existing MESHSAT configuration have been confirmed by the tester.
+Status: implementation and local automated validation complete. Physical direct
+LoRa text delivery with signed confirmations passed in both directions. Relay
+delivery and the additional hardware checks below remain pending.
 Specification: read-only meshstar `0fcceb6`, `docs/codex/m11-android.md`.
 iOS behavior reference: `codex/m7-mailbox`, `45daf4c` (0.3.0 build 18).
 Neither source reference was changed. RNSLite formats and vectors were not changed.
@@ -69,15 +69,20 @@ The optional first-launch hint recommends checking them only
 if background reception stops; it does not change system settings automatically.
 One-minute screen-off success is not an overnight/Doze endurance result.
 
+## Physical MeshCore acceptance
+
+On 2026-11-12 the tester confirmed companion connection and the existing MESHSAT
+channel configuration on Android **0.3.0 (5)**. With a second companion connected
+to iPhone, both clients explicitly selected **LoRa** in their RNS conversation.
+Text arrived **Android → iPhone and iPhone → Android**, and both senders received
+signed ✅. This is direct LoRa acceptance, not a Relay or HTTP-box result.
+
 ## Remaining hardware acceptance
 
 - Build 5 is installed and launches. Repeat Bluetooth checks on this build and
   apply the final UI-only refresh described below.
-- Companion scan/connection and the existing MESHSAT configuration were confirmed
-  on build 5. Radio delivery remains to test. Verify occupied-slot refusal before
-  explicit replacement
-  on an intentionally selected test slot; do not overwrite unrelated channels.
-- Android → LoRa → iPhone and reply, signed ✅ in both directions.
+- Verify occupied-slot refusal before explicit replacement on an intentionally
+  selected test slot; do not overwrite unrelated channels.
 - Android → Relay → box/bridge → remote recipient, signed ✅ and return message.
 - Coexistence of Bluetooth public/DM traffic with the companion connection.
 - Ordinary channel receive/send and Public history merge without duplicates.
