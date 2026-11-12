@@ -2,7 +2,8 @@
 
 Build: **0.3.0 (5)**, application ID `net.meshstar.app`.
 Status: implementation and local automated validation complete; physical
-MeshCore/Relay and ordinary upstream-client acceptance still pending.
+LoRa/Relay delivery acceptance still pending. Companion connection and the
+existing MESHSAT configuration have been confirmed by the tester.
 Specification: read-only meshstar `0fcceb6`, `docs/codex/m11-android.md`.
 iOS behavior reference: `codex/m7-mailbox`, `45daf4c` (0.3.0 build 18).
 Neither source reference was changed. RNSLite formats and vectors were not changed.
@@ -56,13 +57,15 @@ Confirmed by the tester on 2026-11-12 using Android 11 / MIUI 12.5:
 | Android MeshStar ↔ iPhone MeshStar DM | Passed both directions on build 4 |
 | Home/background, incoming DM | Notification and message received |
 | Screen off for about one minute, incoming DM | Notification and message received |
-| Ordinary upstream client public/DM | Pending |
+| Android MeshStar ↔ ordinary upstream client public/DM | Tester confirmed both chats in both directions; the other client platform was not specified |
 | Retest after build 5 update | Pending |
 
 The app's Bluetooth/location permissions and foreground service were active during
-the scoped diagnostic check. **Autostart and battery restriction settings are
-unknown: the tester does not remember them.** No claim is made that those settings
-had to be changed. The optional first-launch hint recommends checking them only
+the scoped diagnostic check. The tester subsequently checked the settings:
+**Autostart is off; the selected battery mode is “Battery saver”.** Background
+and short screen-off reception succeeded without requiring unrestricted battery
+mode or autostart. No claim is made that either setting was changed for the test.
+The optional first-launch hint recommends checking them only
 if background reception stops; it does not change system settings automatically.
 One-minute screen-off success is not an overnight/Doze endurance result.
 
@@ -70,14 +73,16 @@ One-minute screen-off success is not an overnight/Doze endurance result.
 
 - Build 5 is installed and launches. Repeat Bluetooth checks on this build and
   apply the final UI-only refresh described below.
-- Scan/connect the tester-selected companion; verify name/RSSI/slot and existing
-  MESHSAT configuration. Verify occupied-slot refusal before explicit replacement
+- Companion scan/connection and the existing MESHSAT configuration were confirmed
+  on build 5. Radio delivery remains to test. Verify occupied-slot refusal before
+  explicit replacement
   on an intentionally selected test slot; do not overwrite unrelated channels.
 - Android → LoRa → iPhone and reply, signed ✅ in both directions.
 - Android → Relay → box/bridge → remote recipient, signed ✅ and return message.
 - Coexistence of Bluetooth public/DM traffic with the companion connection.
 - Ordinary channel receive/send and Public history merge without duplicates.
-- Ordinary upstream client interop and actual MIUI power settings remain to record.
+- The ordinary upstream client public/DM check passed both ways. Its platform was
+  not specified, so separate upstream iOS and Android matrix coverage is not claimed.
 
 A6 voice recording/playback and completion of notification parity are not included.
 Incoming encrypted voice frames are retained for later support; playback or voice
