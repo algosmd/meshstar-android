@@ -55,13 +55,24 @@ live Android↔iPhone service interoperability.
 
 Build 3 (`b8919d7`) also passed [CI](https://github.com/algosmd/meshstar-android/actions/runs/43153859877):
 build/JVM suite and API 26/34, four instrumented tests per API. This adds app-link
-and camera-free contact import validation; live mailbox acceptance remains pending.
+and camera-free contact import validation.
 
-## Live acceptance checklist — pending tester input
+## Live acceptance — bidirectional Internet text confirmed
+
+On 2026-11-12, the tester confirmed build `0.3.0 (3)` exchanges text between
+Android and iPhone through **Internet (mailbox)**, with ✅ at the sender in both
+directions. This confirms the live text/proof round trip. No server address,
+credentials, contact keys or message contents are recorded.
+
+Offline recovery, server-side ACK cleanup and restart continuity below remain
+pending live verification (their mock tests pass). Satellite/box text delivery
+is a separate A2 check; this Internet result does not establish that path.
+
+## Live acceptance checklist
 
 1. In Settings enter Internet server on Android; the same service is configured
    on iOS. Exchange RNS contact QR codes if not already paired.
-2. Choose Internet in the peer chat, send text each way, verify signature and ✅.
+2. **Passed:** Internet text in both directions, with ✅ for both senders.
 3. Disable networking for five minutes; enqueue text, then restore networking.
    Confirm queued ciphertext is retried and one copy arrives with ✅.
 4. Confirm consumed server entries are empty after ACK, using the tester's own
