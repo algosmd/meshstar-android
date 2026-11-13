@@ -1,9 +1,10 @@
 # A5 — Bluetooth regression and MeshCore companion
 
 Build: **0.3.0 (5)**, application ID `net.meshstar.app`.
-Status: implementation and local automated validation complete. The primary
-physical delivery checks passed: direct LoRa and Relay, text with signed
-confirmations in both directions. Additional hardware coverage is listed below.
+Status: **A5 implementation and primary live acceptance passed.** Direct LoRa
+and Relay delivered text with signed confirmations in both directions. Concurrent
+Bluetooth/MeshCore operation and Public history were also confirmed. Test coverage
+limits are recorded below; they are not presented as completed hardware tests.
 Specification: read-only meshstar `0fcceb6`, `docs/codex/m11-android.md`.
 iOS behavior reference: `codex/m7-mailbox`, `45daf4c` (0.3.0 build 18).
 Neither source reference was changed. RNSLite formats and vectors were not changed.
@@ -58,7 +59,7 @@ Confirmed by the tester on 2026-11-12 using Android 11 / MIUI 12.5:
 | Home/background, incoming DM | Notification and message received |
 | Screen off for about one minute, incoming DM | Notification and message received |
 | Android MeshStar ↔ ordinary upstream client public/DM | Tester confirmed both chats in both directions; the other client platform was not specified |
-| Retest after build 5 update | Pending |
+| Build 5 Bluetooth with MeshCore connected | Tester confirmed public and direct chats work while the companion connection remains active |
 
 The app's Bluetooth/location permissions and foreground service were active during
 the scoped diagnostic check. The tester subsequently checked the settings:
@@ -83,14 +84,21 @@ reported Relay/box-bridge acceptance; it does not claim measured latency or a
 particular bridge-versus-orbit backhaul. No endpoint or message contents were
 collected.
 
-## Additional hardware checks
+Also on 2026-11-13, the tester confirmed both additional scenarios:
 
-- Build 5 is installed and launches. Repeat Bluetooth checks on this build and
-  apply the final UI-only refresh described below.
-- Verify occupied-slot refusal before explicit replacement on an intentionally
-  selected test slot; do not overwrite unrelated channels.
-- Coexistence of Bluetooth public/DM traffic with the companion connection.
-- Ordinary channel receive/send and Public history merge without duplicates.
+- Bluetooth public and direct chats work while the MeshCore companion remains
+  connected; neither transport displaced the other in this test.
+- Ordinary Public channel send/receive works, and opening its history with the
+  box connected shows messages without duplicates.
+
+## Coverage limits
+
+- Occupied-slot refusal, explicit replacement consent, and secret validation passed
+  JVM/UI tests; destructive replacement on physical hardware was not performed.
+- The final UI-only APK refresh hides empty slots. The last device hash check
+  identified the preceding build 5 candidate with identical transport code. The
+  device was unavailable for the subsequent verification attempt; final artifact
+  replacement is not claimed.
 - The ordinary upstream client public/DM check passed both ways. Its platform was
   not specified, so separate upstream iOS and Android matrix coverage is not claimed.
 
