@@ -1,9 +1,9 @@
 # A5 — Bluetooth regression and MeshCore companion
 
 Build: **0.3.0 (5)**, application ID `net.meshstar.app`.
-Status: implementation and local automated validation complete. Physical direct
-LoRa text delivery with signed confirmations passed in both directions. Relay
-delivery and the additional hardware checks below remain pending.
+Status: implementation and local automated validation complete. The primary
+physical delivery checks passed: direct LoRa and Relay, text with signed
+confirmations in both directions. Additional hardware coverage is listed below.
 Specification: read-only meshstar `0fcceb6`, `docs/codex/m11-android.md`.
 iOS behavior reference: `codex/m7-mailbox`, `45daf4c` (0.3.0 build 18).
 Neither source reference was changed. RNSLite formats and vectors were not changed.
@@ -77,13 +77,18 @@ to iPhone, both clients explicitly selected **LoRa** in their RNS conversation.
 Text arrived **Android → iPhone and iPhone → Android**, and both senders received
 signed ✅. This is direct LoRa acceptance, not a Relay or HTTP-box result.
 
-## Remaining hardware acceptance
+On 2026-11-13 the tester confirmed the separate **Relay** scenario: messages
+arrived in both directions and both senders received signed ✅. This records the
+reported Relay/box-bridge acceptance; it does not claim measured latency or a
+particular bridge-versus-orbit backhaul. No endpoint or message contents were
+collected.
+
+## Additional hardware checks
 
 - Build 5 is installed and launches. Repeat Bluetooth checks on this build and
   apply the final UI-only refresh described below.
 - Verify occupied-slot refusal before explicit replacement on an intentionally
   selected test slot; do not overwrite unrelated channels.
-- Android → Relay → box/bridge → remote recipient, signed ✅ and return message.
 - Coexistence of Bluetooth public/DM traffic with the companion connection.
 - Ordinary channel receive/send and Public history merge without duplicates.
 - The ordinary upstream client public/DM check passed both ways. Its platform was

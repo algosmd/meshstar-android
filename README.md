@@ -12,8 +12,9 @@ A5 MeshCore companion BLE with LoRa/Relay text and ordinary channel history.
 The main screen has **Bluetooth / LoRa / Satellite** tabs; use the header QR or
 **+** for contacts/settings, or tap **MeshStar/@nickname** to open settings.
 This is **not yet** the complete MeshStar iOS feature set: recording/media and
-remaining notification work are A6. Physical LoRa/Relay acceptance is tracked in
-the A5 report; a passing JVM/emulator suite is not radio interoperability proof.
+remaining notification work are A6. Direct LoRa and Relay text with signed confirmations have passed in both
+directions on physical devices; the A5 report records the tested build and
+remaining hardware coverage.
 The application keeps the upstream Bluetooth protocol and Kotlin package names.
 
 - Application ID: `net.meshstar.app`; source namespace: `com.bitchat.android`.
