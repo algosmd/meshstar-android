@@ -33,3 +33,8 @@ channel opening, text in both directions and slot release passed on code 9.
 Occupied-slot replacement and badges still need hardware confirmation. Remaining
 M10 stages are pending live acceptance; companion/repeater changes require the
 user's confirmation. The stage reports contain the remaining checklist.
+
+Physical follow-up (2026-11-15): after confirmation-placement fix `9b9b5bc`,
+the user confirmed CR 4/8 save/readback, restoration to 4/5 and unchanged power.
+P1.1 remains partially accepted; other settings and subsequent stages still
+require the checks documented in their reports.
