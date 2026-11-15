@@ -38,3 +38,7 @@ Physical follow-up (2026-11-15): after confirmation-placement fix `9b9b5bc`,
 the user confirmed CR 4/8 save/readback, restoration to 4/5 and unchanged power.
 P1.1 remains partially accepted; other settings and subsequent stages still
 require the checks documented in their reports.
+
+P1.2 live follow-up (2026-11-15, code 13): the user confirmed authorized repeater
+login, time and firmware replies, and the status card. Remaining admin acceptance
+items are recorded in the P1.2 report.
