@@ -40,6 +40,7 @@ data class SatState(
     val bluetoothLinks: MutableMap<String, String> = mutableMapOf(),
     val readThrough: MutableMap<String, Long> = mutableMapOf(),
     var readTrackingInitialized: Boolean = false,
+    var hashtagCaseTrackingInitialized:Boolean=false,
     var node: net.meshstar.meshcore.NodeConfiguration? = null,
     val nativeContacts: MutableMap<String,String> = mutableMapOf(),
     val nativeChats: MutableSet<String> = mutableSetOf(),

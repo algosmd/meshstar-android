@@ -32,7 +32,7 @@ import net.meshstar.meshcore.*
     if(state.busy)Secondary(tr(T.admin_waiting),size=10)
     if(state.loggedIn){
         MeshCard {
-            listOf("time" to T.admin_time,"ver" to T.admin_version,"neighbors" to T.admin_neighbors,"get radio" to T.admin_read_radio,"get name" to T.admin_read_name).forEach{(text,title)->MeshButton(tr(title),enabled=!state.busy){act(UiAction.AdminRun(text,wait))}}
+            listOf("clock" to T.admin_time,"ver" to T.admin_version,"neighbors" to T.admin_neighbors,"get radio" to T.admin_read_radio,"get name" to T.admin_read_name).forEach{(text,title)->MeshButton(tr(title),enabled=!state.busy){act(UiAction.AdminRun(text,wait))}}
             MeshButton(tr(T.admin_status),enabled=!state.busy){act(UiAction.AdminStatus(wait))}
             MeshButton(tr(T.admin_sync),enabled=!state.busy){pending="clock sync"}
             MeshButton(tr(T.radio_flood),enabled=!state.busy){pending="advert"}
@@ -53,7 +53,7 @@ import net.meshstar.meshcore.*
     pending?.let{raw->MeshCard{
         Secondary(tr(T.admin_confirm),size=12)
         if(!AdminProtocol.sensitive(raw))Text(raw,fontSize=12.sp)
-        MeshButton(tr(T.channel_confirm),enabled=!state.busy){val text=if(raw=="clock sync")"clock ${System.currentTimeMillis()/1000}"else raw;act(UiAction.AdminRun(text,wait));pending=null;command=""}
+        MeshButton(tr(T.channel_confirm),enabled=!state.busy){act(UiAction.AdminRun(raw,wait));pending=null;command=""}
         MeshButton(tr(T.back)){pending=null}
     }}
     Secondary(tr(T.admin_console),size=12)

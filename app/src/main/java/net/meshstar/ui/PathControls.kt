@@ -11,6 +11,10 @@ import java.util.Date
 
 @Composable fun PathControls(key:String,state:PathState,known:List<NodeContact>,snr:Double?,action:suspend(UiAction)->Boolean){
     val scope=rememberCoroutineScope()
+    // The app replaces LocalContext when its language changes; the platform
+    // LocalConfiguration alone still describes the device language.
+    @android.annotation.SuppressLint("LocalContextConfigurationRead")
+    val locale=androidx.compose.ui.platform.LocalContext.current.resources.configuration.locales[0]
     fun act(a:UiAction){scope.launch{action(a)}}
     LaunchedEffect(key){if(key.isNotEmpty())action(UiAction.PathOpen(key))}
     var text by remember(key){mutableStateOf("")}
@@ -23,7 +27,7 @@ import java.util.Date
     state.error?.let{Secondary(tr(when(it){NodeError.Code.RADIO_TIMEOUT->T.admin_timeout;NodeError.Code.PATH_TRACE->T.path_trace_error;NodeError.Code.AMBIGUOUS->T.admin_ambiguous;else->T.path_error}),size=12)}
     if(state.busy)Secondary(tr(T.admin_waiting),size=10)
     state.contact?.let{contact->
-        Secondary(tr(T.path_advert)+" · "+if(contact.advertisedAt>0)DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT).format(Date(contact.advertisedAt*1000))else "—",size=10)
+        Secondary(tr(T.path_advert)+" · "+if(contact.advertisedAt>0)DateFormat.getDateTimeInstance(DateFormat.SHORT,DateFormat.SHORT,locale).format(Date(contact.advertisedAt*1000))else "—",size=10)
         if(snr!=null)Secondary("SNR $snr dB",size=10)
         Secondary(tr(T.path_rssi),size=10)
         if(contact.pathLength==255)Text("flood",fontSize=12.sp)

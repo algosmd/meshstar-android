@@ -5,6 +5,26 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    location_unavailable(R.string.ms_location_unavailable),
+
+    map_title(R.string.ms_map_title),
+    map_filters(R.string.ms_map_filters),
+    map_fit(R.string.ms_map_fit),
+    map_locate(R.string.ms_map_locate),
+    map_companion(R.string.ms_map_companion),
+    map_repeater(R.string.ms_map_repeater),
+    map_room(R.string.ms_map_room),
+    map_sensor(R.string.ms_map_sensor),
+    map_unknown(R.string.ms_map_unknown),
+    map_all(R.string.ms_map_all),
+    map_hour(R.string.ms_map_hour),
+    map_day(R.string.ms_map_day),
+    map_week(R.string.ms_map_week),
+    map_stale(R.string.ms_map_stale),
+    map_empty(R.string.ms_map_empty),
+    map_unavailable(R.string.ms_map_unavailable),
+    map_nodes(R.string.ms_map_nodes),
+
     path_error(R.string.ms_path_error),
     path_trace_error(R.string.ms_path_trace_error),
     path_advert(R.string.ms_path_advert),

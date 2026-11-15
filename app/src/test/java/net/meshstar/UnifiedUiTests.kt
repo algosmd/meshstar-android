@@ -16,6 +16,17 @@ import java.time.Instant
 @org.junit.runner.RunWith(org.robolectric.RobolectricTestRunner::class)
 @org.robolectric.annotation.Config(sdk = [34], application = android.app.Application::class, manifest = org.robolectric.annotation.Config.NONE)
 class UnifiedUiTests {
+    @Test fun hashtagReadMarkersMigrateOnceWithoutCollapsingCaseSensitiveChannels() = runBlocking {
+        val old=SatState(readTrackingInitialized=true)
+        old.channelNames[1]="#Demo";old.channelNames[2]="#demo";old.readThrough["channel:#demo"]=100L
+        val store=MemoryStore(old);val engine=SatEngine(Identity(ByteArray(64){9}),store,now={Instant.ofEpochMilli(200)})
+        engine.initializeReadTracking()
+        assertEquals(100L,engine.state.value.readThrough["channel:#Demo"])
+        engine.markRead("channel:#Demo")
+        engine.initializeReadTracking()
+        assertEquals(200L,engine.state.value.readThrough["channel:#Demo"])
+        assertEquals(100L,engine.state.value.readThrough["channel:#demo"])
+    }
     @Test fun autoPrioritizesAvailableFreePathsAndManualNeverFallsBack() {
         assertEquals("bluetooth", resolvePath(PathChoice.AUTO, true, true, true))
         assertEquals("internet", resolvePath(PathChoice.AUTO, false, true, true))

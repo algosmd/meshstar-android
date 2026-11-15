@@ -216,4 +216,22 @@
     <string name="ms_path_final">SNR final</string>
     <string name="ms_path_message_hint">ce message fournit les sauts et le SNR, pas les hash traversés ; le chemin sortant actuel peut différer</string>
     <string name="ms_path_outbound">chemin sortant actuel</string>
+    <string name="ms_map_title">carte</string>
+    <string name="ms_map_filters">filtres</string>
+    <string name="ms_map_fit">tout afficher</string>
+    <string name="ms_map_locate">où suis-je</string>
+    <string name="ms_map_companion">compagnon</string>
+    <string name="ms_map_repeater">répéteur</string>
+    <string name="ms_map_room">salon</string>
+    <string name="ms_map_sensor">capteur</string>
+    <string name="ms_map_unknown">inconnu</string>
+    <string name="ms_map_all">toute ancienneté</string>
+    <string name="ms_map_hour">heure</string>
+    <string name="ms_map_day">jour</string>
+    <string name="ms_map_week">semaine</string>
+    <string name="ms_map_stale">marqueurs gris : annonce ancienne d’au moins un jour ou inconnue</string>
+    <string name="ms_map_empty">aucun nœud avec coordonnées pour ces filtres</string>
+    <string name="ms_map_unavailable">tuiles indisponibles ; marqueurs des nœuds conservés</string>
+    <string name="ms_map_nodes">nœuds sur la carte</string>
+    <string name="ms_location_unavailable">position indisponible ; vérifier l’autorisation et réessayer</string>
 </resources>

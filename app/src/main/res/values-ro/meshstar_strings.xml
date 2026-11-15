@@ -216,4 +216,22 @@
     <string name="ms_path_final">SNR final</string>
     <string name="ms_path_message_hint">mesajul oferă salturi și SNR, nu hash-urile parcurse; calea curentă poate diferi</string>
     <string name="ms_path_outbound">calea de ieșire curentă</string>
+    <string name="ms_map_title">hartă</string>
+    <string name="ms_map_filters">filtre</string>
+    <string name="ms_map_fit">arată tot</string>
+    <string name="ms_map_locate">unde sunt</string>
+    <string name="ms_map_companion">companion</string>
+    <string name="ms_map_repeater">repetor</string>
+    <string name="ms_map_room">cameră</string>
+    <string name="ms_map_sensor">senzor</string>
+    <string name="ms_map_unknown">necunoscut</string>
+    <string name="ms_map_all">orice vechime</string>
+    <string name="ms_map_hour">oră</string>
+    <string name="ms_map_day">zi</string>
+    <string name="ms_map_week">săptămână</string>
+    <string name="ms_map_stale">marcaje gri: anunț de peste o zi sau necunoscut</string>
+    <string name="ms_map_empty">niciun nod cu coordonate pentru aceste filtre</string>
+    <string name="ms_map_unavailable">harta indisponibilă; marcajele nodurilor rămân</string>
+    <string name="ms_map_nodes">noduri pe hartă</string>
+    <string name="ms_location_unavailable">poziție indisponibilă; verifică permisiunea și reîncearcă</string>
 </resources>

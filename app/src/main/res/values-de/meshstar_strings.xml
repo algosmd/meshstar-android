@@ -216,4 +216,22 @@
     <string name="ms_path_final">finaler SNR</string>
     <string name="ms_path_message_hint">diese nachricht enthält hops und SNR, keine durchlaufenen hashes; der aktuelle ausgangspfad kann abweichen</string>
     <string name="ms_path_outbound">aktueller ausgangspfad</string>
+    <string name="ms_map_title">karte</string>
+    <string name="ms_map_filters">filter</string>
+    <string name="ms_map_fit">alle anzeigen</string>
+    <string name="ms_map_locate">wo bin ich</string>
+    <string name="ms_map_companion">companion</string>
+    <string name="ms_map_repeater">repeater</string>
+    <string name="ms_map_room">raum</string>
+    <string name="ms_map_sensor">sensor</string>
+    <string name="ms_map_unknown">unbekannt</string>
+    <string name="ms_map_all">jedes alter</string>
+    <string name="ms_map_hour">stunde</string>
+    <string name="ms_map_day">tag</string>
+    <string name="ms_map_week">woche</string>
+    <string name="ms_map_stale">graue marker: ankündigung mindestens einen tag alt oder unbekannt</string>
+    <string name="ms_map_empty">keine knoten mit koordinaten für diese filter</string>
+    <string name="ms_map_unavailable">kartenkacheln nicht verfügbar; knotenmarker bleiben sichtbar</string>
+    <string name="ms_map_nodes">knoten auf der karte</string>
+    <string name="ms_location_unavailable">position nicht verfügbar; standortberechtigung prüfen und erneut versuchen</string>
 </resources>

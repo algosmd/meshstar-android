@@ -14,16 +14,22 @@ import androidx.core.content.ContextCompat
 import kotlinx.coroutines.delay
 
 /** Explicit one-shot request. No last-known location, storage, or background subscription. */
-@Composable fun PhoneCoordinates(received:(Double,Double)->Unit) {
+@Composable fun PhoneCoordinates(requestPermission:Boolean=false,label:T=T.radio_phone,clear:()->Unit={},received:(Double,Double)->Unit) {
     val context=LocalContext.current
     val lifecycle=androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     val granted=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED || ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_COARSE_LOCATION)==PackageManager.PERMISSION_GRANTED
-    if(!granted)return
+    if(!granted&&!requestPermission)return
     var requested by remember{mutableStateOf(false)}
     var failed by remember{mutableStateOf(false)}
     val callback by rememberUpdatedState(received)
-    MeshButton(tr(T.radio_phone),enabled=!requested){failed=false;requested=true}
-    if(failed)Secondary(tr(T.timeout),size=10)
+    val cleanup by rememberUpdatedState(clear)
+    DisposableEffect(lifecycle){
+        val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP)cleanup()}
+        lifecycle.addObserver(observer);onDispose{lifecycle.removeObserver(observer);cleanup()}
+    }
+    val permission=androidx.activity.compose.rememberLauncherForActivityResult(androidx.activity.result.contract.ActivityResultContracts.RequestMultiplePermissions()){result->if(result.values.any{it})requested=true else failed=true}
+    MeshButton(tr(label),enabled=!requested){failed=false;if(granted)requested=true else permission.launch(arrayOf(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION))}
+    if(failed)Secondary(tr(T.location_unavailable),size=10)
     if(requested){
         DisposableEffect(Unit){
             val manager=context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
@@ -35,7 +41,8 @@ import kotlinx.coroutines.delay
                 @Deprecated("platform") override fun onStatusChanged(provider:String?,status:Int,extras:Bundle?){}
             }
             try{
-                val provider=if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
+                val fine=ContextCompat.checkSelfPermission(context,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED
+                val provider=if(fine&&manager.isProviderEnabled(LocationManager.GPS_PROVIDER))LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
                 manager.requestSingleUpdate(provider,listener,Looper.getMainLooper())
             }catch(_:Exception){requested=false;failed=true}
             val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP){active=false;manager.removeUpdates(listener);requested=false}}

@@ -35,6 +35,13 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         }
     }
     suspend fun initializeReadTracking() {
+        if(!state.value.hashtagCaseTrackingInitialized)change { next->
+            (next.channelNames.values+next.channelTexts.map{it.channel}).filter{it.startsWith("#")}.distinct().forEach { name->
+                val old="channel:"+name.lowercase(java.util.Locale.ROOT)
+                next.readThrough[old]?.let{next.readThrough.putIfAbsent(Hashtag.id(name),it)}
+            }
+            next.hashtagCaseTrackingInitialized=true
+        }
         if (!state.value.readTrackingInitialized) change { next ->
             next.messages.filter { !it.outgoing }.groupBy { it.peer }.forEach { (peer, messages) ->
                 next.readThrough[peer] = messages.maxOf { it.at }

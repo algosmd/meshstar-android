@@ -216,4 +216,22 @@
     <string name="ms_path_final">конечный SNR</string>
     <string name="ms_path_message_hint">сообщение содержит число хопов и SNR, но не пройденные хэши; текущий исходящий путь может отличаться</string>
     <string name="ms_path_outbound">текущий исходящий путь</string>
+    <string name="ms_map_title">карта</string>
+    <string name="ms_map_filters">фильтры</string>
+    <string name="ms_map_fit">показать все</string>
+    <string name="ms_map_locate">где я</string>
+    <string name="ms_map_companion">компаньон</string>
+    <string name="ms_map_repeater">репитер</string>
+    <string name="ms_map_room">комната</string>
+    <string name="ms_map_sensor">датчик</string>
+    <string name="ms_map_unknown">неизвестный</string>
+    <string name="ms_map_all">любая давность</string>
+    <string name="ms_map_hour">час</string>
+    <string name="ms_map_day">сутки</string>
+    <string name="ms_map_week">неделя</string>
+    <string name="ms_map_stale">серые маркеры: анонс старше суток или неизвестен</string>
+    <string name="ms_map_empty">нет нод с координатами для выбранных фильтров</string>
+    <string name="ms_map_unavailable">тайлы карты недоступны; маркеры нод остаются</string>
+    <string name="ms_map_nodes">ноды на карте</string>
+    <string name="ms_location_unavailable">положение недоступно; проверьте разрешение геолокации и повторите</string>
 </resources>

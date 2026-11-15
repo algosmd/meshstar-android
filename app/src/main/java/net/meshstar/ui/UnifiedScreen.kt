@@ -42,7 +42,7 @@ import java.util.Locale
 @Composable fun UnifiedScreen(model: UiSnapshot, onAction: suspend (UiAction) -> Boolean,
     language: String = "", appearance: String = "system", feedback: String? = null, busy: Boolean = false,
     requestedPeer: String = "", sharedDraft: String = "", incoming: String = "", boxImport: Pair<String,String>? = null,
-    initialPage: String = "chats", initialTab: ChatTab = ChatTab.BLUETOOTH, initialRoutes: Boolean = false, initialNodeKey:String="") {
+    initialPage: String = "chats", initialTab: ChatTab = ChatTab.BLUETOOTH, initialRoutes: Boolean = false, initialNodeKey:String="",mapNetworking:Boolean=true) {
     var page by remember { mutableStateOf(initialPage) }
     var tab by remember { mutableStateOf(initialTab) }
     var selected by remember { mutableStateOf(requestedPeer) }
@@ -144,7 +144,10 @@ import java.util.Locale
                         }
                         if (!model.bleReady) MeshButton(tr(T.bluetooth_setup)) { act(UiAction.BluetoothSetup) }
                     }
-                    if (tab == ChatTab.LORA) MeshButton(if(model.node.companion) model.node.name + " · #" + model.node.slot else nodeStatusText(model.nodeStatus)) { navigate("node") }
+                    if (tab == ChatTab.LORA) Row(verticalAlignment=Alignment.CenterVertically) {
+                        MeshButton(if(model.node.companion) model.node.name + " · #" + model.node.slot else nodeStatusText(model.nodeStatus),Modifier.weight(1f)) { navigate("node") }
+                        MeshIconButton(tr(T.map_title),Icons.Outlined.Map){navigate("map")}
+                    }
                     if (tab == ChatTab.SATELLITE) {
                         Secondary(localizedFailure(context, model.boxStatus), size = 10)
                         if (model.pointOnline) Secondary("🌐 " + tr(T.via_point), size = 10)
@@ -181,6 +184,10 @@ import java.util.Locale
                         }
                     }
                 }
+                "map" -> {
+                    LaunchedEffect(Unit){if(model.node.companion&&model.node.settings==null)onAction(UiAction.NodeSettings)}
+                    NodeMapView(model.node,mapNetworking){contact->nodeKey=contact.key.hex();navigate("nodecard")}
+                }
                 "nodes" -> {
                     CompactField(nodeSearch,{nodeSearch=it},tr(T.search))
                     LazyColumn(Modifier.weight(1f)){
@@ -199,7 +206,7 @@ import java.util.Locale
                     }
                 }
                 "nodecard" -> ScrollPage {
-                    model.node.contacts.firstOrNull{it.key.hex()==nodeKey}?.let { contact->
+                    (model.node.contacts+model.node.advertisements).firstOrNull{it.key.hex()==nodeKey}?.let { contact->
                         Text(contact.name);Secondary(contact.key.hex(),size=10)
                         PathControls(nodeKey,model.pathState,model.node.contacts,model.messages["native:"+nodeKey]?.lastOrNull{it.snr!=null}?.snr,onAction)
                         MeshButton(tr(T.chats)){act(UiAction.OpenNative(nodeKey));open("native:"+nodeKey)}
