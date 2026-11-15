@@ -616,7 +616,7 @@ class ChatViewModel(
         }
         
         // Initialize new geohash architecture
-        geohashViewModel.initialize()
+        if (com.bitchat.android.BuildConfig.ENABLE_NOSTR) geohashViewModel.initialize()
 
         // Initialize favorites persistence service
         com.bitchat.android.favorites.FavoritesPersistenceService.initialize(getApplication())
@@ -937,6 +937,11 @@ class ChatViewModel(
         onAccepted: (Boolean) -> Unit = {}
     ) {
         if (content.isEmpty()) {
+            onAccepted(false)
+            return
+        }
+        if (!net.meshstar.ui.MeshStarCommands.allowed(content)) {
+            messageManager.addSystemMessage(getApplication<Application>().getString(com.bitchat.android.R.string.ms_command_unavailable))
             onAccepted(false)
             return
         }

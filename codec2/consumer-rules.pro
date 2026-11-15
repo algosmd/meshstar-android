@@ -1,0 +1,1 @@
+-keep class net.meshstar.codec2.Codec2 { *; }

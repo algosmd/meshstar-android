@@ -5,6 +5,26 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    https_required(R.string.ms_https_required),
+    voice_record(R.string.ms_voice_record),
+    voice_play(R.string.ms_voice_play),
+    voice_stop(R.string.ms_voice_stop),
+    voice_delete(R.string.ms_voice_delete),
+    voice_compressed(R.string.ms_voice_compressed),
+    voice_hold(R.string.ms_voice_hold),
+    voice_remaining(R.string.ms_voice_remaining),
+    voice_duration(R.string.ms_voice_duration),
+    voice_error(R.string.ms_voice_error),
+    voice_lora_warning(R.string.ms_voice_lora_warning),
+    voice_relay(R.string.ms_voice_relay),
+    voice_unverified(R.string.ms_voice_unverified),
+    voice_preview(R.string.ms_voice_preview),
+    notifications(R.string.ms_notifications),
+    notification_new(R.string.ms_notification_new),
+    notification_settings(R.string.ms_notification_settings),
+    notification_allow(R.string.ms_notification_allow),
+    licenses(R.string.ms_licenses),
+
     miui_hint(R.string.ms_miui_hint),
     app_settings(R.string.ms_app_settings),
     hops_format(R.string.ms_hops_format),

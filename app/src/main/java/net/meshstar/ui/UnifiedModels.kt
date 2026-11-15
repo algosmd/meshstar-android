@@ -10,7 +10,7 @@ data class UiPeer(val id: String, val name: String, val fingerprint: String = ""
                   val paths: Set<ChatTab> = emptySet(), val at: Long = 0, val qr: String = "")
 data class UiMessage(val id: String, val name: String, val text: String, val at: Long, val outgoing: Boolean,
                      val route: Route? = null, val viaPoint: Boolean = false, val delivery: Delivery = Delivery.SENT,
-                     val signature: Boolean? = null, val peer: String = "", val showDelivery: Boolean = route != null, val snr:Double? = null, val hops:Int? = null, val fromBox:Boolean = false)
+                     val signature: Boolean? = null, val peer: String = "", val showDelivery: Boolean = route != null, val snr:Double? = null, val hops:Int? = null, val fromBox:Boolean = false, val voice:ByteArray? = null)
 data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = emptyList(),
     val messages: Map<String, List<UiMessage>> = emptyMap(), val publicMessages: List<UiMessage> = emptyList(),
     val unreadPublic: Int = 0, val myQr: String = "", val myFingerprint: String = "", val myAddress: String = "",
@@ -23,6 +23,8 @@ data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = e
     val relayAvailable:Boolean=false)
 sealed interface UiAction {
     data class Send(val peer: String, val text: String, val path: PathChoice): UiAction
+    data class SendVoice(val peer: String, val codec: ByteArray, val path: PathChoice): UiAction
+    data class VisiblePeer(val peer: String?): UiAction
     data class Read(val peer: String): UiAction
     data class Import(val text: String): UiAction
     data class Verify(val peer: String, val value: Boolean): UiAction

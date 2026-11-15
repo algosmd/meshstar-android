@@ -18,7 +18,7 @@ jobs:
       - uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92
       - uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
         with:
-          packages: platforms;android-37.0 build-tools;37.0.0
+          packages: platforms;android-37.0 build-tools;37.0.0 ndk;28.2.13676358 cmake;3.22.1
       - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065
         with:
           python-version: '3.11'

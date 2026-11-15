@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ms_https_required">Für öffentliche Server HTTPS verwenden. HTTP ist nur für private IP-Adressen oder localhost erlaubt.</string>
     <string name="ms_chats">Chats</string>
     <string name="ms_bluetooth">Bluetooth</string>
     <string name="ms_lora">LoRa</string>
@@ -130,4 +131,23 @@
     <string name="ms_miui_hint">wenn Hintergrundnachrichten unter MIUI ausbleiben, Autostart und Akku „keine Einschränkungen“ für MeshStar prüfen. bei funktionierendem Empfang ist keine Änderung nötig.</string>
     <string name="ms_app_settings">App-Einstellungen</string>
     <string name="ms_hops_format">%1$d Hops</string>
+    <string name="ms_voice_record">Sprachnachricht aufnehmen</string>
+    <string name="ms_voice_play">Sprachnachricht abspielen</string>
+    <string name="ms_voice_stop">Wiedergabe stoppen</string>
+    <string name="ms_voice_delete">Aufnahme löschen</string>
+    <string name="ms_voice_compressed">Sprache für Funk komprimiert</string>
+    <string name="ms_voice_hold">halten · bis zu 32 s</string>
+    <string name="ms_voice_remaining">noch %1$.1f s</string>
+    <string name="ms_voice_duration">🎤 %1$.1f s</string>
+    <string name="ms_voice_error">Aufnahme oder Wiedergabe fehlgeschlagen. Mikrofonberechtigung prüfen.</string>
+    <string name="ms_voice_lora_warning">Lange Nachrichten belegen den gemeinsamen LoRa-Kanal. Kurz halten; die Übertragung kann länger als die Aufnahme dauern.</string>
+    <string name="ms_voice_relay">sprache wird nicht über relais gesendet. LoRa oder Satellite verwenden.</string>
+    <string name="ms_voice_unverified">🎤 Signatur nicht geprüft</string>
+    <string name="ms_voice_preview">Sprachnachricht</string>
+    <string name="ms_notifications">Benachrichtigungen</string>
+    <string name="ms_notification_new">Neue Nachricht</string>
+    <string name="ms_notification_settings">Benachrichtigungen und Ton</string>
+    <string name="ms_notification_allow">Benachrichtigungen erlauben</string>
+    <string name="ms_licenses">Codec2 · Lizenz und Quellcode</string>
+    <string name="ms_command_unavailable">Dieser Befehl ist in MeshStar nicht verfügbar.</string>
 </resources>

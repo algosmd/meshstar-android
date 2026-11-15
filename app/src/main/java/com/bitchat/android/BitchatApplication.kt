@@ -19,7 +19,7 @@ class BitchatApplication : Application() {
         // Initialize Tor first so any early network goes over Tor
         try {
             val torProvider = ArtiTorManager.getInstance()
-            torProvider.init(this)
+            if (BuildConfig.ENABLE_NOSTR) torProvider.init(this)
         } catch (_: Exception){}
 
         // Initialize relay directory (loads assets/nostr_relays.csv)
@@ -71,7 +71,7 @@ class BitchatApplication : Application() {
 
         // Own relay connectivity, selected-channel subscriptions, and presence scheduling at the
         // process level so closing the Activity does not disconnect Nostr.
-        try { com.bitchat.android.nostr.NostrBackgroundRuntime.initialize(this) } catch (_: Exception) { }
+        try { if (BuildConfig.ENABLE_NOSTR) com.bitchat.android.nostr.NostrBackgroundRuntime.initialize(this) } catch (_: Exception) { }
 
         // Initialize mesh service preferences
         try { com.bitchat.android.service.MeshServicePreferences.init(this) } catch (_: Exception) { }

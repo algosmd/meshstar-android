@@ -15,10 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.compose.LocalLifecycleOwner
-import com.google.mlkit.vision.barcode.BarcodeScanning
-import com.google.mlkit.vision.barcode.BarcodeScannerOptions
-import com.google.mlkit.vision.barcode.common.Barcode
-import com.google.mlkit.vision.common.InputImage
 import java.util.concurrent.Executors
 
 @Composable
@@ -46,21 +42,20 @@ private fun CameraScanner(onCode: (String) -> Unit) {
     DisposableEffect(lifecycle) {
         val executor = Executors.newSingleThreadExecutor()
         val future = ProcessCameraProvider.getInstance(context)
-        val scanner = BarcodeScanning.getClient(BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_QR_CODE).build())
+        val mainExecutor = ContextCompat.getMainExecutor(context)
         var provider: ProcessCameraProvider? = null
         var disposed = false
         var detected = false
         val preview = Preview.Builder().build().also { it.setSurfaceProvider { request -> surface = request } }
         val analysis = ImageAnalysis.Builder().setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST).build()
         analysis.setAnalyzer(executor) { frame ->
-            val image = frame.image
-            if (image == null || detected || disposed) frame.close()
-            else scanner.process(InputImage.fromMediaImage(image, frame.imageInfo.rotationDegrees))
-                .addOnSuccessListener { codes ->
-                    codes.firstOrNull()?.rawValue?.takeIf { it.length <= 4096 }?.let { value ->
-                        if (!disposed && !detected) { detected = true; callback(value) }
+            try {
+                if (!detected && !disposed) frame.image?.let { image ->
+                    net.meshstar.qr.OfflineQr.decode(image)?.let { value ->
+                        mainExecutor.execute { if (!disposed && !detected) { detected = true; callback(value) } }
                     }
-                }.addOnCompleteListener { frame.close() }
+                }
+            } finally { frame.close() }
         }
         future.addListener({
             if (!disposed) runCatching {
@@ -68,7 +63,7 @@ private fun CameraScanner(onCode: (String) -> Unit) {
                 provider?.bindToLifecycle(lifecycle, CameraSelector.DEFAULT_BACK_CAMERA, preview, analysis)
             }.onFailure { failure = true }
         }, ContextCompat.getMainExecutor(context))
-        onDispose { disposed = true; analysis.clearAnalyzer(); provider?.unbind(preview, analysis); executor.shutdown(); scanner.close(); surface = null }
+        onDispose { disposed = true; analysis.clearAnalyzer(); provider?.unbind(preview, analysis); executor.shutdown(); surface = null }
     }
     if (failure) Text(tr(T.camera_unavailable))
     surface?.let { CameraXViewfinder(it, Modifier.fillMaxSize(), implementationMode = ImplementationMode.EMBEDDED) }

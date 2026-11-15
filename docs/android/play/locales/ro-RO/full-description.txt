@@ -1,0 +1,21 @@
+MeshStar conectează oamenii din apropiere și dincolo de acoperirea mobilă. O singură listă de contacte reunește Bluetooth, MeshCore LoRa și satelitul, cu o căsuță poștală opțională prin internet.
+
+ALEGE CALEA
+• Bluetooth: chat public și mesaje private cu telefoanele din apropiere.
+• LoRa: conectează un nod companion MeshCore compatibil prin Bluetooth.
+• Satelit: trimite mesaje criptate printr-o cutie MeshStar configurată, cu modem Iridium.
+• Internet: configurează propriul server de mesagerie. Este dezactivat până introduci adresa serverului.
+Alege Auto sau o rută explicită. Releul transmite text printr-un nod apropiat și o cutie; vocea folosește LoRa direct, satelitul sau internetul.
+
+TEXT ȘI VOCE
+Înregistrează note vocale de până la aproximativ 32 de secunde. Codec2 comprimă vocea pentru radio, deci sunetul diferă de o înregistrare obișnuită. Livrarea poate dura, mai ales prin LoRa și satelit. Confirmarea verde într-un chat RNS criptat înseamnă o confirmare semnată cu cheia destinatarului; acceptarea de către server nu înseamnă livrare.
+
+CHEILE RĂMÂN LA TINE
+Nu ai nevoie de cont, număr de telefon sau e-mail. Adaugă contacte prin QR sau link și compară cheile înainte de a le marca drept verificate. Mesajele private RNS și notele vocale sunt criptate end-to-end. Mesajele publice Bluetooth și canalele text obișnuite MeshCore sunt vizibile participanților și nu au protecția unui chat privat.
+
+DE CE AI NEVOIE
+Bluetooth necesită o aplicație compatibilă în apropiere. LoRa necesită propriul nod companion MeshCore. Satelitul necesită o cutie compatibilă și un serviciu activ; echipamentul și serviciul se plătesc separat. Internetul necesită un server compatibil. Raza, timpul de livrare și recepția în fundal depind de echipament, conexiune și setările de baterie Android. MeshStar nu este un serviciu garantat de comunicații de urgență.
+
+Limbi: engleză, rusă, română, germană și franceză.
+Confidențialitate: https://meshstar.net/privacy
+Asistență: https://meshstar.net/support

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ms_https_required">Для публичных серверов используйте HTTPS. HTTP разрешён только для частного IP-адреса или localhost.</string>
     <string name="ms_chats">чаты</string>
     <string name="ms_bluetooth">Bluetooth</string>
     <string name="ms_lora">LoRa</string>
@@ -130,4 +131,23 @@
     <string name="ms_miui_hint">если сообщения в фоне перестанут приходить на MIUI, проверьте автозапуск и батарею «без ограничений» для MeshStar. если приём работает, менять настройки не требуется.</string>
     <string name="ms_app_settings">настройки приложения</string>
     <string name="ms_hops_format">%1$d переходов</string>
+    <string name="ms_voice_record">Записать голосовое</string>
+    <string name="ms_voice_play">Воспроизвести</string>
+    <string name="ms_voice_stop">Остановить</string>
+    <string name="ms_voice_delete">Удалить запись</string>
+    <string name="ms_voice_compressed">Голос сжат для радио</string>
+    <string name="ms_voice_hold">удерживай · до 32 с</string>
+    <string name="ms_voice_remaining">осталось %1$.1f с</string>
+    <string name="ms_voice_duration">🎤 %1$.1f с</string>
+    <string name="ms_voice_error">Не удалось записать или воспроизвести. Проверьте доступ к микрофону.</string>
+    <string name="ms_voice_lora_warning">Длинные записи занимают общий канал LoRa; говорите коротко. Доставка может занять больше времени, чем запись.</string>
+    <string name="ms_voice_relay">голос не проходит через релей. используйте LoRa или Satellite.</string>
+    <string name="ms_voice_unverified">🎤 подпись не проверена</string>
+    <string name="ms_voice_preview">Голосовое сообщение</string>
+    <string name="ms_notifications">Уведомления</string>
+    <string name="ms_notification_new">Новое сообщение</string>
+    <string name="ms_notification_settings">Настройки уведомлений и звука</string>
+    <string name="ms_notification_allow">Разрешить уведомления</string>
+    <string name="ms_licenses">Codec2 · лицензия и исходники</string>
+    <string name="ms_command_unavailable">Эта команда недоступна в MeshStar.</string>
 </resources>

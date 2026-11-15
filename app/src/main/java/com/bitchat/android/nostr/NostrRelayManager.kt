@@ -185,6 +185,7 @@ class NostrRelayManager private constructor() {
      * picker's worldwide activity sweep. Pair with [releaseRelays].
      */
     fun connectToRelays(relayUrls: Collection<String>) {
+        if (!com.bitchat.android.BuildConfig.ENABLE_NOSTR) return
         val urls = relayUrls.filter { it.isNotBlank() }.toSet()
         if (urls.isEmpty()) return
         // A relay held only for a live-location channel keeps its live gating.
@@ -437,6 +438,7 @@ class NostrRelayManager private constructor() {
      * Connect to all configured relays
      */
     fun connect() {
+        if (!com.bitchat.android.BuildConfig.ENABLE_NOSTR) return
         desiredConnected.set(true)
         Log.i(TAG, "Connecting to ${relaysList.size} Nostr relays")
         scope.launch {
@@ -888,6 +890,7 @@ class NostrRelayManager private constructor() {
         urlString: String,
         liveLocationToken: Long? = null
     ) {
+        if (!com.bitchat.android.BuildConfig.ENABLE_NOSTR) return
         if (!desiredConnected.get()) return
         val connectionToken = liveLocationToken
             ?.takeIf { urlString !in nonLiveRelayUrls }

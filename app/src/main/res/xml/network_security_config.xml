@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+    <!-- Android domain-config cannot express CIDR ranges or dynamic user hosts.
+         CarrierHttp enforces the literal private/loopback allowlist before any
+         request and disables redirects/proxies. This opt-in enables those LAN
+         HTTP endpoints; it does NOT itself restrict cleartext to private CIDRs. -->
+    <base-config cleartextTrafficPermitted="true">
+        <trust-anchors>
+            <certificates src="system" />
+        </trust-anchors>
+    </base-config>
+</network-security-config>

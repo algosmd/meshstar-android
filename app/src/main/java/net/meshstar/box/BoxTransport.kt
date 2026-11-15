@@ -49,6 +49,12 @@ class BoxTransport(val config: BoxConfig, private val http: CarrierHttp = Carrie
         require(root["hash"].asString == packet.hash.hex() && root["dest"].asString == packet.destination.hex()) { "Invalid box receipt" }
         return root["id"].asLong.also { require(it > 0) }
     }
+    suspend fun sendVoice(raw: ByteArray): Long {
+        require(raw.size in 133..1400 && raw.copyOfRange(0, 5).contentEquals(VoiceFrame.magic))
+        val root = JsonParser.parseString(http.request(config.url, "api/rns/voice", config.token, raw, false)).asJsonObject
+        require(root["bytes"].asInt == raw.size && root["dest"].asString == raw.copyOfRange(5, 21).hex())
+        return root["id"].asLong.also { require(it > 0) }
+    }
     suspend fun sent(since: Long): List<SentRow> = JsonParser.parseString(http.request(config.url, "api/rns/sent", config.token,
         query = mapOf("since" to since.toString(), "limit" to "500"))).asJsonArray.map {
         val row = it.asJsonObject

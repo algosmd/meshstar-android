@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1024" height="500" viewBox="0 0 1024 500">
+ <rect width="1024" height="500" fill="#071b25"/>
+ <path d="M50 56H974V444H50Z" fill="none" stroke="#173d46" stroke-width="2"/>
+ <g transform="translate(65 125) scale(.48)">
+  <path d="M120 372V162L256 298L392 162V372" stroke="#62eec6" stroke-width="32" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+  <circle cx="256" cy="106" r="18" fill="white"/>
+ </g>
+ <g font-family="monospace" font-weight="normal">
+  <text x="350" y="204" font-size="73" fill="#62eec6">MeshStar</text>
+  <text x="354" y="260" font-size="25" fill="#ffffff">Private text &amp; voice</text>
+  <text x="354" y="312" font-size="19" fill="#bdd4d9">Bluetooth · LoRa · Satellite</text>
+  <text x="354" y="348" font-size="19" fill="#bdd4d9">Optional Internet mailbox</text>
+ </g>
+</svg>

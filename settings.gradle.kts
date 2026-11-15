@@ -21,3 +21,5 @@ include(":app")
 include(":rnslite")
 
 include(":meshcore")
+
+include(":codec2")

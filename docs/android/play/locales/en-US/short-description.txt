@@ -1,0 +1,1 @@
+Private chats over Bluetooth, LoRa, satellite and your internet server.

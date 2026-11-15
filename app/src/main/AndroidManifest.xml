@@ -40,8 +40,6 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <!-- Connected device foreground service type for BLE operations (API 34+) -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE" />
-    <!-- Data sync foreground service type (required when declaring dataSync) -->
-    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <!-- Location foreground service type required for BLE scanning in background -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -51,11 +49,7 @@
     <!-- Camera for QR verification -->
     <uses-permission android:name="android.permission.CAMERA" />
 
-    <!-- Storage permissions for file sharing -->
-    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="28" />
-    <uses-permission android:name="android.permission.READ_MEDIA_IMAGES" />
-    <uses-permission android:name="android.permission.READ_MEDIA_VIDEO" />
-    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- Attachments use system document/content pickers with per-URI grants. -->
 
     <!-- Haptic feedback permission -->
     <uses-permission android:name="android.permission.VIBRATE" />
@@ -77,7 +71,7 @@
     <application
         android:name=".BitchatApplication"
         android:allowBackup="false"
-        android:usesCleartextTraffic="true"
+        android:networkSecurityConfig="@xml/network_security_config"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
@@ -160,7 +154,7 @@
         <service
             android:name=".service.MeshForegroundService"
             android:exported="false"
-            android:foregroundServiceType="connectedDevice|dataSync|location"
+            android:foregroundServiceType="connectedDevice|location"
             tools:ignore="DataExtractionRules">
         </service>
 
@@ -188,11 +182,9 @@
             android:theme="@style/Theme.BitchatAndroid"
             android:launchMode="singleTop" />
 
-        <!-- Declare the foreground service type for WorkManager's foreground
-             service so the APK download worker can run as dataSync work -->
+        <!-- APK downloads are disabled in MeshStar; no WorkManager FGS is used. -->
         <service
             android:name="androidx.work.impl.foreground.SystemForegroundService"
-            android:foregroundServiceType="dataSync"
-            tools:node="merge" />
+            tools:node="remove" />
     </application>
 </manifest>

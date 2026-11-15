@@ -1,0 +1,1 @@
+Notes vocales par LoRa, satellite et internet ; notifications ; réception en arrière-plan ; lecteur QR sans service réseau.

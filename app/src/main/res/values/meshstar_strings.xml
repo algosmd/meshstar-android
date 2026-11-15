@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <string name="ms_https_required">Use HTTPS for public servers. HTTP is allowed only for a private IP address or localhost.</string>
     <string name="ms_chats">chats</string>
     <string name="ms_bluetooth">Bluetooth</string>
     <string name="ms_lora">LoRa</string>
@@ -130,4 +131,23 @@
     <string name="ms_miui_hint">if background messages stop on MIUI, check autostart and battery “no restrictions” for MeshStar. these settings are optional when reception already works.</string>
     <string name="ms_app_settings">app settings</string>
     <string name="ms_hops_format">%1$d hops</string>
+    <string name="ms_voice_record">Record voice note</string>
+    <string name="ms_voice_play">Play voice note</string>
+    <string name="ms_voice_stop">Stop playback</string>
+    <string name="ms_voice_delete">Delete recording</string>
+    <string name="ms_voice_compressed">Voice compressed for radio</string>
+    <string name="ms_voice_hold">hold · up to 32 s</string>
+    <string name="ms_voice_remaining">%1$.1f s remaining</string>
+    <string name="ms_voice_duration">🎤 %1$.1f s</string>
+    <string name="ms_voice_error">Could not record or play audio. Check microphone permission.</string>
+    <string name="ms_voice_lora_warning">Long notes occupy the shared LoRa channel; keep them short. Delivery can take longer than recording.</string>
+    <string name="ms_voice_relay">voice does not go through a relay. use LoRa or Satellite.</string>
+    <string name="ms_voice_unverified">🎤 signature not verified</string>
+    <string name="ms_voice_preview">Voice note</string>
+    <string name="ms_notifications">Notifications</string>
+    <string name="ms_notification_new">New message</string>
+    <string name="ms_notification_settings">Notification and sound settings</string>
+    <string name="ms_notification_allow">Allow notifications</string>
+    <string name="ms_licenses">Codec2 · license and source</string>
+    <string name="ms_command_unavailable">This command is not available in MeshStar.</string>
 </resources>

@@ -1,0 +1,21 @@
+MeshStar connects people nearby and beyond cellular coverage. One contact list brings together Bluetooth, MeshCore LoRa and satellite conversations, with an optional internet mailbox.
+
+CHOOSE YOUR PATH
+• Bluetooth: public chat and private messages with nearby phones.
+• LoRa: connect a compatible MeshCore companion radio over Bluetooth.
+• Satellite: send encrypted messages through a configured MeshStar box with an Iridium modem.
+• Internet: use a mailbox server you configure yourself. Disabled until you enter a server address.
+Choose Auto or a specific route. Relay carries text through a nearby radio and box; voice uses direct LoRa, Satellite or Internet.
+
+TEXT AND VOICE
+Record a voice note up to about 32 seconds. Codec2 compresses speech for radio: it sounds different from a normal voice recording. Delivery can take time, especially over LoRa and satellite. A green confirmation in an encrypted RNS chat means the recipient's key signed a receipt; submission to a server alone is not delivery.
+
+KEYS STAY WITH YOU
+No account, phone number or email is required. Add contacts with a QR code or pasted link and compare keys with your contact before marking them verified. Private RNS messages and voice notes are end-to-end encrypted. Public Bluetooth messages and ordinary MeshCore text channels are visible to their participants and do not provide private-chat protection.
+
+WHAT YOU NEED
+Bluetooth needs another compatible app nearby. LoRa needs your own MeshCore companion node. Satellite needs access to a compatible box and an active satellite service; hardware and service charges are separate. Internet delivery needs a compatible mailbox server. Range, delivery time and background reception depend on equipment, connectivity and Android battery settings. MeshStar is not a guaranteed emergency communication service.
+
+Languages: English, Russian, Romanian, German and French.
+Privacy: https://meshstar.net/privacy
+Support: https://meshstar.net/support

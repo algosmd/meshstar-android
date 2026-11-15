@@ -36,7 +36,10 @@ android {
         applicationId = "net.meshstar.app"
         minSdk = libs.versions.minSdk.get().toInt()
         targetSdk = libs.versions.targetSdk.get().toInt()
-        versionCode = 5
+        // Retain upstream protocol sources without enabling hidden relay services.
+        buildConfigField("boolean", "ENABLE_NOSTR", "false")
+        buildConfigField("boolean", "ENABLE_APK_DOWNLOAD", "false")
+        versionCode = 8
         versionName = "0.3.0"
         buildConfigField(
             "String",
@@ -47,7 +50,7 @@ android {
         testInstrumentationRunner = if (composerUiTests) {
             "com.bitchat.android.ui.ComposerPanicTestRunner"
         } else if (releaseUiTests) {
-            "com.bitchat.android.ui.ReleaseScannerTestRunner"
+            "net.meshstar.A6ReleaseTestRunner"
         } else {
             "com.bitchat.android.ui.PerformanceTestRunner"
         }
@@ -55,6 +58,7 @@ android {
             useSupportLibrary = true
         }
     }
+
 
     dependenciesInfo {
         // Disables dependency metadata when building APKs.
@@ -67,6 +71,16 @@ android {
         sourceSets.getByName("androidTest").kotlin.directories.add("src/composerAndroidTest/java")
     }
 
+    val signingKeys = listOf("MESHSTAR_UPLOAD_STORE_FILE", "MESHSTAR_UPLOAD_STORE_PASSWORD", "MESHSTAR_UPLOAD_KEY_ALIAS", "MESHSTAR_UPLOAD_KEY_PASSWORD")
+    val uploadConfigured = signingKeys.all { providers.gradleProperty(it).isPresent }
+    signingConfigs {
+        if (uploadConfigured) create("meshstarUpload") {
+            storeFile = file(providers.gradleProperty(signingKeys[0]).get())
+            storePassword = providers.gradleProperty(signingKeys[1]).get()
+            keyAlias = providers.gradleProperty(signingKeys[2]).get()
+            keyPassword = providers.gradleProperty(signingKeys[3]).get()
+        }
+    }
     buildTypes {
         debug {
             if (composerUiTests) applicationIdSuffix = ".composerTest"
@@ -76,6 +90,7 @@ android {
             }
         }
         release {
+            if (uploadConfigured) signingConfig = signingConfigs.getByName("meshstarUpload")
             if (releaseUiTests) {
                 signingConfig = signingConfigs.getByName("debug")
                 proguardFiles("release-instrumentation.pro")
@@ -149,6 +164,7 @@ kotlin {
 dependencies {
     implementation(project(":rnslite"))
     implementation(project(":meshcore"))
+    implementation(project(":codec2"))
     // Core Android dependencies
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.activity.compose)
@@ -170,7 +186,6 @@ dependencies {
 
     // QR
     implementation(libs.zxing.core)
-    implementation(libs.mlkit.barcode.scanning)
 
     // CameraX
     implementation(libs.androidx.camera.camera2)
@@ -231,4 +246,11 @@ tasks.withType<org.gradle.api.tasks.testing.Test>().configureEach {
         "robolectric.dependency.repo.url",
         "https://repo.maven.apache.org/maven2"
     )
+}
+
+// Explicit release packaging fails closed when private upload properties are absent.
+tasks.configureEach {
+    if (name in setOf("bundleRelease", "assembleRelease") && !releaseUiTests) doFirst {
+        check(listOf("MESHSTAR_UPLOAD_STORE_FILE", "MESHSTAR_UPLOAD_STORE_PASSWORD", "MESHSTAR_UPLOAD_KEY_ALIAS", "MESHSTAR_UPLOAD_KEY_PASSWORD").all { providers.gradleProperty(it).isPresent }) { "Configure local MeshStar upload signing properties" }
+    }
 }

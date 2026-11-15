@@ -84,7 +84,7 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
     }
     suspend fun send(raw:ByteArray)=sends.withLock{
         if(!state.value.ready)throw NodeError(NodeError.Code.OFFLINE)
-        valid(raw.size in 1..500)
+        valid(raw.size in 1..if(raw.take(5).toByteArray().contentEquals(VoiceFrame.magic))1400 else 500)
         for(f in MeshCoreFrag.split(raw,rng.nextInt(65536)))transmit(Protocol.sendData(f,state.value.slot),setOf(0))
     }
     suspend fun sendChannel(text:String,index:Int,timestamp:Long)=sends.withLock{

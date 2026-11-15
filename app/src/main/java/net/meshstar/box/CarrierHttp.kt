@@ -18,10 +18,23 @@ class HttpFailure(val code: Int, val powBits: Int? = null, val retrySeconds: Lon
 class CarrierHttp(private val client: OkHttpClient = OkHttpClient.Builder()
     .followRedirects(false).followSslRedirects(false).retryOnConnectionFailure(false)
     .connectTimeout(15, TimeUnit.SECONDS).readTimeout(40, TimeUnit.SECONDS).callTimeout(45, TimeUnit.SECONDS).build()) {
+    private val guardedClient = client.newBuilder()
+        .followRedirects(false).followSslRedirects(false)
+        .proxy(java.net.Proxy.NO_PROXY)
+        .dns { host ->
+            if (host == "localhost") listOf(java.net.InetAddress.getByAddress(byteArrayOf(127, 0, 0, 1)))
+            else client.dns.lookup(host)
+        }
+        .addInterceptor { chain ->
+            CarrierNetworkPolicy.requireAllowed(chain.request().url)
+            chain.proceed(chain.request())
+        }
+        .build()
     companion object {
         fun endpoint(value: String): HttpUrl {
             val url = value.trim().toHttpUrlOrNull() ?: error("Invalid URL")
             require(url.username.isEmpty() && url.password.isEmpty() && url.query == null && url.fragment == null) { "Use a URL without credentials or query" }
+            CarrierNetworkPolicy.requireAllowed(url)
             return url
         }
     }
@@ -33,7 +46,7 @@ class CarrierHttp(private val client: OkHttpClient = OkHttpClient.Builder()
         credential?.let { req.header("X-Box-Token", it) }
         body?.let { req.post(it.toRequestBody((if (json) "application/json" else "application/octet-stream").toMediaType())) }
         return suspendCancellableCoroutine { continuation ->
-            val call = client.newCall(req.build())
+            val call = guardedClient.newCall(req.build())
             continuation.invokeOnCancellation { call.cancel() }
             call.enqueue(object : Callback {
                 override fun onFailure(call: Call, e: IOException) { if (!continuation.isCancelled) continuation.resumeWithException(e) }

@@ -84,7 +84,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     val rns = state.contacts.map { c ->
         val history = histories[c.address].orEmpty()
         UiPeer("rns:${c.address}", c.name, contactFingerprints.getValue(c.address), rns = c.address,
-            verified = state.verifiedKeys[c.address] == c.key, preview = history.lastOrNull()?.text.orEmpty(),
+            verified = state.verifiedKeys[c.address] == c.key, preview = history.lastOrNull()?.let { if(it.voice!=null)context.getString(T.voice_preview.resource)else it.text }.orEmpty(),
             unread = history.count { !it.outgoing && it.at > (state.readThrough[c.address] ?: 0) },
             paths = setOf(ChatTab.SATELLITE) + if(node.ready) setOf(ChatTab.LORA) else emptySet(), at = history.lastOrNull()?.at ?: 0, qr = c.qr)
     } + state.messages.map { it.peer }.distinct().filter { p -> state.contacts.none { it.address == p } }.map { p ->
@@ -117,8 +117,8 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         }, peer = peers.firstOrNull { it.ble == m.senderPeerID }?.id ?: "ble:${m.senderPeerID ?: m.sender}", showDelivery = m.isPrivate && m.deliveryStatus != null)
     val timelines = peers.associate { peer -> peer.id to (
         histories[peer.rns].orEmpty().map { m -> UiMessage(m.hash, if (m.outgoing) nickname else peer.name,
-            m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
-            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops) } +
+            if(m.voice!=null && !m.verified) context.getString(T.voice_unverified.resource) else m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
+            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops, voice=m.voice?.codec?.takeIf{it.isNotEmpty()}?.unhex()) } +
             peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty() +
             (if(peer.id.startsWith("channel:")||peer.id.startsWith("native:"))state.channelTexts.filter { ("channel:"+it.channel.lowercase()==peer.id)||("native:"+it.channel.removePrefix("direct:")==peer.id) }.map {
                 UiMessage(it.id,if(it.outgoing)node.name else peer.name,it.text,it.receivedAt,it.outgoing,Route.LORA,showDelivery=false,snr=it.snr,hops=it.hops,fromBox=it.fromBox)
@@ -142,6 +142,15 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         feedback = null
         try {
             when (event) {
+                is UiAction.VisiblePeer -> runtime.visiblePeer = event.peer
+                is UiAction.SendVoice -> {
+                    if(event.path==PathChoice.RELAY) {feedback=context.getString(T.voice_relay.resource);return false}
+                    val peer=peers.firstOrNull { it.id==event.peer }
+                    val choice=resolvePath(event.path,false,currentState.internet.isNotEmpty(),currentState.box!=null,node.ready,false)
+                    if(choice==null){feedback=context.getString(T.route_unavailable.resource);return false}
+                    busy=true
+                    withContext(Dispatchers.IO){engine.sendVoice(peer?.rns?:error("Add RNS contact"),event.codec,when(choice){"lora"->Route.LORA;"internet"->Route.INTERNET;else->Route.SATELLITE})}
+                }
                 is UiAction.Send -> {
                     if(event.peer.startsWith("native:")) {
                         val key=event.peer.removePrefix("native:")
@@ -227,6 +236,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
+        status == "HTTPS required for public servers" -> T.https_required
         status == "Node:SECRET" -> T.node_secret_help
         status == "Node:OCCUPIED" -> T.node_occupied
         status == "Node:MTU" -> T.node_mtu

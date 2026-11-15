@@ -54,6 +54,8 @@ class ApkDownloadWorker(
     private var currentPhase = ApkDownloader.DownloadPhase.SelectingSource
 
     override suspend fun doWork(): Result {
+        // Also reject persisted work scheduled by an earlier build.
+        if (!com.bitchat.android.BuildConfig.ENABLE_APK_DOWNLOAD) return Result.failure()
         Log.d(TAG, "Starting APK download work")
 
         // Promote to foreground so long transfers aren't stopped by the

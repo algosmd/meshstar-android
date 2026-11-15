@@ -15,7 +15,7 @@ import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 
-/** Calls the same analyzer constructor as ScannerView, with minified ML Kit dependencies. */
+/** Calls the same analyzer constructor as ScannerView, with the offline decoder after minification. */
 class BarcodeScannerInstrumentedTest {
     @Test
     fun scannerCreationCompletesAfterColdStart() {

@@ -27,6 +27,7 @@ class WorkManagerApkDownloader(context: Context) : ApkDownloader {
             .map { workInfos -> mapWorkInfoToState(workInfos.firstOrNull()) }
 
     override fun startDownload() {
+        if (!com.bitchat.android.BuildConfig.ENABLE_APK_DOWNLOAD) return
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

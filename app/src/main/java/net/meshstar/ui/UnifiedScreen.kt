@@ -68,6 +68,7 @@ import java.util.Locale
     val keyboardController=LocalSoftwareKeyboardController.current
     val keyboardVisible=WindowInsets.ime.getBottom(LocalDensity.current)>0
     val scope = rememberCoroutineScope()
+    val voiceAudio = rememberVoiceAudio()
     val uiPrefs=remember { context.getSharedPreferences("meshstar.ui",Context.MODE_PRIVATE) }
     var showPowerHint by remember { mutableStateOf(!uiPrefs.getBoolean("miuiHintSeen",false)) }
     val miuiDevice=android.os.Build.MANUFACTURER.equals("Xiaomi",true)
@@ -85,6 +86,7 @@ import java.util.Locale
     LaunchedEffect(incoming) { if (incoming.isNotEmpty()) { qrText = incoming; page = "scan" } }
     LaunchedEffect(boxImport) { boxImport?.let { boxUrl = it.first; token = it.second; page = "box" } }
     LaunchedEffect(page, selected, timeline.lastOrNull()?.id) { if (page == "chat") onAction(UiAction.Read(selected)) }
+    LaunchedEffect(page, selected) { voiceAudio.cancel(); onAction(UiAction.VisiblePeer(if(page=="chat")selected else null)) }
     BackHandler(page != "chats" || plus || routes) { if (plus) plus = false else if (routes) routes = false else page = "chats" }
     Surface(Modifier.fillMaxSize().testTag("meshstar.unified").safeDrawingPadding().imePadding(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
@@ -201,7 +203,13 @@ import java.util.Locale
                     if ((path == PathChoice.LORA || path == PathChoice.RELAY) && !model.node.ready) Secondary(tr(T.radio_unavailable), size = 10)
                     val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { "channel:"+it.name.lowercase()==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
                         resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) != null
-                    Composer(input, { input = it }, enabled) {
+                    val voiceRoute = resolvePath(path, false, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(), model.node.ready, false)
+                    val voiceEnabled = !busy && peer?.rns != null && voiceRoute != null && path != PathChoice.RELAY
+                    if (peer?.rns != null) {
+                        if(path==PathChoice.RELAY) Secondary(tr(T.voice_relay),size=10)
+                        VoicePreview(voiceAudio,voiceRoute=="lora",voiceEnabled) { onAction(UiAction.SendVoice(selected,it,path)) }
+                    }
+                    Composer(input, { input = it }, enabled, voiceAudio.takeIf { peer?.rns != null }, voiceEnabled) {
                         val draft = input
                         scope.launch { if (onAction(UiAction.Send(selected, draft, path)) && input == draft) input = "" }
                     }
@@ -319,6 +327,8 @@ import java.util.Locale
                     }
                     MeshCard { MeshButton(tr(T.bluetooth_setup)) { act(UiAction.BluetoothSetup) }; Secondary(tr(T.background_hint), size = 10) }
                     if(miuiDevice)MeshCard { Secondary(tr(T.miui_hint),size=10);MeshButton(tr(T.app_settings)){appSettings()} }
+                    NotificationControls()
+                    CodecLicenseControls()
                     Secondary(tr(T.version) + " " + com.bitchat.android.BuildConfig.VERSION_NAME + " (" + com.bitchat.android.BuildConfig.VERSION_CODE + ")", size = 10)
                 }
             }
@@ -364,6 +374,7 @@ import java.util.Locale
             withStyle(SpanStyle(color = color, fontSize = 14.sp)) { append("<${message.name}> ${message.text}") }
             withStyle(SpanStyle(color = Color.Gray.copy(alpha = .7f), fontSize = 10.sp)) { append(" [${time(message.at)}]") }
         })
+        message.voice?.let { VoicePlayback(it) }
         if (message.route != null) {
             Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
@@ -382,9 +393,10 @@ import java.util.Locale
 }
 private fun time(at: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(at))
 
-@Composable private fun Composer(value: String, change: (String) -> Unit, enabled: Boolean, send: () -> Unit) {
+@Composable private fun Composer(value: String, change: (String) -> Unit, enabled: Boolean, audio: net.meshstar.voice.VoiceAudio? = null, voiceEnabled: Boolean = false, send: () -> Unit) {
     Row(Modifier.fillMaxWidth().padding(bottom = 8.dp), verticalAlignment = Alignment.Bottom) {
         CompactField(value, change, tr(T.message), Modifier.weight(1f), singleLine = false, tag = "meshstar.message")
+        if(audio!=null) VoiceRecordButton(audio,voiceEnabled)
         MeshIconButton(tr(T.send), Icons.Outlined.ArrowUpward, composer = true, enabled = enabled, onClick = send)
     }
 }

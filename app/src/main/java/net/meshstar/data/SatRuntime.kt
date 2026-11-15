@@ -23,6 +23,8 @@ class SatRuntime private constructor(private val context: Context) {
     private val engineValue = MutableStateFlow<SatEngine?>(null)
     val engine = engineValue.asStateFlow()
     val node=MutableStateFlow<NodeRuntime?>(null)
+    @Volatile var visiblePeer: String? = null
+    private val notifications = net.meshstar.notifications.IncomingNotifications(context.applicationContext)
     val startupError = MutableStateFlow<String?>(null)
     val boxStatus = MutableStateFlow("Box not configured")
     val mailStatus = MutableStateFlow("Internet server disabled")
@@ -44,7 +46,8 @@ class SatRuntime private constructor(private val context: Context) {
             previous?.join() // Finish the old node teardown before starting a new owner.
             val engine = try { initialized.await() } catch (_: Exception) { return@launch }
             withContext(Dispatchers.Main.immediate){ if(node.value==null)node.value=NodeRuntime(context.applicationContext,engine);node.value?.start() }
-            try { engine.state.map { it.box to it.internet }.distinctUntilChanged().collectLatest {
+            val alerts = launch(Dispatchers.Main.immediate) { engine.state.collect { notifications.update(it,visiblePeer) } }
+            try { engine.recoverVoice(); engine.state.map { it.box to it.internet }.distinctUntilChanged().collectLatest {
               supervisorScope {
                 launch { loop(boxStatus, 5_000) {
                     if (engine.state.value.box == null) { boxStatus.value = "Box not configured"; return@loop }
@@ -58,7 +61,7 @@ class SatRuntime private constructor(private val context: Context) {
                     engine.pollMailbox(25); mailStatus.value = "Internet server available"
                 } }
               }
-            } } finally { withContext(NonCancellable+Dispatchers.Main.immediate){node.value?.stop()} }
+            } } finally { alerts.cancel(); withContext(NonCancellable+Dispatchers.Main.immediate){node.value?.stop()} }
         }
     }
     @Synchronized fun detach(owner: Any) {
@@ -87,7 +90,7 @@ class SatRuntime private constructor(private val context: Context) {
             if (runtime != null) {
                 synchronized(runtime) { runtime.erased = true; runtime.owners.clear() }
                 runtime.work?.cancelAndJoin()
-                withContext(Dispatchers.Main.immediate){runtime.node.value?.erase();runtime.node.value=null}
+                withContext(Dispatchers.Main.immediate){runtime.node.value?.erase();runtime.node.value=null;runtime.notifications.clear()}
                 runtime.initialized.cancelAndJoin()
                 runtime.engineValue.value?.closeForReset()
                 runtime.engineValue.value = null
@@ -99,6 +102,7 @@ class SatRuntime private constructor(private val context: Context) {
 }
 
 fun safeFailure(error: Throwable): String = when (error) {
+    is net.meshstar.box.CleartextEndpointRejected -> "HTTPS required for public servers"
     is net.meshstar.meshcore.NodeError -> "Node:"+error.code.name
     is HttpFailure -> when (error.code) {
         401 -> "HTTP 401: check the box token"

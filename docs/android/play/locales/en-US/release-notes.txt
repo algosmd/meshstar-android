@@ -1,0 +1,1 @@
+Voice notes over LoRa, satellite and Internet; incoming-message notifications; background mailbox reception; offline QR scanning.

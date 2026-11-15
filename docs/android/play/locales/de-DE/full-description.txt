@@ -1,0 +1,21 @@
+MeshStar verbindet Menschen in der Nähe und außerhalb des Mobilfunknetzes. Eine Kontaktliste vereint Bluetooth, MeshCore LoRa und Satellit sowie ein optionales Internetpostfach.
+
+WÄHLE DEN WEG
+• Bluetooth: öffentlicher Chat und private Nachrichten mit Geräten in der Nähe.
+• LoRa: verbinde einen kompatiblen MeshCore-Companion-Knoten über Bluetooth.
+• Satellit: verschlüsselte Nachrichten über eine konfigurierte MeshStar-Box mit Iridium-Modem.
+• Internet: trage einen eigenen Postfachserver ein. Ohne Serveradresse bleibt diese Funktion ausgeschaltet.
+Wähle Auto oder einen bestimmten Weg. Relais überträgt Text über einen nahen Funkknoten und eine Box; Sprache nutzt direktes LoRa, Satellit oder Internet.
+
+TEXT UND SPRACHE
+Nimm Sprachnachrichten von bis zu etwa 32 Sekunden auf. Codec2 komprimiert Sprache für Funk; der Klang unterscheidet sich von einer normalen Aufnahme. Die Zustellung kann dauern, besonders über LoRa und Satellit. Eine grüne Bestätigung im verschlüsselten RNS-Chat bedeutet eine mit dem Empfängerschlüssel signierte Quittung. Die Annahme durch einen Server allein bestätigt keine Zustellung.
+
+DEINE SCHLÜSSEL BLEIBEN BEI DIR
+Kein Konto, keine Telefonnummer und keine E-Mail erforderlich. Füge Kontakte per QR-Code oder Link hinzu und vergleiche ihre Schlüssel, bevor du sie als verifiziert markierst. Private RNS-Nachrichten und Sprachnotizen sind Ende-zu-Ende verschlüsselt. Öffentliche Bluetooth-Nachrichten und normale MeshCore-Textkanäle sind für ihre Teilnehmer sichtbar und bieten nicht den Schutz eines privaten Chats.
+
+VORAUSSETZUNGEN
+Bluetooth benötigt eine kompatible App in der Nähe. LoRa benötigt einen eigenen MeshCore-Companion-Knoten. Satellit benötigt eine kompatible Box und einen aktiven Satellitendienst; Hardware und Dienst werden separat bezahlt. Internet benötigt einen kompatiblen Postfachserver. Reichweite, Zustellzeit und Hintergrundempfang hängen von Hardware, Verbindung und Android-Akkueinstellungen ab. MeshStar ist kein garantierter Notfalldienst.
+
+Sprachen: Englisch, Russisch, Rumänisch, Deutsch und Französisch.
+Datenschutz: https://meshstar.net/privacy
+Hilfe: https://meshstar.net/support

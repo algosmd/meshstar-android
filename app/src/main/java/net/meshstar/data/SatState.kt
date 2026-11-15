@@ -15,7 +15,13 @@ data class ChatMessage(
     var viaPoint: Boolean = false,
     val relayTransportId: String? = null,
     var radioSnr: Double? = null, var radioHops: Int? = null,
+    val voice: VoiceNote? = null,
 )
+data class VoiceNote(val frames: List<String>, val codec: String, val noProof: Boolean = false,
+    var submittedParts: Int = 0) {
+    val seconds: Double get() = codec.length / 2 / 150.0
+}
+data class VoiceParts(val started: Long, val frames: List<String>)
 data class PendingProof(val raw: String, val peer: String, val route: Route, val carrier: String)
 data class BoxCursor(var inbox: Long = 0, var sent: Long = 0)
 data class ChannelText(val id: String, val channel: String, val text: String, val timestamp: Long,
@@ -29,6 +35,7 @@ data class SatState(
     val mailCursors: MutableMap<String, Long> = mutableMapOf(),
     val seen: MutableList<String> = mutableListOf(),
     val pendingVoice: MutableMap<String, String> = mutableMapOf(),
+    val voiceParts: MutableMap<String, VoiceParts> = mutableMapOf(),
     val verifiedKeys: MutableMap<String, String> = mutableMapOf(),
     val bluetoothLinks: MutableMap<String, String> = mutableMapOf(),
     val readThrough: MutableMap<String, Long> = mutableMapOf(),

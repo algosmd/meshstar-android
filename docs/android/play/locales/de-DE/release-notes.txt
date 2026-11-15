@@ -1,0 +1,1 @@
+Sprachnachrichten über LoRa, Satellit und Internet; Benachrichtigungen; Postfachempfang im Hintergrund; QR-Scanner ohne Netzwerkdienst.

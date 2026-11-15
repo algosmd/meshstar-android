@@ -50,6 +50,7 @@ object RelayDirectory {
     private val relaysLock = Any()
 
     fun initialize(application: Application) {
+        if (!com.bitchat.android.BuildConfig.ENABLE_NOSTR) return
         if (initialized) return
         synchronized(this) {
             if (initialized) return

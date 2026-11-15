@@ -1,0 +1,21 @@
+MeshStar relie les personnes à proximité et hors couverture mobile. Une seule liste de contacts réunit Bluetooth, MeshCore LoRa et satellite, avec une boîte aux lettres internet facultative.
+
+CHOISISSEZ LE TRAJET
+• Bluetooth : discussion publique et messages privés avec les téléphones à proximité.
+• LoRa : connectez un nœud compagnon MeshCore compatible par Bluetooth.
+• Satellite : messages chiffrés via un boîtier MeshStar configuré avec un modem Iridium.
+• Internet : configurez votre serveur de messagerie. Cette fonction reste désactivée sans adresse de serveur.
+Choisissez Auto ou un trajet précis. Relais transporte le texte via un nœud radio proche et un boîtier ; la voix utilise LoRa direct, Satellite ou Internet.
+
+TEXTE ET VOIX
+Enregistrez des notes vocales d'environ 32 secondes au maximum. Codec2 comprime la voix pour la radio : le son diffère d'un enregistrement classique. La livraison peut prendre du temps, surtout par LoRa et satellite. La confirmation verte dans une discussion RNS chiffrée signifie un accusé signé avec la clé du destinataire. L'acceptation par un serveur ne suffit pas à confirmer la livraison.
+
+VOS CLÉS RESTENT CHEZ VOUS
+Aucun compte, numéro de téléphone ou e-mail requis. Ajoutez des contacts par QR ou lien, puis comparez les clés avant de les marquer comme vérifiées. Les messages privés RNS et notes vocales sont chiffrés de bout en bout. Les messages publics Bluetooth et les canaux texte MeshCore ordinaires sont visibles par leurs participants et n'offrent pas la protection d'une discussion privée.
+
+MATÉRIEL NÉCESSAIRE
+Bluetooth nécessite une application compatible à proximité. LoRa nécessite votre propre nœud compagnon MeshCore. Le satellite nécessite un boîtier compatible et un service satellite actif ; le matériel et le service sont facturés séparément. Internet nécessite un serveur compatible. La portée, le délai de livraison et la réception en arrière-plan dépendent du matériel, de la connexion et des réglages de batterie Android. MeshStar n'est pas un service de communication d'urgence garanti.
+
+Langues : anglais, russe, roumain, allemand et français.
+Confidentialité : https://meshstar.net/privacy
+Assistance : https://meshstar.net/support

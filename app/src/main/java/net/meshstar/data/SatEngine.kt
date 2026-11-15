@@ -63,7 +63,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
     suspend fun addContact(qr: String): Contact {
         val contact = Contact.parse(qr)
         require(contact.address != identity.lxmfAddress.hex()) { "This is your own contact" }
-        change { addContact(it, contact) }; return contact
+        change { addContact(it, contact) }; recoverVoice(); return contact
     }
     private fun addContact(state: SatState, contact: Contact) {
         val old = state.contacts.firstOrNull { it.address == contact.address }
@@ -111,10 +111,63 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         }
         return packet.hash.hex()
     }
+    suspend fun sendVoice(peer: String, codec: ByteArray, route: Route): String {
+        require(route != Route.RELAY) { "Voice cannot use Relay" }
+        require(codec.size in 6..net.meshstar.voice.VoiceInbox.MAX_BYTES && codec.size % 6 == 0)
+        val s = state.value
+        val contact = s.contacts.firstOrNull { it.address == peer } ?: error("Add the contact first")
+        val carrier = when (route) {
+            Route.LORA -> s.node?.publicKey ?: error("Configure the node first")
+            Route.SATELLITE -> s.box?.address ?: error("Configure the box first")
+            Route.INTERNET -> s.internet.takeIf { it.isNotBlank() }?.let(::carrierId) ?: error("Configure the internet server first")
+            Route.RELAY -> error("Voice cannot use Relay")
+        }
+        require(route != Route.SATELLITE || peer != carrier)
+        val id = java.security.SecureRandom().nextInt().toLong() and 0xffffffffL
+        val frames = VoiceFrame.frames(identity, contact.identity, id, codec)
+        val last = frames.last().frame
+        val hash = Hash.sha256(last).hex()
+        change {
+            require(it.messages.size < 10_000 && it.messages.count { m -> m.outgoing && !m.submitted } < 1000)
+            it.messages.add(ChatMessage(hash, peer, true, "", last.hex(), route, carrier, now().toEpochMilli(),
+                viaPoint = route == Route.SATELLITE && point.value,
+                voice = VoiceNote(frames.map { frame -> frame.frame.hex() }, codec.hex())))
+        }
+        return hash
+    }
+    suspend fun recoverVoice() {
+        if (state.value.pendingVoice.isEmpty()) return
+        change { next ->
+            for ((_, raw) in next.pendingVoice.toMap()) {
+                val source = runCatching { raw.unhex().copyOfRange(21, 37).hex() }.getOrNull() ?: continue
+                if (next.contacts.none { it.address == source }) continue
+                val prior = next.messages.firstOrNull { it.raw == raw }
+                val route = prior?.route ?: if (next.box != null) Route.SATELLITE else Route.INTERNET
+                val carrier = prior?.carrier ?: next.box?.address ?: carrierId(next.internet)
+                net.meshstar.voice.VoiceInbox.consume(next, raw.unhex(), identity, now().toEpochMilli(), route, carrier)
+            }
+        }
+    }
     suspend fun flushOutgoing(route: Route) {
         val s = state.value
         val carrier = if (route == Route.SATELLITE) s.box?.address ?: return else s.internet.takeIf { it.isNotEmpty() }?.let(::carrierId) ?: return
         for (message in s.messages.filter { it.outgoing && !it.submitted && it.route == route && it.carrier == carrier }) {
+            if (message.voice != null) {
+                for (index in message.voice.submittedParts until message.voice.frames.size) {
+                    val raw = message.voice.frames[index].unhex()
+                    val id = if (route == Route.SATELLITE) BoxTransport(s.box!!, http).sendVoice(raw) else {
+                        val contact = s.contacts.firstOrNull { it.address == message.peer } ?: error("Unknown contact")
+                        MailboxTransport(s.internet, http).drop(raw, mailboxTo(contact), "voice")
+                    }
+                    change { next -> next.messages.firstOrNull { it.hash == message.hash }?.let {
+                        it.voice!!.submittedParts = index + 1
+                        if (it.serverId == 0L) it.serverId = id
+                        it.submitted = index == it.voice.frames.lastIndex
+                        if (it.submitted && it.delivery != Delivery.DELIVERED) it.delivery = Delivery.SENT
+                    } }
+                }
+                continue
+            }
             val packet = Packet(message.raw.unhex())
             val id = if (route == Route.SATELLITE) BoxTransport(s.box!!, http).send(packet) else {
                 val contact = s.contacts.firstOrNull { it.address == message.peer } ?: continue
@@ -197,18 +250,14 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         // Invalid carrier rows are consumed without confirmation, not retried forever.
         val raw = runCatching { hex.unhex() }.getOrNull() ?: return
         if (kind == "voice") {
-            // Preserve encrypted frames until A6 rather than discard an acknowledged voice note.
-            if (raw.size in 133..1400 && raw.copyOfRange(0,5).contentEquals(VoiceFrame.magic) && raw.copyOfRange(5,21).contentEquals(identity.lxmfAddress)) {
-                require(state.pendingVoice.size < 1000 || state.pendingVoice.containsKey(Hash.sha256(raw).hex())) { "Voice inbox is full" }
-                state.pendingVoice[Hash.sha256(raw).hex()] = hex
-            }
+            net.meshstar.voice.VoiceInbox.consume(state, raw, identity, now().toEpochMilli(), route, carrier)
             return
         }
         val packet = runCatching { Packet(raw) }.getOrNull() ?: return
         if (packet.type == Packet.PROOF) {
-            for (message in state.messages.filter { it.outgoing && Packet(it.raw.unhex()).truncatedHash.contentEquals(packet.destination) }) {
+            for (message in state.messages.filter { it.outgoing && (if (it.voice != null) Hash.sha256(it.raw.unhex()).copyOf(16) else Packet(it.raw.unhex()).truncatedHash).contentEquals(packet.destination) }) {
                 val contact = state.contacts.firstOrNull { it.address == message.peer } ?: continue
-                if (Packet(message.raw.unhex()).validateProof(packet, contact.identity)) {
+                if (if (message.voice != null) VoiceFrame.validateProof(packet, message.raw.unhex(), contact.identity) else Packet(message.raw.unhex()).validateProof(packet, contact.identity)) {
                     if(message.delivery!=Delivery.DELIVERED && route==Route.LORA && message.route==Route.LORA) {
                         val recent=state.radioObservations[message.peer].orEmpty()
                         message.viaPoint=point.value && recent.none { (hash,at)->hash!=packet.hash.hex()&&at<=now().toEpochMilli()&&now().toEpochMilli()-at<300000 }
@@ -261,6 +310,18 @@ class SatEngine(val identity: Identity, private val store: StateStore,
     suspend fun flushRadio(send:suspend(ByteArray)->Unit) {
         val node=state.value.node?.publicKey?:return
         for(m in state.value.messages.filter { it.outgoing&&!it.submitted&&it.route in setOf(Route.LORA,Route.RELAY)&&it.carrier==node }) {
+            if (m.voice != null) {
+                require(m.route == Route.LORA)
+                for (index in m.voice.submittedParts until m.voice.frames.size) {
+                    send(m.voice.frames[index].unhex())
+                    change { next -> next.messages.firstOrNull { it.hash == m.hash }?.let {
+                        it.voice!!.submittedParts = index + 1
+                        it.submitted = index == it.voice.frames.lastIndex
+                        if (it.submitted && it.delivery != Delivery.DELIVERED) it.delivery = Delivery.SENT
+                    } }
+                }
+                continue
+            }
             val packet=Packet(m.raw.unhex());val wire=if(m.route==Route.RELAY)packet.via(m.relayTransportId?.unhex()?:error("Missing relay identity"))else packet
             send(wire.raw)
             change { next->next.messages.firstOrNull { it.hash==m.hash }?.let { it.submitted=true;if(it.delivery!=Delivery.DELIVERED)it.delivery=Delivery.SENT } }
