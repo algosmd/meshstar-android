@@ -223,6 +223,10 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                     withContext(Dispatchers.IO){engine.channelVisibility(event.channel.name,true)}
                     openedPeer=""
                 }
+                UiAction.NodeSettings -> nodeRuntime?.settings()
+                UiAction.NodeTelemetry -> nodeRuntime?.telemetry()
+                is UiAction.ChangeNode -> nodeRuntime?.changeSettings(event.change)
+                is UiAction.NodeAdvert -> nodeRuntime?.sendAdvert(event.flood)
                 UiAction.ScanNode -> { if(!bleReady)onPreferences(UiAction.BluetoothSetup)else nodeRuntime?.scan() }
                 is UiAction.ConfigureNode -> nodeRuntime?.configure(event.id,event.name,event.slot,event.secret,event.replace)
                 UiAction.ForgetNode -> nodeRuntime?.forget()

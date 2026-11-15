@@ -84,6 +84,10 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
     }
     suspend fun openHashtag(name:String,slot:Int?,expected:ByteArray?) = session?.openHashtag(name,slot,expected) ?: throw NodeError(NodeError.Code.OFFLINE)
     suspend fun leaveChannel(index:Int,expected:ByteArray) { session?.leaveChannel(index,expected) ?: throw NodeError(NodeError.Code.OFFLINE) }
+    suspend fun settings(){session?.refreshSettings()?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun telemetry(){session?.refreshTelemetry()?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun changeSettings(change:NodeChange){session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun sendAdvert(flood:Boolean){session?.sendAdvert(flood)?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun advertise(){session?.advertise()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun refresh(){session?.refreshContacts()?:throw NodeError(NodeError.Code.OFFLINE)}
     private var lastTextTimestamp=0L

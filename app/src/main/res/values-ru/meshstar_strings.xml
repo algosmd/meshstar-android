@@ -162,4 +162,20 @@
     <string name="ms_channel_name_error">2–32 буквы, цифры или _; не более 32 байт UTF-8 с #</string>
     <string name="ms_channel_full">нет свободных слотов; выберите слот для замены</string>
     <string name="ms_channel_changed">слот изменился; обновите и подтвердите снова</string>
+    <string name="ms_radio_settings">настройки радио</string>
+    <string name="ms_radio_preset">профиль радио</string>
+    <string name="ms_radio_custom">свой</string>
+    <string name="ms_radio_warning">смена профиля отключает от текущего меша</string>
+    <string name="ms_radio_apply">применить настройки радио</string>
+    <string name="ms_radio_power">мощность</string>
+    <string name="ms_radio_limit">справочный регуляторный максимум; учитывайте усиление антенны</string>
+    <string name="ms_radio_latitude">широта</string>
+    <string name="ms_radio_longitude">долгота</string>
+    <string name="ms_radio_coordinates">задать координаты</string>
+    <string name="ms_radio_hide">скрывать положение в анонсах</string>
+    <string name="ms_radio_flood">отправить flood-анонс</string>
+    <string name="ms_radio_flood_hint">раз в несколько часов, не чаще</string>
+    <string name="ms_radio_confirm">применить изменение к ноде?</string>
+    <string name="ms_radio_phone">взять положение телефона</string>
+    <string name="ms_radio_refresh">обновить</string>
 </resources>

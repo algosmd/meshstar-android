@@ -162,4 +162,20 @@
     <string name="ms_channel_name_error">2–32 buchstaben, ziffern oder _; höchstens 32 UTF-8-bytes mit #</string>
     <string name="ms_channel_full">kein freier slot; slot zum ersetzen wählen</string>
     <string name="ms_channel_changed">slot geändert; aktualisieren und erneut bestätigen</string>
+    <string name="ms_radio_settings">funkeinstellungen</string>
+    <string name="ms_radio_preset">funkprofil</string>
+    <string name="ms_radio_custom">benutzerdefiniert</string>
+    <string name="ms_radio_warning">profilwechsel trennt die aktuelle mesh-verbindung</string>
+    <string name="ms_radio_apply">funkeinstellungen anwenden</string>
+    <string name="ms_radio_power">sendeleistung</string>
+    <string name="ms_radio_limit">regulatorischer richtwert; antennengewinn beachten</string>
+    <string name="ms_radio_latitude">breitengrad</string>
+    <string name="ms_radio_longitude">längengrad</string>
+    <string name="ms_radio_coordinates">koordinaten setzen</string>
+    <string name="ms_radio_hide">position in ankündigungen verbergen</string>
+    <string name="ms_radio_flood">flood-ankündigung senden</string>
+    <string name="ms_radio_flood_hint">höchstens alle paar stunden</string>
+    <string name="ms_radio_confirm">änderung am knoten anwenden?</string>
+    <string name="ms_radio_phone">telefonposition verwenden</string>
+    <string name="ms_radio_refresh">aktualisieren</string>
 </resources>

@@ -162,4 +162,20 @@
     <string name="ms_channel_name_error">2–32 lettres, chiffres ou _ ; 32 octets UTF-8 maximum avec #</string>
     <string name="ms_channel_full">aucun emplacement libre ; choisir lequel remplacer</string>
     <string name="ms_channel_changed">emplacement modifié ; actualiser et confirmer à nouveau</string>
+    <string name="ms_radio_settings">réglages radio</string>
+    <string name="ms_radio_preset">profil radio</string>
+    <string name="ms_radio_custom">personnalisé</string>
+    <string name="ms_radio_warning">changer de profil déconnecte du maillage actuel</string>
+    <string name="ms_radio_apply">appliquer les réglages radio</string>
+    <string name="ms_radio_power">puissance</string>
+    <string name="ms_radio_limit">maximum réglementaire indicatif ; tenir compte du gain d’antenne</string>
+    <string name="ms_radio_latitude">latitude</string>
+    <string name="ms_radio_longitude">longitude</string>
+    <string name="ms_radio_coordinates">définir les coordonnées</string>
+    <string name="ms_radio_hide">masquer la position dans les annonces</string>
+    <string name="ms_radio_flood">envoyer une annonce flood</string>
+    <string name="ms_radio_flood_hint">une fois toutes les quelques heures, pas plus</string>
+    <string name="ms_radio_confirm">appliquer cette modification au nœud ?</string>
+    <string name="ms_radio_phone">utiliser la position du téléphone</string>
+    <string name="ms_radio_refresh">actualiser</string>
 </resources>

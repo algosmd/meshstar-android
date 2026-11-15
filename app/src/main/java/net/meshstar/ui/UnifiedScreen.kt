@@ -177,6 +177,7 @@ import java.util.Locale
                         }
                     }
                 }
+                "radio" -> ScrollPage { RadioControls(model.node.settings,onAction) }
                 "channels" -> ScrollPage {
                     HashtagControls(model.node, hashtag, {hashtag=it}, onAction) { name->open(net.meshstar.meshcore.Hashtag.id(name)) }
                 }
@@ -314,6 +315,7 @@ import java.util.Locale
                     if(model.node.ready)Secondary(tr(T.node_channel_ready))
                     if(model.node.companion){
                         MeshCard { MeshButton(tr(T.node_refresh)){act(UiAction.RefreshNode)};MeshButton(tr(T.node_advertise)){act(UiAction.AdvertiseNode)} }
+                        MeshButton(tr(T.radio_settings)){navigate("radio")}
                         MeshButton(tr(T.channel_open)){navigate("channels")}
                         Secondary(tr(T.node_contacts));model.node.contacts.forEach { contact->MeshButton(contact.name){act(UiAction.OpenNative(contact.key.hex()));open("native:"+contact.key.hex())} }
                         Secondary(tr(T.node_adverts));model.node.advertisements.forEach { Secondary(it.name,size=12) }

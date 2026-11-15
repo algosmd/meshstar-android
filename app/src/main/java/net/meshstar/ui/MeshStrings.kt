@@ -5,6 +5,24 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    radio_refresh(R.string.ms_radio_refresh),
+
+    radio_settings(R.string.ms_radio_settings),
+    radio_preset(R.string.ms_radio_preset),
+    radio_custom(R.string.ms_radio_custom),
+    radio_warning(R.string.ms_radio_warning),
+    radio_apply(R.string.ms_radio_apply),
+    radio_power(R.string.ms_radio_power),
+    radio_limit(R.string.ms_radio_limit),
+    radio_latitude(R.string.ms_radio_latitude),
+    radio_longitude(R.string.ms_radio_longitude),
+    radio_coordinates(R.string.ms_radio_coordinates),
+    radio_hide(R.string.ms_radio_hide),
+    radio_flood(R.string.ms_radio_flood),
+    radio_flood_hint(R.string.ms_radio_flood_hint),
+    radio_confirm(R.string.ms_radio_confirm),
+    radio_phone(R.string.ms_radio_phone),
+
     channel_open(R.string.ms_channel_open),
     channel_name(R.string.ms_channel_name),
     channel_public(R.string.ms_channel_public),

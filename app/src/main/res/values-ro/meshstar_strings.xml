@@ -162,4 +162,20 @@
     <string name="ms_channel_name_error">2–32 litere, cifre sau _; maximum 32 octeți UTF-8 cu #</string>
     <string name="ms_channel_full">niciun slot liber; alege unul de înlocuit</string>
     <string name="ms_channel_changed">slot modificat; actualizează și confirmă din nou</string>
+    <string name="ms_radio_settings">setări radio</string>
+    <string name="ms_radio_preset">profil radio</string>
+    <string name="ms_radio_custom">personalizat</string>
+    <string name="ms_radio_warning">schimbarea profilului deconectează rețeaua curentă</string>
+    <string name="ms_radio_apply">aplică setările radio</string>
+    <string name="ms_radio_power">putere</string>
+    <string name="ms_radio_limit">maxim de referință; contează și câștigul antenei</string>
+    <string name="ms_radio_latitude">latitudine</string>
+    <string name="ms_radio_longitude">longitudine</string>
+    <string name="ms_radio_coordinates">setează coordonatele</string>
+    <string name="ms_radio_hide">ascunde poziția în anunțuri</string>
+    <string name="ms_radio_flood">trimite anunț flood</string>
+    <string name="ms_radio_flood_hint">o dată la câteva ore, nu mai des</string>
+    <string name="ms_radio_confirm">aplici modificarea nodului?</string>
+    <string name="ms_radio_phone">folosește poziția telefonului</string>
+    <string name="ms_radio_refresh">actualizează</string>
 </resources>

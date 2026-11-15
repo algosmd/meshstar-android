@@ -21,8 +21,8 @@ class CommandQueue(private val write: suspend (ByteArray)->Unit, private val tim
     fun close(error:Throwable=NodeError(NodeError.Code.OFFLINE)) {
         synchronized(lock) { open=false; pending?.done?.completeExceptionally(error);pending=null }
     }
-    suspend fun command(frame:ByteArray,codes:Set<Int>,channel:Int?=null,intermediate:((ByteArray)->Boolean)?=null):ByteArray = serial.withLock {
-        val p=Pending({ b->b.isNotEmpty() && b.u(0) in codes && (channel==null || b.u(0)!=0x12 || (b.size>1&&b.u(1)==channel)) },intermediate,CompletableDeferred())
+    suspend fun command(frame:ByteArray,codes:Set<Int>,channel:Int?=null,intermediate:((ByteArray)->Boolean)?=null,matching:((ByteArray)->Boolean)?=null):ByteArray = serial.withLock {
+        val p=Pending({ b->b.isNotEmpty() && b.u(0) in codes && (matching?.invoke(b)!=false) && (channel==null || b.u(0)!=0x12 || (b.size>1&&b.u(1)==channel)) },intermediate,CompletableDeferred())
         synchronized(lock) { if(!open)throw NodeError(NodeError.Code.OFFLINE); pending=p }
         try {
             withTimeout(timeout) { write(frame) }
@@ -41,7 +41,7 @@ class CommandQueue(private val write: suspend (ByteArray)->Unit, private val tim
     suspend fun receive(b:ByteArray) {
         if(b.isEmpty() || !synchronized(lock){open})return
         val code=b.u(0)
-        if(code>=0x80){ onPush(b);return }
+        if(code>=0x80){ onPush(b); synchronized(lock){pending}?.let{if(it.accepts(b))it.done.complete(b)};return }
         if(code in Protocol.messages)onMessage(b) // Persist before next destructive SYNC.
         val p=synchronized(lock){pending}?:return
         try {

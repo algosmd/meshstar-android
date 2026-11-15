@@ -9,7 +9,7 @@ import java.security.SecureRandom
 
 data class NodeConfiguration(val device:String,val name:String,val slot:Int=7,val secret:String?=null,val publicKey:String?=null)
 data class NodeState(val name:String="",val slot:Int=7,val ready:Boolean=false,val companion:Boolean=false,
-                     val channels:List<Channel> = emptyList(),val contacts:List<NodeContact> = emptyList(),val advertisements:List<NodeContact> = emptyList())
+                     val channels:List<Channel> = emptyList(),val contacts:List<NodeContact> = emptyList(),val advertisements:List<NodeContact> = emptyList(), val settings:NodeSettings?=null)
 /** Android GATT is an adapter. This protocol session is exercised with fake notifications on JVM. */
 class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,private val disconnect:()->Unit,
               private val save:suspend(NodeConfiguration)->Unit,
@@ -20,6 +20,8 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
               private val now:()->Long={System.nanoTime()/1_000_000},private val pause:suspend(Long)->Unit={delay(it)}) {
     val queue=CommandQueue(write,desynchronized=disconnect)
     private val mutable=MutableStateFlow(NodeState());val state=mutable.asStateFlow()
+    private var configuration:NodeConfiguration?=null
+    private val settingsEdits=Mutex()
     private val sends=Mutex();private var lastSent:Long?=null
     private var assembler=MeshCoreFrag.Assembler(now,45_000,256)
     private val completed=linkedMapOf<String,Long>()
@@ -62,6 +64,7 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
         }
         val ready=chosen.name=="MESHSAT"&&chosen.secret.any{it!=0.toByte()}
         val resolved=config.copy(name=name.ifEmpty{config.name},slot=chosen.index,secret=if(ready)chosen.secret.hex()else config.secret,publicKey=key.hex())
+        configuration=resolved
         save(resolved) // Secret stays in encrypted app storage; exposed channel rows omit it.
         mutable.value=NodeState(resolved.name,chosen.index,ready,true,channels.map{it.copy(secret=byteArrayOf())})
         saveChannels(mutable.value.channels)
@@ -82,6 +85,29 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
     fun drain(){if(!state.value.companion||drainJob?.isActive==true)return
         drainJob=scope.launch{try{do{waiting=false;val b=queue.command(byteArrayOf(10),Protocol.messages+10);if(b.u(0)==10&&!waiting)break}while(isActive&&state.value.companion)}catch(e:CancellationException){throw e}catch(e:Exception){queue.close(e);disconnect();stop()}}
     }
+    suspend fun refreshSettings() {
+        if(!state.value.companion)throw NodeError(NodeError.Code.OFFLINE)
+        val snapshot=NodeSettings.parse(queue.command(Protocol.appStart,setOf(5)))
+        val device=queue.command(byteArrayOf(0x16,3),setOf(0x0d))
+        valid(device.size>=2)
+        val settings=snapshot.copy(firmware=if(device.size>=80)device.text(60,80) else "v"+device.u(1),repeat=if(device.size>80)device.u(80)!=0 else null,
+            batteryMV=state.value.settings?.batteryMV,measurements=state.value.settings?.measurements.orEmpty())
+        configuration?.copy(name=settings.name)?.let{save(it);configuration=it}
+        mutable.value=state.value.copy(name=settings.name,settings=settings)
+    }
+    suspend fun refreshTelemetry(){
+        val current=state.value.settings?:throw NodeError(NodeError.Code.OFFLINE)
+        val battery=queue.command(byteArrayOf(0x14),setOf(0x0c));valid(battery.size>=3)
+        mutable.value=state.value.copy(settings=current.copy(batteryMV=battery.u(1) or (battery.u(2) shl 8)))
+        val telemetry=queue.command(byteArrayOf(0x27,0,0,0),setOf(0x8b),matching={it.size>=8&&it.copyOfRange(2,8).contentEquals(current.key.copyOf(6))})
+        mutable.value=state.value.copy(settings=state.value.settings?.copy(measurements=LocalTelemetry.parse(telemetry,current.key)))
+    }
+    suspend fun changeSettings(change:NodeChange)=settingsEdits.withLock {
+        refreshSettings()
+        queue.command(change.frame(state.value.settings!!),setOf(0))
+        refreshSettings();valid(change.confirmed(state.value.settings!!))
+    }
+    suspend fun sendAdvert(flood:Boolean){queue.command(if(flood)byteArrayOf(7,1)else byteArrayOf(7),setOf(0))}
     private val channelEdits = Mutex()
     private suspend fun readChannel(index: Int) = Protocol.channel(queue.command(byteArrayOf(0x1f, index.toByte()), setOf(0x12), index), index)
     suspend fun openHashtag(input: String, slot: Int? = null, expected: ByteArray? = null): String = channelEdits.withLock {

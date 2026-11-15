@@ -162,4 +162,20 @@
     <string name="ms_channel_name_error">use 2–32 letters, digits or _; maximum 32 UTF-8 bytes with #</string>
     <string name="ms_channel_full">no free slots; choose a slot to replace</string>
     <string name="ms_channel_changed">slot changed; refresh and confirm again</string>
+    <string name="ms_radio_settings">radio settings</string>
+    <string name="ms_radio_preset">radio preset</string>
+    <string name="ms_radio_custom">custom</string>
+    <string name="ms_radio_warning">changing the preset disconnects you from the current mesh</string>
+    <string name="ms_radio_apply">apply radio settings</string>
+    <string name="ms_radio_power">power</string>
+    <string name="ms_radio_limit">regulatory reference maximum; antenna gain also matters</string>
+    <string name="ms_radio_latitude">latitude</string>
+    <string name="ms_radio_longitude">longitude</string>
+    <string name="ms_radio_coordinates">set coordinates</string>
+    <string name="ms_radio_hide">hide location in adverts</string>
+    <string name="ms_radio_flood">send flood advert</string>
+    <string name="ms_radio_flood_hint">once every few hours, not more often</string>
+    <string name="ms_radio_confirm">apply this change to the node?</string>
+    <string name="ms_radio_phone">use phone position</string>
+    <string name="ms_radio_refresh">refresh</string>
 </resources>
