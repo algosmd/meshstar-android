@@ -28,7 +28,8 @@ reported for the new map, radio, admin, hashtag or path UI/protocol files. Missi
 lint dependency-lock configurations were completed without upgrading libraries.
 This result does not certify release readiness.
 
-Physical M10 acceptance is pending. The first channel APK was installed/launched
-and the user was given the hashtag exchange/leave procedure. Companion/repeater
-changes require the user's live confirmation; code and synthetic tests alone are
-not marked as radio acceptance. The stage reports contain the remaining checklist.
+Physical P1.0 hashtag exchange/leave was confirmed by the user on 2026-11-15:
+channel opening, text in both directions and slot release passed on code 9.
+Occupied-slot replacement and badges still need hardware confirmation. Remaining
+M10 stages are pending live acceptance; companion/repeater changes require the
+user's confirmation. The stage reports contain the remaining checklist.
