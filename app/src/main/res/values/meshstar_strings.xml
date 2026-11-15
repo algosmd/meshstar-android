@@ -202,4 +202,18 @@
     <string name="ms_admin_redacted">[sensitive reply hidden]</string>
     <string name="ms_admin_reboot_sent">reboot submitted; reconnect to verify</string>
     <string name="ms_path_title">path</string>
+    <string name="ms_path_error">invalid or changed path; refresh and try again</string>
+    <string name="ms_path_trace_error">trace needs a known repeater path with unambiguous hashes</string>
+    <string name="ms_path_advert">last advert</string>
+    <string name="ms_path_rssi">radio RSSI is not provided for this contact</string>
+    <string name="ms_path_direct">direct · 0 hops</string>
+    <string name="ms_path_discover">find path</string>
+    <string name="ms_path_trace">trace</string>
+    <string name="ms_path_manual">manual path · aabb:1</string>
+    <string name="ms_path_width">bytes per hash</string>
+    <string name="ms_path_pick">choose repeater</string>
+    <string name="ms_path_reset_confirm">reset to flood?</string>
+    <string name="ms_path_final">final SNR</string>
+    <string name="ms_path_message_hint">this message provides hops and SNR, not the traversed hashes; the current outbound path may differ</string>
+    <string name="ms_path_outbound">current outbound path</string>
 </resources>

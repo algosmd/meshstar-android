@@ -50,14 +50,14 @@ class CompanionTest {
         q.receive(byteArrayOf(0));assertEquals(1,poisoned)
         try{q.command(byteArrayOf(1),setOf(0));fail()}catch(e:NodeError){assertEquals(NodeError.Code.OFFLINE,e.code)}
     }
-    @Test fun contactsStreamIgnoresPushAndDoesNotRetainLocationFields()=runTest {
+    @Test fun contactsStreamIgnoresPushAndKeepsWireMetadataInMemory()=runTest {
         val q=CommandQueue({});q.open()
         val result=async{q.contacts()};runCurrent()
         q.receive(byteArrayOf(2)+little(1));q.receive(byteArrayOf(0x83.toByte()))
         val contact=ByteArray(148);contact[0]=3;ByteArray(32){6}.copyInto(contact,1);"Synthetic".toByteArray().copyInto(contact,100);little(10).copyInto(contact,144)
         q.receive(contact);q.receive(byteArrayOf(4)+little(10))
         val (list,cursor)=result.await();assertEquals(1,list.size);assertEquals("Synthetic",list.single().name);assertEquals(10,cursor)
-        assertFalse(NodeContact::class.java.declaredFields.any{it.name in setOf("latitude","longitude","raw")})
+        assertEquals(0,list.single().advLat);assertEquals(0,list.single().advLon)
     }
     @Test fun contactProgressExtendsInactivityDeadline()=runTest {
         val q=CommandQueue({},timeout=1000);q.open()

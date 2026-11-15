@@ -202,4 +202,18 @@
     <string name="ms_admin_redacted">[vertrauliche antwort ausgeblendet]</string>
     <string name="ms_admin_reboot_sent">neustart gesendet; zur prüfung neu verbinden</string>
     <string name="ms_path_title">pfad</string>
+    <string name="ms_path_error">ungültiger oder geänderter pfad; aktualisieren und erneut versuchen</string>
+    <string name="ms_path_trace_error">trace benötigt einen bekannten repeaterpfad mit eindeutigen hashes</string>
+    <string name="ms_path_advert">letzte ankündigung</string>
+    <string name="ms_path_rssi">funk-RSSI für diesen kontakt nicht verfügbar</string>
+    <string name="ms_path_direct">direkt · 0 hops</string>
+    <string name="ms_path_discover">pfad suchen</string>
+    <string name="ms_path_trace">trace</string>
+    <string name="ms_path_manual">manueller pfad · aabb:1</string>
+    <string name="ms_path_width">bytes je hash</string>
+    <string name="ms_path_pick">repeater wählen</string>
+    <string name="ms_path_reset_confirm">auf flood zurücksetzen?</string>
+    <string name="ms_path_final">finaler SNR</string>
+    <string name="ms_path_message_hint">diese nachricht enthält hops und SNR, keine durchlaufenen hashes; der aktuelle ausgangspfad kann abweichen</string>
+    <string name="ms_path_outbound">aktueller ausgangspfad</string>
 </resources>

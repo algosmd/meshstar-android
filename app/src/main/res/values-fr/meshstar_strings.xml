@@ -202,4 +202,18 @@
     <string name="ms_admin_redacted">[réponse sensible masquée]</string>
     <string name="ms_admin_reboot_sent">redémarrage envoyé ; reconnecter pour vérifier</string>
     <string name="ms_path_title">chemin</string>
+    <string name="ms_path_error">chemin invalide ou modifié ; actualiser et réessayer</string>
+    <string name="ms_path_trace_error">le traçage nécessite un chemin de répéteurs connus aux hash uniques</string>
+    <string name="ms_path_advert">dernière annonce</string>
+    <string name="ms_path_rssi">RSSI radio non fourni pour ce contact</string>
+    <string name="ms_path_direct">direct · 0 saut</string>
+    <string name="ms_path_discover">trouver le chemin</string>
+    <string name="ms_path_trace">tracer</string>
+    <string name="ms_path_manual">chemin manuel · aabb:1</string>
+    <string name="ms_path_width">octets par hash</string>
+    <string name="ms_path_pick">choisir un répéteur</string>
+    <string name="ms_path_reset_confirm">réinitialiser en flood ?</string>
+    <string name="ms_path_final">SNR final</string>
+    <string name="ms_path_message_hint">ce message fournit les sauts et le SNR, pas les hash traversés ; le chemin sortant actuel peut différer</string>
+    <string name="ms_path_outbound">chemin sortant actuel</string>
 </resources>

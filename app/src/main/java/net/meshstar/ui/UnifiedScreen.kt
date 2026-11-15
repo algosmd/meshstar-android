@@ -42,11 +42,12 @@ import java.util.Locale
 @Composable fun UnifiedScreen(model: UiSnapshot, onAction: suspend (UiAction) -> Boolean,
     language: String = "", appearance: String = "system", feedback: String? = null, busy: Boolean = false,
     requestedPeer: String = "", sharedDraft: String = "", incoming: String = "", boxImport: Pair<String,String>? = null,
-    initialPage: String = "chats", initialTab: ChatTab = ChatTab.BLUETOOTH, initialRoutes: Boolean = false) {
+    initialPage: String = "chats", initialTab: ChatTab = ChatTab.BLUETOOTH, initialRoutes: Boolean = false, initialNodeKey:String="") {
     var page by remember { mutableStateOf(initialPage) }
     var tab by remember { mutableStateOf(initialTab) }
     var selected by remember { mutableStateOf(requestedPeer) }
-    var nodeKey by remember { mutableStateOf("") }
+    var inspectedMessage by remember { mutableStateOf<UiMessage?>(null) }
+    var nodeKey by remember { mutableStateOf(initialNodeKey) }
     var nodeSearch by remember { mutableStateOf("") }
     var hashtag by remember { mutableStateOf("") }
     var leaveConfirm by remember { mutableStateOf(false) }
@@ -91,7 +92,7 @@ import java.util.Locale
     LaunchedEffect(boxImport) { boxImport?.let { boxUrl = it.first; token = it.second; page = "box" } }
     LaunchedEffect(page, selected, timeline.lastOrNull()?.id) { if (page == "chat") onAction(UiAction.Read(selected)) }
     LaunchedEffect(page, selected) { voiceAudio.cancel(); onAction(UiAction.VisiblePeer(if(page=="chat")selected else null)) }
-    DisposableEffect(page){val wasAdmin=page=="admin";onDispose{if(wasAdmin)act(UiAction.AdminClose)}}
+    DisposableEffect(page){val wasAdmin=page=="admin";val wasPath=page=="nodecard";onDispose{if(wasAdmin)act(UiAction.AdminClose);if(wasPath)act(UiAction.PathClose)}}
     BackHandler(page != "chats" || plus || routes) { if (plus) plus = false else if (routes) routes = false else page = "chats" }
     Surface(Modifier.fillMaxSize().testTag("meshstar.unified").safeDrawingPadding().imePadding(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
@@ -188,9 +189,19 @@ import java.util.Locale
                         }
                     }
                 }
+                "messagepath" -> ScrollPage {
+                    Text(tr(T.path_title))
+                    inspectedMessage?.let{m->
+                        m.hops?.let{Secondary(LocalContext.current.getString(T.hops_format.resource,it),size=12)}
+                        m.snr?.let{Secondary("SNR $it dB",size=12)}
+                        Secondary(tr(T.path_message_hint),size=12)
+                        if(nodeKey.isNotEmpty())MeshButton(tr(T.path_outbound)){navigate("nodecard")}
+                    }
+                }
                 "nodecard" -> ScrollPage {
                     model.node.contacts.firstOrNull{it.key.hex()==nodeKey}?.let { contact->
                         Text(contact.name);Secondary(contact.key.hex(),size=10)
+                        PathControls(nodeKey,model.pathState,model.node.contacts,model.messages["native:"+nodeKey]?.lastOrNull{it.snr!=null}?.snr,onAction)
                         MeshButton(tr(T.chats)){act(UiAction.OpenNative(nodeKey));open("native:"+nodeKey)}
                         if(contact.type in setOf(2,3))MeshButton(tr(T.admin_title)){scope.launch{if(onAction(UiAction.AdminOpen(nodeKey)))navigate("admin")}}
                     }
@@ -215,7 +226,7 @@ import java.util.Locale
                     if(model.node.companion) MeshButton(model.node.name + " · LoRa · " + (model.nodeRssi?.let { "$it dBm · " } ?: "") + "#${model.node.slot}") { navigate("node") }
                     if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
                     LazyColumn(Modifier.weight(1f).testTag("meshstar.timeline"), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message, if(selected.startsWith("channel:")) { tag -> hashtag=tag;navigate("channels") } else null) }
+                        items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message, if(selected.startsWith("channel:")) { tag -> hashtag=tag;navigate("channels") } else null, { inspectedMessage=message;nodeKey=selected.removePrefix("native:").takeIf{selected.startsWith("native:")}.orEmpty();navigate("messagepath") }) }
                     }
                     if (selected != "public" && peer?.rns != null) {
                         if (routes) MeshCard {
@@ -402,7 +413,7 @@ import java.util.Locale
         PathChoice.AUTO -> Icon(Icons.Outlined.AltRoute, null, Modifier.size(14.dp))
     }
 }
-@Composable private fun MessageRow(message: UiMessage, hashtag: ((String)->Unit)? = null) {
+@Composable private fun MessageRow(message: UiMessage, hashtag: ((String)->Unit)? = null, inspectPath:(()->Unit)?=null) {
     val color = if (message.outgoing) Color(0xFFFF9500) else peerColor(message.peer, LocalMeshDark.current)
     Column(Modifier.fillMaxWidth()) {
         Text(buildAnnotatedString {
@@ -420,7 +431,7 @@ import java.util.Locale
         })
         message.voice?.let { VoicePlayback(it) }
         if (message.route != null) {
-            Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+            Row(Modifier.fillMaxWidth().then(if(inspectPath!=null&&message.route in setOf(Route.LORA,Route.RELAY))Modifier.clickable(onClick=inspectPath)else Modifier), verticalAlignment = Alignment.CenterVertically) {
                 Row(Modifier.weight(1f), verticalAlignment = Alignment.CenterVertically) {
                     if (message.viaPoint) { Icon(Icons.Outlined.SettingsInputAntenna, null, Modifier.size(10.dp)); Secondary("→🌐 " + tr(T.via_point), size = 10, maxLines = 1) }
                     else if(message.route in setOf(Route.LORA,Route.RELAY)){

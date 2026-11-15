@@ -5,6 +5,21 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    path_error(R.string.ms_path_error),
+    path_trace_error(R.string.ms_path_trace_error),
+    path_advert(R.string.ms_path_advert),
+    path_rssi(R.string.ms_path_rssi),
+    path_direct(R.string.ms_path_direct),
+    path_discover(R.string.ms_path_discover),
+    path_trace(R.string.ms_path_trace),
+    path_manual(R.string.ms_path_manual),
+    path_width(R.string.ms_path_width),
+    path_pick(R.string.ms_path_pick),
+    path_reset_confirm(R.string.ms_path_reset_confirm),
+    path_final(R.string.ms_path_final),
+    path_message_hint(R.string.ms_path_message_hint),
+    path_outbound(R.string.ms_path_outbound),
+
     admin_title(R.string.ms_admin_title),
     admin_wait(R.string.ms_admin_wait),
     admin_timeout(R.string.ms_admin_timeout),

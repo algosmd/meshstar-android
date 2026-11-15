@@ -5,6 +5,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import net.meshstar.data.SatEngine
 import net.meshstar.rnslite.hex
+import net.meshstar.rnslite.unhex
 
 /** Shares the existing foreground-service owner; no radio work outlives a stopped runtime. */
 class NodeRuntime(context:Context,private val engine:SatEngine) {
@@ -12,6 +13,7 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
     private val radio=MeshCoreBle(context.applicationContext,scope)
     private val files=net.meshstar.identity.EncryptedFiles(context.applicationContext)
     val admin=MutableStateFlow(AdminState())
+    val pathState=MutableStateFlow(PathState())
     val devices=radio.devices;val rssi=radio.rssi
     val state=MutableStateFlow(NodeState());val status=MutableStateFlow("node_off")
     val conflict=MutableStateFlow(false)
@@ -54,7 +56,7 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
             previous?.join()
             var backoff=2000L;var consent=replace
             while(isActive&&started){
-                var receive:Job?=null;var updates:Job?=null;var adminUpdates:Job?=null
+                var receive:Job?=null;var updates:Job?=null;var adminUpdates:Job?=null;var pathUpdates:Job?=null
                 try{
                     failure=null;flushPending()
                     status.value="node_connecting";radio.connect(initial.device)
@@ -69,6 +71,7 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                     receive=launch{for(frame in radio.frames){try{s.queue.receive(frame)}catch(e:CancellationException){throw e}catch(e:Exception){failure=e;s.queue.close(e);break}}}
                     updates=launch{s.state.collect{state.value=it}}
                     adminUpdates=launch{s.admin.state.collect{admin.value=it}}
+                    pathUpdates=launch{s.paths.state.collect{pathState.value=it}}
                     status.value="node_reading"
                     s.initialize(engine.state.value.node?:initial,consent);consent=false
                     status.value=if(s.state.value.ready)"node_ready"else "node_text_only";backoff=2000
@@ -82,14 +85,20 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                 catch(e:Exception){
                     consent=false;status.value=when((e as? NodeError)?.code){NodeError.Code.OCCUPIED->"node_occupied";NodeError.Code.SECRET->"node_secret";NodeError.Code.MTU->"node_mtu";else->"node_failed"}
                     if(e is NodeError&&e.code==NodeError.Code.OCCUPIED){conflict.value=true;break}
-                }finally{receive?.cancel();updates?.cancel();adminUpdates?.cancel();admin.value=AdminState();session?.stop();session=null;radio.disconnect();state.value=NodeState()}
+                }finally{receive?.cancel();updates?.cancel();adminUpdates?.cancel();pathUpdates?.cancel();pathState.value=PathState();admin.value=AdminState();session?.stop();session=null;radio.disconnect();state.value=NodeState()}
                 delay(backoff);backoff=minOf(30000,backoff*2)
             }
         }
     }
     suspend fun openHashtag(name:String,slot:Int?,expected:ByteArray?) = session?.openHashtag(name,slot,expected) ?: throw NodeError(NodeError.Code.OFFLINE)
     suspend fun leaveChannel(index:Int,expected:ByteArray) { session?.leaveChannel(index,expected) ?: throw NodeError(NodeError.Code.OFFLINE) }
-    fun openAdmin(key:String){val contact=state.value.contacts.firstOrNull{it.key.hex()==key}?:throw NodeError(NodeError.Code.OFFLINE);session?.admin?.open(contact)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun pathOpen(key:String){session?.paths?.open(key.unhex())?:throw NodeError(NodeError.Code.OFFLINE)}
+    fun pathClose(){session?.paths?.close()}
+    suspend fun pathSet(text:String?,width:Int){session?.paths?.set(text?.let{ContactPath.parse(it,width)})?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun pathDiscover(){session?.paths?.discover()?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun pathTrace(){session?.paths?.trace()?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun pathRefresh(){session?.paths?.refresh()?:throw NodeError(NodeError.Code.OFFLINE)}
+    fun openAdmin(key:String){pathClose();val contact=state.value.contacts.firstOrNull{it.key.hex()==key}?:throw NodeError(NodeError.Code.OFFLINE);session?.admin?.open(contact)?:throw NodeError(NodeError.Code.OFFLINE)}
     fun closeAdmin(){session?.admin?.close()}
     suspend fun adminPassword():String=withContext(Dispatchers.IO){admin.value.contact?.key?.let{files.read("admin."+it.hex())?.toString(Charsets.UTF_8)}.orEmpty()}
     suspend fun forgetAdmin(){withContext(Dispatchers.IO){admin.value.contact?.key?.let{files.delete("admin."+it.hex())}}}

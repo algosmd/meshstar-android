@@ -21,6 +21,13 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
               private val now:()->Long={System.nanoTime()/1_000_000},private val pause:suspend(Long)->Unit={delay(it)}) {
     val queue=CommandQueue(write,desynchronized=disconnect)
     val admin=RepeaterAdmin(scope,{queue.command(it,setOf(0,6))},{key->state.value.contacts.count{it.key.take(6)==key.take(6)}==1},saveAdmin)
+    val paths=PathController({queue.command(it,setOf(0,6))},{key->
+        val contact=NodeContact.parse(queue.command(byteArrayOf(30)+key,setOf(3)))
+        valid(contact.key.contentEquals(key));contact
+    },{contact->
+        val contacts=state.value.contacts.filterNot{it.key.contentEquals(contact.key)}+contact
+        saveContacts(contacts);mutable.value=state.value.copy(contacts=contacts)
+    },{state.value.contacts},{state.value.companion&&!admin.state.value.busy&&!admin.state.value.loggedIn})
     private val mutable=MutableStateFlow(NodeState());val state=mutable.asStateFlow()
     private var configuration:NodeConfiguration?=null
     private val settingsEdits=Mutex()
@@ -32,10 +39,10 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
     private val advertKeys=linkedSetOf<String>()
     private val rng=SecureRandom()
     init {
-        queue.onPush={b->if(!admin.receive(b))when(b.u(0)){
+        queue.onPush={b->paths.receive(b);if(!admin.receive(b))when(b.u(0)){
             0x83->{waiting=true;drain()}
             0x8a->{ val c=NodeContact.parse(b);mutable.value=mutable.value.copy(advertisements=(mutable.value.advertisements.filterNot{it.key.contentEquals(c.key)}+c).takeLast(256)) }
-            0x80->{if(b.size==33){advertKeys.add(b.copyOfRange(1,33).hex());while(advertKeys.size>256)advertKeys.remove(advertKeys.first());refreshAdverts()}}
+            0x80,0x81->{if(b.size==33){advertKeys.add(b.copyOfRange(1,33).hex());while(advertKeys.size>256)advertKeys.remove(advertKeys.first());refreshAdverts()}}
         }}
         queue.onMessage=message@{b->
             if(admin.receive(b))return@message
@@ -83,6 +90,9 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
             val key=advertKeys.first();advertKeys.remove(key)
             val c=runCatching{NodeContact.parse(queue.command(byteArrayOf(30)+key.unhex(),setOf(3)))}.getOrElse{NodeContact(key.unhex(),key.take(8),0,0,0)}
             mutable.value=mutable.value.copy(advertisements=(mutable.value.advertisements.filterNot{it.key.contentEquals(c.key)}+c).takeLast(256))
+            if(c.type!=0&&state.value.contacts.any{it.key.contentEquals(c.key)}){
+                val contacts=state.value.contacts.map{if(it.key.contentEquals(c.key))c else it};saveContacts(contacts);mutable.value=state.value.copy(contacts=contacts)
+            }
         }}
     }
     fun drain(){if(!state.value.companion||drainJob?.isActive==true)return
@@ -165,5 +175,5 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
             }}
         }finally{lastSent=now()}
     }
-    fun stop(){admin.close(false);drainJob?.cancel();contactJob?.cancel();queue.close();mutable.value=NodeState();assembler=MeshCoreFrag.Assembler(now,45_000,256);completed.clear()}
+    fun stop(){paths.close();admin.close(false);drainJob?.cancel();contactJob?.cancel();queue.close();mutable.value=NodeState();assembler=MeshCoreFrag.Assembler(now,45_000,256);completed.clear()}
 }
