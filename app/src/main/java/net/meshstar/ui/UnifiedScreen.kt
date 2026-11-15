@@ -46,6 +46,8 @@ import java.util.Locale
     var page by remember { mutableStateOf(initialPage) }
     var tab by remember { mutableStateOf(initialTab) }
     var selected by remember { mutableStateOf(requestedPeer) }
+    var hashtag by remember { mutableStateOf("") }
+    var leaveConfirm by remember { mutableStateOf(false) }
     var search by remember { mutableStateOf("") }
     var plus by remember { mutableStateOf(false) }
     var path by remember { mutableStateOf(PathChoice.AUTO) }
@@ -101,6 +103,7 @@ import java.util.Locale
                 MeshButton(tr(T.add_contact)) { navigate("scan") }
                 MeshButton(tr(T.box_settings)) { navigate("box") }
                 MeshButton(tr(T.node)) { navigate("node") }
+                if(tab==ChatTab.LORA)MeshButton(tr(T.channel_open)){navigate("channels")}
                 MeshButton(tr(T.settings)) { navigate("settings") }
             }
             if(page=="chats"&&miuiDevice&&showPowerHint&&!keyboardVisible)MeshCard{
@@ -174,15 +177,25 @@ import java.util.Locale
                         }
                     }
                 }
+                "channels" -> ScrollPage {
+                    HashtagControls(model.node, hashtag, {hashtag=it}, onAction) { name->open(net.meshstar.meshcore.Hashtag.id(name)) }
+                }
                 "chat" -> {
                     Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                         Text(if (selected == "public") tr(T.public_chat) else peer?.name ?: tr(T.unknown), Modifier.weight(1f), maxLines = 1, overflow = TextOverflow.Ellipsis)
                         if (selected != "public") MeshIconButton(tr(T.contact), Icons.Outlined.VerifiedUser) { navigate("contact") }
                     }
+                    if(selected.startsWith("channel:")) {
+                        Secondary(tr(T.channel_public),size=10)
+                        model.node.channels.firstOrNull{net.meshstar.meshcore.Hashtag.id(it.name)==selected && !it.protected}?.let { channel ->
+                            MeshButton(tr(T.channel_leave)){leaveConfirm=!leaveConfirm}
+                            if(leaveConfirm)MeshCard { Secondary(tr(T.channel_leave_confirm),size=10);MeshButton(tr(T.channel_confirm)){scope.launch{if(onAction(UiAction.LeaveChannel(channel))){leaveConfirm=false;navigate("chats")}}} }
+                        }
+                    }
                     if(model.node.companion) MeshButton(model.node.name + " · LoRa · " + (model.nodeRssi?.let { "$it dBm · " } ?: "") + "#${model.node.slot}") { navigate("node") }
                     if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
                     LazyColumn(Modifier.weight(1f).testTag("meshstar.timeline"), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                        items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message) }
+                        items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message, if(selected.startsWith("channel:")) { tag -> hashtag=tag;navigate("channels") } else null) }
                     }
                     if (selected != "public" && peer?.rns != null) {
                         if (routes) MeshCard {
@@ -201,7 +214,7 @@ import java.util.Locale
                         }
                     }
                     if ((path == PathChoice.LORA || path == PathChoice.RELAY) && !model.node.ready) Secondary(tr(T.radio_unavailable), size = 10)
-                    val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { "channel:"+it.name.lowercase()==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
+                    val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { net.meshstar.meshcore.Hashtag.id(it.name)==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
                         resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) != null
                     val voiceRoute = resolvePath(path, false, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(), model.node.ready, false)
                     val voiceEnabled = !busy && peer?.rns != null && voiceRoute != null && path != PathChoice.RELAY
@@ -301,9 +314,10 @@ import java.util.Locale
                     if(model.node.ready)Secondary(tr(T.node_channel_ready))
                     if(model.node.companion){
                         MeshCard { MeshButton(tr(T.node_refresh)){act(UiAction.RefreshNode)};MeshButton(tr(T.node_advertise)){act(UiAction.AdvertiseNode)} }
+                        MeshButton(tr(T.channel_open)){navigate("channels")}
                         Secondary(tr(T.node_contacts));model.node.contacts.forEach { contact->MeshButton(contact.name){act(UiAction.OpenNative(contact.key.hex()));open("native:"+contact.key.hex())} }
                         Secondary(tr(T.node_adverts));model.node.advertisements.forEach { Secondary(it.name,size=12) }
-                        model.node.channels.filterNot{it.transport || it.name.isBlank()}.forEach{channel->MeshButton("#"+channel.name){open("channel:"+channel.name.lowercase())}}
+                        model.node.channels.filterNot{it.transport || it.name.isBlank()}.forEach{channel->MeshButton(channel.displayName){open("channel:"+channel.name.lowercase())}}
                     }
                 }
                 "language" -> ScrollPage {
@@ -367,11 +381,20 @@ import java.util.Locale
         PathChoice.AUTO -> Icon(Icons.Outlined.AltRoute, null, Modifier.size(14.dp))
     }
 }
-@Composable private fun MessageRow(message: UiMessage) {
+@Composable private fun MessageRow(message: UiMessage, hashtag: ((String)->Unit)? = null) {
     val color = if (message.outgoing) Color(0xFFFF9500) else peerColor(message.peer, LocalMeshDark.current)
     Column(Modifier.fillMaxWidth()) {
         Text(buildAnnotatedString {
-            withStyle(SpanStyle(color = color, fontSize = 14.sp)) { append("<${message.name}> ${message.text}") }
+            withStyle(SpanStyle(color = color, fontSize = 14.sp)) { append("<${message.name}> ")
+                if(hashtag==null)append(message.text) else {
+                    var cursor=0
+                    net.meshstar.meshcore.Hashtag.matches(message.text).forEach { match ->
+                        append(message.text.substring(cursor,match.range.first))
+                        pushLink(androidx.compose.ui.text.LinkAnnotation.Clickable(match.value, androidx.compose.ui.text.TextLinkStyles(SpanStyle(textDecoration=androidx.compose.ui.text.style.TextDecoration.Underline))) { hashtag(match.value) })
+                        append(match.value);pop();cursor=match.range.last+1
+                    }
+                    append(message.text.substring(cursor))
+                } }
             withStyle(SpanStyle(color = Color.Gray.copy(alpha = .7f), fontSize = 10.sp)) { append(" [${time(message.at)}]") }
         })
         message.voice?.let { VoicePlayback(it) }

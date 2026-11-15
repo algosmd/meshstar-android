@@ -26,7 +26,7 @@ class IncomingNotifications(private val context: Context,
     fun update(state: SatState, visiblePeer: String?) {
         val rows = state.messages.filter { !it.outgoing }.map { Triple(it.hash, "rns:"+it.peer, it.at) } +
             state.channelTexts.filter { !it.outgoing }.map {
-                Triple(it.id, if(it.channel.startsWith("direct:")) "native:"+it.channel.removePrefix("direct:") else "channel:"+it.channel.lowercase(),it.receivedAt)
+                Triple(it.id, if(it.channel.startsWith("direct:")) "native:"+it.channel.removePrefix("direct:") else net.meshstar.meshcore.Hashtag.id(it.channel),it.receivedAt)
             }
         val fresh = rows.filter { it.first !in (seen ?: rows.map { row -> row.first }.toSet()) }
         seen = rows.map { it.first }.toSet()

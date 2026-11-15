@@ -301,6 +301,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         }
     }
     suspend fun saveNode(config:NodeConfiguration?) { change { it.node=config } }
+    suspend fun channelVisibility(name:String,closed:Boolean) { change { if(closed)it.closedChannels.add(net.meshstar.meshcore.Hashtag.id(name)) else it.closedChannels.remove(net.meshstar.meshcore.Hashtag.id(name)) } }
     suspend fun saveChannels(channels:List<net.meshstar.meshcore.Channel>) { change { it.channelNames.clear();channels.filterNot { c->c.transport || c.name.isBlank() }.forEach { c->it.channelNames[c.index]=c.name } } }
     suspend fun receiveRadio(raw:ByteArray,reception:Reception,carrier:String?=state.value.node?.publicKey) {
         val node=carrier?:return
@@ -362,15 +363,15 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         appendChannel(s,name,text.text,text.timestamp,now().toEpochMilli(),false,text.reception?.snr,text.reception?.hops,directKey=directKey)
     } }
     private fun appendChannel(s:SatState,name:String,text:String,timestamp:Long,receivedAt:Long,fromBox:Boolean,snr:Double?,hops:Int?,outgoing:Boolean=false,directKey:String?=null) {
-        val id=Hash.sha256((name.lowercase()+"\u0000"+timestamp+"\u0000"+text).toByteArray()).hex()
-        if(s.channelTexts.none { it.id==id || (it.channel.equals(name,true)&&it.timestamp==timestamp&&it.text==text) })s.channelTexts.add(ChannelText(id,name,text,timestamp,receivedAt,fromBox,snr,hops,outgoing,directKey))
+        val id=Hash.sha256((net.meshstar.meshcore.Hashtag.id(name)+"\u0000"+timestamp+"\u0000"+text).toByteArray()).hex()
+        if(s.channelTexts.none { it.id==id || (net.meshstar.meshcore.Hashtag.id(it.channel)==net.meshstar.meshcore.Hashtag.id(name)&&it.timestamp==timestamp&&it.text==text) })s.channelTexts.add(ChannelText(id,name,text,timestamp,receivedAt,fromBox,snr,hops,outgoing,directKey))
         while(s.channelTexts.size>5000)s.channelTexts.removeAt(0)
     }
     suspend fun recordChannelSent(name:String,text:String,timestamp:Long){change{appendChannel(it,name,text,timestamp,now().toEpochMilli(),false,null,null,true)}}
     suspend fun pollChannelHistory() {
         val config=state.value.box?:return;val transport=BoxTransport(config,http)
         for((index,name) in transport.channels().filterNot { it.second.trim().equals("MESHSAT",true) }) {
-            val key=config.address+":"+name.lowercase()
+            val key=config.address+":"+net.meshstar.meshcore.Hashtag.id(name)
             for(page in 0 until 10) {
                 val since=state.value.channelCursors[key]?:0.0
                 val rows=transport.channelHistory(index,since)

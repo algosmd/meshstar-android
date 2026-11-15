@@ -106,11 +106,11 @@
     <string name="ms_node_slot">слот</string>
     <string name="ms_node_secret">секрет канала или QR канала</string>
     <string name="ms_more">подробнее</string>
-    <string name="ms_node_secret_help">оставьте пустым для существующего канала MESHSAT; иначе вставьте 32 hex-символа или QR канала</string>
+    <string name="ms_node_secret_help">оставьте пустым для существующего канала MeshStar; иначе вставьте 32 hex-символа или QR канала</string>
     <string name="ms_node_connect">подключить</string>
     <string name="ms_node_occupied">слот занят; существующий канал сохранён</string>
     <string name="ms_node_replace">заменить канал</string>
-    <string name="ms_node_replace_warning">выбранный слот будет заменён на MESHSAT с указанным секретом</string>
+    <string name="ms_node_replace_warning">выбранный слот будет заменён на MeshStar с указанным секретом</string>
     <string name="ms_node_replace_confirm">подтвердить замену</string>
     <string name="ms_node_forget">забыть ноду</string>
     <string name="ms_node_channel_ready">канал MeshStar · настроен</string>
@@ -121,7 +121,7 @@
     <string name="ms_node_scanning">поиск нод…</string>
     <string name="ms_node_connecting">подключение к ноде…</string>
     <string name="ms_node_reading">чтение каналов…</string>
-    <string name="ms_node_ready">нода подключена · MESHSAT готов</string>
+    <string name="ms_node_ready">нода подключена · MeshStar готов</string>
     <string name="ms_node_text_only">нода подключена · только текстовые каналы</string>
     <string name="ms_node_mtu">слишком большой BLE-кадр; переподключите ноду</string>
     <string name="ms_node_permission">разрешите Bluetooth для поиска нод</string>
@@ -150,4 +150,16 @@
     <string name="ms_notification_allow">Разрешить уведомления</string>
     <string name="ms_licenses">Codec2 · лицензия и исходники</string>
     <string name="ms_command_unavailable">Эта команда недоступна в MeshStar.</string>
+    <string name="ms_channel_open">открыть канал</string>
+    <string name="ms_channel_name">имя канала</string>
+    <string name="ms_channel_public">публичный канал · без сквозного шифрования</string>
+    <string name="ms_channel_slots">выбрать слот</string>
+    <string name="ms_channel_free">свободно</string>
+    <string name="ms_channel_replace">заменить канал в слоте</string>
+    <string name="ms_channel_confirm">подтвердить</string>
+    <string name="ms_channel_leave">выйти из канала</string>
+    <string name="ms_channel_leave_confirm">освободить слот? история останется на телефоне</string>
+    <string name="ms_channel_name_error">2–32 буквы, цифры или _; не более 32 байт UTF-8 с #</string>
+    <string name="ms_channel_full">нет свободных слотов; выберите слот для замены</string>
+    <string name="ms_channel_changed">слот изменился; обновите и подтвердите снова</string>
 </resources>

@@ -106,11 +106,11 @@
     <string name="ms_node_slot">emplacement</string>
     <string name="ms_node_secret">secret du canal ou QR</string>
     <string name="ms_more">plus</string>
-    <string name="ms_node_secret_help">laisser vide pour le canal MESHSAT existant ; sinon coller 32 caractères hex ou son QR</string>
+    <string name="ms_node_secret_help">laisser vide pour le canal MeshStar existant ; sinon coller 32 caractères hex ou son QR</string>
     <string name="ms_node_connect">connecter</string>
     <string name="ms_node_occupied">emplacement occupé ; canal existant conservé</string>
     <string name="ms_node_replace">remplacer le canal</string>
-    <string name="ms_node_replace_warning">remplace le canal choisi par MESHSAT avec le secret fourni</string>
+    <string name="ms_node_replace_warning">remplace le canal choisi par MeshStar avec le secret fourni</string>
     <string name="ms_node_replace_confirm">confirmer le remplacement</string>
     <string name="ms_node_forget">oublier le nœud</string>
     <string name="ms_node_channel_ready">canal MeshStar · configuré</string>
@@ -121,7 +121,7 @@
     <string name="ms_node_scanning">recherche de nœuds…</string>
     <string name="ms_node_connecting">connexion au nœud…</string>
     <string name="ms_node_reading">lecture des canaux…</string>
-    <string name="ms_node_ready">nœud connecté · MESHSAT prêt</string>
+    <string name="ms_node_ready">nœud connecté · MeshStar prêt</string>
     <string name="ms_node_text_only">nœud connecté · canaux texte uniquement</string>
     <string name="ms_node_mtu">trame BLE trop grande ; reconnecter le nœud</string>
     <string name="ms_node_permission">autoriser Bluetooth pour chercher des nœuds</string>
@@ -150,4 +150,16 @@
     <string name="ms_notification_allow">Autoriser les notifications</string>
     <string name="ms_licenses">Codec2 · licence et sources</string>
     <string name="ms_command_unavailable">Cette commande n’est pas disponible dans MeshStar.</string>
+    <string name="ms_channel_open">ouvrir le canal</string>
+    <string name="ms_channel_name">nom du canal</string>
+    <string name="ms_channel_public">canal public · sans chiffrement de bout en bout</string>
+    <string name="ms_channel_slots">choisir un emplacement</string>
+    <string name="ms_channel_free">libre</string>
+    <string name="ms_channel_replace">remplacer le canal dans cet emplacement</string>
+    <string name="ms_channel_confirm">confirmer</string>
+    <string name="ms_channel_leave">quitter le canal</string>
+    <string name="ms_channel_leave_confirm">libérer cet emplacement ? historique conservé sur le téléphone</string>
+    <string name="ms_channel_name_error">2–32 lettres, chiffres ou _ ; 32 octets UTF-8 maximum avec #</string>
+    <string name="ms_channel_full">aucun emplacement libre ; choisir lequel remplacer</string>
+    <string name="ms_channel_changed">emplacement modifié ; actualiser et confirmer à nouveau</string>
 </resources>

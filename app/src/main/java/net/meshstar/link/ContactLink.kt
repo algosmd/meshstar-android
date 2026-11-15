@@ -10,7 +10,7 @@ import java.util.Base64
 data class Contact(val address: String, val key: String, val name: String) {
     val identity: PublicIdentity get() = PublicIdentity(Base64.getDecoder().decode(key))
     val fingerprint: String get() = identity.fingerprint
-    val qr: String get() = "meshsat1:$address:$key:$name"
+    val qr: String get() = "meshstar1:$address:$key:$name"
     val link: String get() = "meshstar://contact?qr=" + URLEncoder.encode(qr, "UTF-8")
     companion object {
         fun of(identity: PublicIdentity, name: String) = Contact(identity.lxmfAddress.hex(),
@@ -18,13 +18,13 @@ data class Contact(val address: String, val key: String, val name: String) {
         fun parse(input: String): Contact {
             var text = input.trim()
             require(text.toByteArray().size <= 4096) { "QR is too large" }
-            if (!text.startsWith("meshsat1:")) {
+            if (!text.startsWith("meshsat1:") && !text.startsWith("meshstar1:")) {
                 val uri = ContactLink.uri(text)
                 require(uri.host == "contact") { "Not an RNS contact QR" }
                 text = ContactLink.query(uri)["qr"] ?: error("Missing contact payload")
             }
-            require(text.startsWith("meshsat1:")) { "Not an RNS contact QR" }
-            val parts = text.removePrefix("meshsat1:").split(':', limit = 3)
+            require(text.startsWith("meshsat1:") || text.startsWith("meshstar1:")) { "Not an RNS contact QR" }
+            val parts = text.substringAfter(':').split(':', limit = 3)
             require(parts.size >= 2) { "Incomplete contact" }
             val identity = PublicIdentity(Base64.getDecoder().decode(parts[1]))
             require(parts[0].lowercase() == identity.lxmfAddress.hex()) { "Address does not match public key" }

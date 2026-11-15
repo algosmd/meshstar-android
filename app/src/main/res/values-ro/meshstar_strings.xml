@@ -106,11 +106,11 @@
     <string name="ms_node_slot">slot</string>
     <string name="ms_node_secret">secretul canalului sau QR</string>
     <string name="ms_more">mai mult</string>
-    <string name="ms_node_secret_help">lăsați gol pentru canalul MESHSAT existent; altfel introduceți 32 de caractere hex sau QR-ul canalului</string>
+    <string name="ms_node_secret_help">lăsați gol pentru canalul MeshStar existent; altfel introduceți 32 de caractere hex sau QR-ul canalului</string>
     <string name="ms_node_connect">conectare</string>
     <string name="ms_node_occupied">slot ocupat; canalul existent a fost păstrat</string>
     <string name="ms_node_replace">înlocuiește canalul</string>
-    <string name="ms_node_replace_warning">slotul selectat va fi înlocuit cu MESHSAT folosind secretul introdus</string>
+    <string name="ms_node_replace_warning">slotul selectat va fi înlocuit cu MeshStar folosind secretul introdus</string>
     <string name="ms_node_replace_confirm">confirmă înlocuirea</string>
     <string name="ms_node_forget">uită nodul</string>
     <string name="ms_node_channel_ready">canal MeshStar · configurat</string>
@@ -121,7 +121,7 @@
     <string name="ms_node_scanning">căutare noduri…</string>
     <string name="ms_node_connecting">conectare la nod…</string>
     <string name="ms_node_reading">citire canale…</string>
-    <string name="ms_node_ready">nod conectat · MESHSAT pregătit</string>
+    <string name="ms_node_ready">nod conectat · MeshStar pregătit</string>
     <string name="ms_node_text_only">nod conectat · doar canale text</string>
     <string name="ms_node_mtu">cadru BLE prea mare; reconectați nodul</string>
     <string name="ms_node_permission">permiteți Bluetooth pentru căutarea nodurilor</string>
@@ -150,4 +150,16 @@
     <string name="ms_notification_allow">Permite notificările</string>
     <string name="ms_licenses">Codec2 · licență și surse</string>
     <string name="ms_command_unavailable">Această comandă nu este disponibilă în MeshStar.</string>
+    <string name="ms_channel_open">deschide canal</string>
+    <string name="ms_channel_name">numele canalului</string>
+    <string name="ms_channel_public">canal public · fără criptare integrală</string>
+    <string name="ms_channel_slots">alege slotul</string>
+    <string name="ms_channel_free">liber</string>
+    <string name="ms_channel_replace">înlocuiește canalul din slot</string>
+    <string name="ms_channel_confirm">confirmă</string>
+    <string name="ms_channel_leave">părăsește canalul</string>
+    <string name="ms_channel_leave_confirm">eliberezi slotul? istoricul rămâne pe telefon</string>
+    <string name="ms_channel_name_error">2–32 litere, cifre sau _; maximum 32 octeți UTF-8 cu #</string>
+    <string name="ms_channel_full">niciun slot liber; alege unul de înlocuit</string>
+    <string name="ms_channel_changed">slot modificat; actualizează și confirmă din nou</string>
 </resources>

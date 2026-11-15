@@ -35,6 +35,8 @@ sealed interface UiAction {
     data class Language(val value: String): UiAction
     data class Appearance(val value: String): UiAction
     data class OpenNative(val key:String):UiAction
+    data class OpenHashtag(val name:String,val slot:Int?=null,val expected:ByteArray?=null):UiAction
+    data class LeaveChannel(val channel:net.meshstar.meshcore.Channel):UiAction
     data object ScanNode:UiAction
     data class ConfigureNode(val id:String,val name:String,val slot:Int,val secret:String,val replace:Boolean=false):UiAction
     data object ForgetNode:UiAction

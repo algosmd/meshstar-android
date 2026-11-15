@@ -99,9 +99,9 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
             nearby = peer in connected, verified = fp in verified, preview = history.lastOrNull()?.content.orEmpty(),
             unread = if (peer in unreadBle) 1 else 0, paths = setOf(ChatTab.BLUETOOTH), at = history.lastOrNull()?.timestamp?.time ?: 0)
     }
-    val channelPeers = (state.channelNames.values+state.channelTexts.filter { it.directKey==null }.map { it.channel }).distinctBy { it.lowercase() }.filterNot { it.equals("MESHSAT",true)||it.startsWith("direct:") }.map { name ->
-        val history=state.channelTexts.filter { it.channel.equals(name,true) }
-        UiPeer("channel:"+name.lowercase(),"#"+name,preview=history.lastOrNull()?.text.orEmpty(),unread=history.count{!it.outgoing&&it.receivedAt>(state.readThrough["channel:"+name.lowercase()]?:0)},paths=setOf(ChatTab.LORA),at=history.lastOrNull()?.receivedAt?:0)
+    val channelPeers = (state.channelNames.values+state.channelTexts.filter { it.directKey==null }.map { it.channel }).distinctBy { net.meshstar.meshcore.Hashtag.id(it) }.filterNot { it.equals("MESHSAT",true)||it.startsWith("direct:")||net.meshstar.meshcore.Hashtag.id(it) in state.closedChannels }.map { name ->
+        val history=state.channelTexts.filter { net.meshstar.meshcore.Hashtag.id(it.channel)==net.meshstar.meshcore.Hashtag.id(name) }
+        UiPeer(net.meshstar.meshcore.Hashtag.id(name),net.meshstar.meshcore.Hashtag.display(name),preview=history.lastOrNull()?.text.orEmpty(),unread=history.count{!it.outgoing&&it.receivedAt>(state.readThrough[net.meshstar.meshcore.Hashtag.id(name)]?:0)},paths=setOf(ChatTab.LORA),at=history.lastOrNull()?.receivedAt?:0)
     }
     val nativeKeys=state.nativeChats+state.channelTexts.filter { it.channel.startsWith("direct:") }.map { it.channel.removePrefix("direct:") }
     val nativePeers=nativeKeys.map { key->
@@ -120,7 +120,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
             if(m.voice!=null && !m.verified) context.getString(T.voice_unverified.resource) else m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
             if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops, voice=m.voice?.codec?.takeIf{it.isNotEmpty()}?.unhex()) } +
             peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty() +
-            (if(peer.id.startsWith("channel:")||peer.id.startsWith("native:"))state.channelTexts.filter { ("channel:"+it.channel.lowercase()==peer.id)||("native:"+it.channel.removePrefix("direct:")==peer.id) }.map {
+            (if(peer.id.startsWith("channel:")||peer.id.startsWith("native:"))state.channelTexts.filter { (net.meshstar.meshcore.Hashtag.id(it.channel)==peer.id)||("native:"+it.channel.removePrefix("direct:")==peer.id) }.map {
                 UiMessage(it.id,if(it.outgoing)node.name else peer.name,it.text,it.receivedAt,it.outgoing,Route.LORA,showDelivery=false,snr=it.snr,hops=it.hops,fromBox=it.fromBox)
             } else emptyList())).sortedBy { it.at } }
     val snapshot = UiSnapshot(nickname, peers, timelines, publicMessages.map(::bleMessage),
@@ -159,7 +159,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                         return true
                     }
                     if(event.peer.startsWith("channel:")) {
-                        val channel=node.channels.firstOrNull { "channel:"+it.name.lowercase()==event.peer && !it.transport }?:error("Node not connected")
+                        val channel=node.channels.firstOrNull { net.meshstar.meshcore.Hashtag.id(it.name)==event.peer && !it.transport }?:error("Node not connected")
                         val timestamp=nodeRuntime?.sendText(event.text,channel.index)?:error("Node not connected")
                         withContext(Dispatchers.IO){engine.recordChannelSent(channel.name,node.name+": "+event.text,timestamp)}
                         return true
@@ -213,6 +213,16 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                     openedPeer = target.id
                 }
                 is UiAction.OpenNative -> {withContext(Dispatchers.IO){engine.openNative(event.key)};openedPeer="native:"+event.key}
+                is UiAction.OpenHashtag -> {
+                    val name=nodeRuntime?.openHashtag(event.name,event.slot,event.expected)?:error("Node not connected")
+                    withContext(Dispatchers.IO){engine.channelVisibility(name,false)}
+                    openedPeer=net.meshstar.meshcore.Hashtag.id(name)
+                }
+                is UiAction.LeaveChannel -> {
+                    nodeRuntime?.leaveChannel(event.channel.index,event.channel.fingerprint)?:error("Node not connected")
+                    withContext(Dispatchers.IO){engine.channelVisibility(event.channel.name,true)}
+                    openedPeer=""
+                }
                 UiAction.ScanNode -> { if(!bleReady)onPreferences(UiAction.BluetoothSetup)else nodeRuntime?.scan() }
                 is UiAction.ConfigureNode -> nodeRuntime?.configure(event.id,event.name,event.slot,event.secret,event.replace)
                 UiAction.ForgetNode -> nodeRuntime?.forget()
@@ -237,6 +247,9 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
         status == "HTTPS required for public servers" -> T.https_required
+        status == "Node:CHANNEL_NAME" -> T.channel_name_error
+        status == "Node:CHANNEL_FULL" -> T.channel_full
+        status == "Node:CHANNEL_CHANGED" -> T.channel_changed
         status == "Node:SECRET" -> T.node_secret_help
         status == "Node:OCCUPIED" -> T.node_occupied
         status == "Node:MTU" -> T.node_mtu

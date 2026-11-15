@@ -43,6 +43,7 @@ data class SatState(
     var node: net.meshstar.meshcore.NodeConfiguration? = null,
     val nativeContacts: MutableMap<String,String> = mutableMapOf(),
     val nativeChats: MutableSet<String> = mutableSetOf(),
+    val closedChannels: MutableSet<String> = mutableSetOf(),
     val channelNames: MutableMap<Int,String> = mutableMapOf(),
     val channelTexts: MutableList<ChannelText> = mutableListOf(),
     val channelCursors: MutableMap<String,Double> = mutableMapOf(),

@@ -2,7 +2,7 @@ package net.meshstar.meshcore
 
 /** Companion frames: one UART write/notification per frame, no stream delimiters. */
 class NodeError(val code: Code, val detail: Int = 0) : Exception(code.name) {
-    enum class Code { OFFLINE, TIMEOUT, FRAME, MTU, REJECTED, OCCUPIED, SECRET, STORAGE }
+    enum class Code { OFFLINE, TIMEOUT, FRAME, MTU, REJECTED, OCCUPIED, SECRET, STORAGE, CHANNEL_NAME, CHANNEL_FULL, CHANNEL_CHANGED }
 }
 internal fun valid(value: Boolean) { if (!value) throw NodeError(NodeError.Code.FRAME) }
 internal fun ByteArray.u(i: Int) = this[i].toInt() and 255
@@ -16,9 +16,11 @@ data class NodeContact(val key: ByteArray, val name: String, val type: Int, val 
         return NodeContact(b.copyOfRange(1,33), b.text(100,132), b.u(33), b.u(34), b.word(144))
     } }
 }
-data class Channel(val index: Int, val name: String, val secret: ByteArray) {
+data class Channel(val index: Int, val name: String, val secret: ByteArray, val fingerprint: ByteArray = java.security.MessageDigest.getInstance("SHA-256").digest(name.toByteArray() + byteArrayOf(0) + secret), val vacant: Boolean = name.isEmpty() && secret.all { it == 0.toByte() }) {
     val transport get() = name.trim().equals("MESHSAT", true)
-    val empty get() = name.isEmpty() && secret.all { it == 0.toByte() }
+    val empty get() = vacant
+    val protected get() = transport || name.equals("Public", true)
+    val displayName get() = Hashtag.display(name)
 }
 data class Reception(val snr: Double, val hops: Int)
 data class Datagram(val channel: Int, val type: Int, val bytes: ByteArray, val reception: Reception)
@@ -43,6 +45,10 @@ object Protocol {
         if (secret.size!=16 || secret.all { it==0.toByte() }) throw NodeError(NodeError.Code.SECRET)
         valid(index in 0..39)
         return byteArrayOf(0x20,index.toByte()) + "MESHSAT".toByteArray().copyOf(32) + secret
+    }
+    fun writeChannel(index: Int, name: String, secret: ByteArray): ByteArray {
+        valid(index in 0..39 && name.toByteArray().size <= 32 && secret.size == 16 && '\u0000' !in name)
+        return byteArrayOf(0x20, index.toByte()) + name.toByteArray().copyOf(32) + secret
     }
     /** Preserve every occupied slot unless the caller has explicit, one-attempt replacement consent. */
     fun choose(channels: List<Channel>, desired: Int, secret: ByteArray?, replace: Boolean): Pair<Channel,Boolean> {

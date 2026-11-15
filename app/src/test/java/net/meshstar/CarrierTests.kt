@@ -62,6 +62,8 @@ class CarrierTests {
     @Test fun contactsRoundTripLegacyAndCurrentLinks() {
         val contact = Contact.of(alice, "Test : + / имя")
         assertEquals(contact, Contact.parse(contact.qr))
+        assertTrue(contact.qr.startsWith("meshstar1:"))
+        assertEquals(contact, Contact.parse(contact.qr.replace("meshstar1:","meshsat1:")))
         assertEquals(contact, Contact.parse(contact.link))
         assertEquals(contact, Contact.parse(contact.link.replace("meshstar:", "meshsat:")))
         assertTrue(contact.link.startsWith("meshstar://"))

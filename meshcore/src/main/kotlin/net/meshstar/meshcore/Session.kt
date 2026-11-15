@@ -82,6 +82,35 @@ class Session(private val scope:CoroutineScope,write:suspend(ByteArray)->Unit,pr
     fun drain(){if(!state.value.companion||drainJob?.isActive==true)return
         drainJob=scope.launch{try{do{waiting=false;val b=queue.command(byteArrayOf(10),Protocol.messages+10);if(b.u(0)==10&&!waiting)break}while(isActive&&state.value.companion)}catch(e:CancellationException){throw e}catch(e:Exception){queue.close(e);disconnect();stop()}}
     }
+    private val channelEdits = Mutex()
+    private suspend fun readChannel(index: Int) = Protocol.channel(queue.command(byteArrayOf(0x1f, index.toByte()), setOf(0x12), index), index)
+    suspend fun openHashtag(input: String, slot: Int? = null, expected: ByteArray? = null): String = channelEdits.withLock {
+        val name = Hashtag.name(input)
+        if (!state.value.companion) throw NodeError(NodeError.Code.OFFLINE)
+        val channels = state.value.channels.map { readChannel(it.index) }
+        channels.firstOrNull { it.name == name && it.secret.contentEquals(Hashtag.key(name)) }?.let { publishChannels(channels); return@withLock name }
+        val target = if (slot == null) channels.firstOrNull { it.empty } ?: throw NodeError(NodeError.Code.CHANNEL_FULL)
+            else channels.firstOrNull { it.index == slot } ?: throw NodeError(NodeError.Code.FRAME)
+        valid(!target.protected)
+        if (!target.empty && (expected == null || !target.fingerprint.contentEquals(expected))) throw NodeError(NodeError.Code.CHANNEL_CHANGED)
+        queue.command(Protocol.writeChannel(target.index, name, Hashtag.key(name)), setOf(0))
+        val check = readChannel(target.index)
+        valid(check.name == name && check.secret.contentEquals(Hashtag.key(name)))
+        publishChannels(channels.map { if (it.index == check.index) check else it })
+        name
+    }
+    suspend fun leaveChannel(index: Int, expected: ByteArray) = channelEdits.withLock {
+        val current = readChannel(index)
+        valid(!current.protected)
+        if (!current.fingerprint.contentEquals(expected)) throw NodeError(NodeError.Code.CHANNEL_CHANGED)
+        queue.command(Protocol.writeChannel(index, "", ByteArray(16)), setOf(0))
+        val check = readChannel(index); valid(check.empty)
+        publishChannels(state.value.channels.map { if (it.index == index) check else it })
+    }
+    private suspend fun publishChannels(channels: List<Channel>) {
+        val safe = channels.map { it.copy(secret = byteArrayOf()) }
+        saveChannels(safe); mutable.value = state.value.copy(channels = safe)
+    }
     suspend fun send(raw:ByteArray)=sends.withLock{
         if(!state.value.ready)throw NodeError(NodeError.Code.OFFLINE)
         valid(raw.size in 1..if(raw.take(5).toByteArray().contentEquals(VoiceFrame.magic))1400 else 500)

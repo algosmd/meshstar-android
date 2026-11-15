@@ -106,11 +106,11 @@
     <string name="ms_node_slot">slot</string>
     <string name="ms_node_secret">channel secret or channel QR</string>
     <string name="ms_more">more</string>
-    <string name="ms_node_secret_help">leave blank to use the existing MESHSAT channel; otherwise paste 32 hex characters or its channel QR</string>
+    <string name="ms_node_secret_help">leave blank to use the existing MeshStar channel; otherwise paste 32 hex characters or its channel QR</string>
     <string name="ms_node_connect">connect</string>
     <string name="ms_node_occupied">slot occupied; the existing channel was preserved</string>
     <string name="ms_node_replace">replace channel</string>
-    <string name="ms_node_replace_warning">this replaces the selected slot with MESHSAT using the supplied secret</string>
+    <string name="ms_node_replace_warning">this replaces the selected slot with MeshStar using the supplied secret</string>
     <string name="ms_node_replace_confirm">confirm replacement</string>
     <string name="ms_node_forget">forget node</string>
     <string name="ms_node_channel_ready">MeshStar channel · configured</string>
@@ -121,7 +121,7 @@
     <string name="ms_node_scanning">looking for nodes…</string>
     <string name="ms_node_connecting">connecting to node…</string>
     <string name="ms_node_reading">reading channels…</string>
-    <string name="ms_node_ready">node connected · MESHSAT ready</string>
+    <string name="ms_node_ready">node connected · MeshStar ready</string>
     <string name="ms_node_text_only">node connected · text channels only</string>
     <string name="ms_node_mtu">BLE frame is too large; reconnect the node</string>
     <string name="ms_node_permission">allow Bluetooth permissions to search for nodes</string>
@@ -150,4 +150,16 @@
     <string name="ms_notification_allow">Allow notifications</string>
     <string name="ms_licenses">Codec2 · license and source</string>
     <string name="ms_command_unavailable">This command is not available in MeshStar.</string>
+    <string name="ms_channel_open">open channel</string>
+    <string name="ms_channel_name">channel name</string>
+    <string name="ms_channel_public">public channel · not end-to-end encrypted</string>
+    <string name="ms_channel_slots">choose slot</string>
+    <string name="ms_channel_free">free</string>
+    <string name="ms_channel_replace">replace channel in slot</string>
+    <string name="ms_channel_confirm">confirm</string>
+    <string name="ms_channel_leave">leave channel</string>
+    <string name="ms_channel_leave_confirm">free this slot? history stays on this phone</string>
+    <string name="ms_channel_name_error">use 2–32 letters, digits or _; maximum 32 UTF-8 bytes with #</string>
+    <string name="ms_channel_full">no free slots; choose a slot to replace</string>
+    <string name="ms_channel_changed">slot changed; refresh and confirm again</string>
 </resources>

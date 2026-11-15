@@ -5,6 +5,19 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    channel_open(R.string.ms_channel_open),
+    channel_name(R.string.ms_channel_name),
+    channel_public(R.string.ms_channel_public),
+    channel_slots(R.string.ms_channel_slots),
+    channel_free(R.string.ms_channel_free),
+    channel_replace(R.string.ms_channel_replace),
+    channel_confirm(R.string.ms_channel_confirm),
+    channel_leave(R.string.ms_channel_leave),
+    channel_leave_confirm(R.string.ms_channel_leave_confirm),
+    channel_name_error(R.string.ms_channel_name_error),
+    channel_full(R.string.ms_channel_full),
+    channel_changed(R.string.ms_channel_changed),
+
     https_required(R.string.ms_https_required),
     voice_record(R.string.ms_voice_record),
     voice_play(R.string.ms_voice_play),
