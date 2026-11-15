@@ -62,6 +62,13 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     val nodeDevices = nodeRuntime?.devices?.collectAsState()?.value.orEmpty()
     val nodeStatus = nodeRuntime?.status?.collectAsState()?.value ?: "node_off"
     val nodeRssi = nodeRuntime?.rssi?.collectAsState()?.value
+    val admin=nodeRuntime?.admin?.collectAsState()?.value?:net.meshstar.meshcore.AdminState()
+    val adminLifecycle=androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
+    DisposableEffect(nodeRuntime,adminLifecycle){
+        val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP)nodeRuntime?.closeAdmin()}
+        adminLifecycle.addObserver(observer)
+        onDispose{adminLifecycle.removeObserver(observer);nodeRuntime?.closeAdmin()}
+    }
     val nodeConflict = nodeRuntime?.conflict?.collectAsState()?.value ?: false
     val point by engine.pointOnline.collectAsState()
     val boxStatus by runtime.boxStatus.collectAsState()
@@ -130,7 +137,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         mapOf(ChatTab.BLUETOOTH to (blePeers.sumOf { it.unread } + publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != bleNickname }),
             ChatTab.LORA to (state.messages.count{!it.outgoing&&it.route==Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}+channelPeers.sumOf{it.unread}+nativePeers.sumOf{it.unread}),
             ChatTab.SATELLITE to state.messages.count{!it.outgoing&&it.route!=Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}),
-        node,nodeDevices,nodeStatus,nodeRssi,state.node,nodeConflict,state.box?.transportId!=null)
+        node,nodeDevices,nodeStatus,nodeRssi,state.node,nodeConflict,state.box?.transportId!=null,admin)
     val scope = rememberCoroutineScope()
     var feedback by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -223,6 +230,13 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                     withContext(Dispatchers.IO){engine.channelVisibility(event.channel.name,true)}
                     openedPeer=""
                 }
+                is UiAction.AdminOpen -> nodeRuntime?.openAdmin(event.key)
+                UiAction.AdminClose -> nodeRuntime?.closeAdmin()
+                is UiAction.AdminPassword -> event.received(nodeRuntime?.adminPassword().orEmpty())
+                is UiAction.AdminLogin -> nodeRuntime?.adminLogin(event.password,event.wait)
+                is UiAction.AdminRun -> nodeRuntime?.adminRun(event.text,event.wait)
+                is UiAction.AdminStatus -> nodeRuntime?.adminStatus(event.wait)
+                UiAction.AdminForget -> nodeRuntime?.forgetAdmin()
                 UiAction.NodeSettings -> nodeRuntime?.settings()
                 UiAction.NodeTelemetry -> nodeRuntime?.telemetry()
                 is UiAction.ChangeNode -> nodeRuntime?.changeSettings(event.change)

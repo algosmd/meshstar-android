@@ -46,6 +46,8 @@ import java.util.Locale
     var page by remember { mutableStateOf(initialPage) }
     var tab by remember { mutableStateOf(initialTab) }
     var selected by remember { mutableStateOf(requestedPeer) }
+    var nodeKey by remember { mutableStateOf("") }
+    var nodeSearch by remember { mutableStateOf("") }
     var hashtag by remember { mutableStateOf("") }
     var leaveConfirm by remember { mutableStateOf(false) }
     var search by remember { mutableStateOf("") }
@@ -89,6 +91,7 @@ import java.util.Locale
     LaunchedEffect(boxImport) { boxImport?.let { boxUrl = it.first; token = it.second; page = "box" } }
     LaunchedEffect(page, selected, timeline.lastOrNull()?.id) { if (page == "chat") onAction(UiAction.Read(selected)) }
     LaunchedEffect(page, selected) { voiceAudio.cancel(); onAction(UiAction.VisiblePeer(if(page=="chat")selected else null)) }
+    DisposableEffect(page){val wasAdmin=page=="admin";onDispose{if(wasAdmin)act(UiAction.AdminClose)}}
     BackHandler(page != "chats" || plus || routes) { if (plus) plus = false else if (routes) routes = false else page = "chats" }
     Surface(Modifier.fillMaxSize().testTag("meshstar.unified").safeDrawingPadding().imePadding(), color = MaterialTheme.colorScheme.background) {
         Column(Modifier.fillMaxSize().padding(horizontal = 12.dp)) {
@@ -177,6 +180,22 @@ import java.util.Locale
                         }
                     }
                 }
+                "nodes" -> {
+                    CompactField(nodeSearch,{nodeSearch=it},tr(T.search))
+                    LazyColumn(Modifier.weight(1f)){
+                        items(model.node.contacts.filter{nodeSearch.isBlank()||it.name.contains(nodeSearch,true)||it.key.hex().startsWith(nodeSearch,true)},key={it.key.hex()}){contact->
+                            MeshButton(contact.name){nodeKey=contact.key.hex();navigate("nodecard")}
+                        }
+                    }
+                }
+                "nodecard" -> ScrollPage {
+                    model.node.contacts.firstOrNull{it.key.hex()==nodeKey}?.let { contact->
+                        Text(contact.name);Secondary(contact.key.hex(),size=10)
+                        MeshButton(tr(T.chats)){act(UiAction.OpenNative(nodeKey));open("native:"+nodeKey)}
+                        if(contact.type in setOf(2,3))MeshButton(tr(T.admin_title)){scope.launch{if(onAction(UiAction.AdminOpen(nodeKey)))navigate("admin")}}
+                    }
+                }
+                "admin" -> ScrollPage { AdminControls(model.admin,onAction){navigate("nodecard")} }
                 "radio" -> ScrollPage { RadioControls(model.node.settings,onAction) }
                 "channels" -> ScrollPage {
                     HashtagControls(model.node, hashtag, {hashtag=it}, onAction) { name->open(net.meshstar.meshcore.Hashtag.id(name)) }
@@ -317,7 +336,7 @@ import java.util.Locale
                         MeshCard { MeshButton(tr(T.node_refresh)){act(UiAction.RefreshNode)};MeshButton(tr(T.node_advertise)){act(UiAction.AdvertiseNode)} }
                         MeshButton(tr(T.radio_settings)){navigate("radio")}
                         MeshButton(tr(T.channel_open)){navigate("channels")}
-                        Secondary(tr(T.node_contacts));model.node.contacts.forEach { contact->MeshButton(contact.name){act(UiAction.OpenNative(contact.key.hex()));open("native:"+contact.key.hex())} }
+                        MeshButton(tr(T.node_contacts)){navigate("nodes")}
                         Secondary(tr(T.node_adverts));model.node.advertisements.forEach { Secondary(it.name,size=12) }
                         model.node.channels.filterNot{it.transport || it.name.isBlank()}.forEach{channel->MeshButton(channel.displayName){open("channel:"+channel.name.lowercase())}}
                     }

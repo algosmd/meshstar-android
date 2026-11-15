@@ -20,7 +20,7 @@ data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = e
     val node: net.meshstar.meshcore.NodeState = net.meshstar.meshcore.NodeState(),
     val nodeDevices: List<net.meshstar.meshcore.NodeDevice> = emptyList(), val nodeStatus:String="node_off",
     val nodeRssi:Int?=null, val nodeConfig: net.meshstar.meshcore.NodeConfiguration?=null, val nodeConflict:Boolean=false,
-    val relayAvailable:Boolean=false)
+    val relayAvailable:Boolean=false,val admin:net.meshstar.meshcore.AdminState=net.meshstar.meshcore.AdminState())
 sealed interface UiAction {
     data class Send(val peer: String, val text: String, val path: PathChoice): UiAction
     data class SendVoice(val peer: String, val codec: ByteArray, val path: PathChoice): UiAction
@@ -37,6 +37,13 @@ sealed interface UiAction {
     data class OpenNative(val key:String):UiAction
     data class OpenHashtag(val name:String,val slot:Int?=null,val expected:ByteArray?=null):UiAction
     data class LeaveChannel(val channel:net.meshstar.meshcore.Channel):UiAction
+    data class AdminOpen(val key:String):UiAction
+    data object AdminClose:UiAction
+    data class AdminPassword(val received:(String)->Unit):UiAction
+    data class AdminLogin(val password:String,val wait:Int):UiAction
+    data class AdminRun(val text:String,val wait:Int):UiAction
+    data class AdminStatus(val wait:Int):UiAction
+    data object AdminForget:UiAction
     data object NodeSettings:UiAction
     data object NodeTelemetry:UiAction
     data class ChangeNode(val change:net.meshstar.meshcore.NodeChange):UiAction

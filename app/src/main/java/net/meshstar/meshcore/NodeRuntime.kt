@@ -4,11 +4,14 @@ import android.content.Context
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import net.meshstar.data.SatEngine
+import net.meshstar.rnslite.hex
 
 /** Shares the existing foreground-service owner; no radio work outlives a stopped runtime. */
 class NodeRuntime(context:Context,private val engine:SatEngine) {
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.Main.immediate)
     private val radio=MeshCoreBle(context.applicationContext,scope)
+    private val files=net.meshstar.identity.EncryptedFiles(context.applicationContext)
+    val admin=MutableStateFlow(AdminState())
     val devices=radio.devices;val rssi=radio.rssi
     val state=MutableStateFlow(NodeState());val status=MutableStateFlow("node_off")
     val conflict=MutableStateFlow(false)
@@ -51,7 +54,7 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
             previous?.join()
             var backoff=2000L;var consent=replace
             while(isActive&&started){
-                var receive:Job?=null;var updates:Job?=null
+                var receive:Job?=null;var updates:Job?=null;var adminUpdates:Job?=null
                 try{
                     failure=null;flushPending()
                     status.value="node_connecting";radio.connect(initial.device)
@@ -60,10 +63,12 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                         packet={raw,reception->deliver(Pending.Packet(raw,reception,engine.state.value.node?.publicKey?:throw NodeError(NodeError.Code.OFFLINE)))},
                         foreign={text->deliver(Pending.Text(text))},
                         saveChannels={channels->withContext(Dispatchers.IO){engine.saveChannels(channels)}},
-                        saveContacts={contacts->withContext(Dispatchers.IO){engine.saveNativeContacts(contacts)}})
+                        saveContacts={contacts->withContext(Dispatchers.IO){engine.saveNativeContacts(contacts)}},
+                        saveAdmin={key,password->withContext(Dispatchers.IO){files.write("admin."+key.hex(),password.toByteArray())}})
                     session=s
                     receive=launch{for(frame in radio.frames){try{s.queue.receive(frame)}catch(e:CancellationException){throw e}catch(e:Exception){failure=e;s.queue.close(e);break}}}
                     updates=launch{s.state.collect{state.value=it}}
+                    adminUpdates=launch{s.admin.state.collect{admin.value=it}}
                     status.value="node_reading"
                     s.initialize(engine.state.value.node?:initial,consent);consent=false
                     status.value=if(s.state.value.ready)"node_ready"else "node_text_only";backoff=2000
@@ -77,13 +82,20 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                 catch(e:Exception){
                     consent=false;status.value=when((e as? NodeError)?.code){NodeError.Code.OCCUPIED->"node_occupied";NodeError.Code.SECRET->"node_secret";NodeError.Code.MTU->"node_mtu";else->"node_failed"}
                     if(e is NodeError&&e.code==NodeError.Code.OCCUPIED){conflict.value=true;break}
-                }finally{receive?.cancel();updates?.cancel();session?.stop();session=null;radio.disconnect();state.value=NodeState()}
+                }finally{receive?.cancel();updates?.cancel();adminUpdates?.cancel();admin.value=AdminState();session?.stop();session=null;radio.disconnect();state.value=NodeState()}
                 delay(backoff);backoff=minOf(30000,backoff*2)
             }
         }
     }
     suspend fun openHashtag(name:String,slot:Int?,expected:ByteArray?) = session?.openHashtag(name,slot,expected) ?: throw NodeError(NodeError.Code.OFFLINE)
     suspend fun leaveChannel(index:Int,expected:ByteArray) { session?.leaveChannel(index,expected) ?: throw NodeError(NodeError.Code.OFFLINE) }
+    fun openAdmin(key:String){val contact=state.value.contacts.firstOrNull{it.key.hex()==key}?:throw NodeError(NodeError.Code.OFFLINE);session?.admin?.open(contact)?:throw NodeError(NodeError.Code.OFFLINE)}
+    fun closeAdmin(){session?.admin?.close()}
+    suspend fun adminPassword():String=withContext(Dispatchers.IO){admin.value.contact?.key?.let{files.read("admin."+it.hex())?.toString(Charsets.UTF_8)}.orEmpty()}
+    suspend fun forgetAdmin(){withContext(Dispatchers.IO){admin.value.contact?.key?.let{files.delete("admin."+it.hex())}}}
+    suspend fun adminLogin(password:String,wait:Int){session?.admin?.login(password,wait)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun adminRun(text:String,wait:Int){session?.admin?.run(text,wait)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun adminStatus(wait:Int){session?.admin?.status(wait)?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun settings(){session?.refreshSettings()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun telemetry(){session?.refreshTelemetry()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun changeSettings(change:NodeChange){session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}

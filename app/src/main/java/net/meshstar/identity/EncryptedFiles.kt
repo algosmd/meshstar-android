@@ -52,6 +52,7 @@ class EncryptedFiles(context: Context, private val namespace: String = "meshstar
         try { stream.write(data); file.finishWrite(stream) }
         catch (error: Exception) { file.failWrite(stream); throw error }
     }
+    @Synchronized fun delete(name:String) { require(name.matches(Regex("[a-z0-9.-]+"))); AtomicFile(File(directory,name)).delete() }
     @Synchronized fun erase() {
         if (directory.listFiles().orEmpty().isEmpty()) { directory.delete(); return }
         KeyStore.getInstance("AndroidKeyStore").apply { load(null); deleteEntry(alias) }

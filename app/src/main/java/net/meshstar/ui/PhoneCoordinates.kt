@@ -27,8 +27,9 @@ import kotlinx.coroutines.delay
     if(requested){
         DisposableEffect(Unit){
             val manager=context.getSystemService(Context.LOCATION_SERVICE) as LocationManager
+            var active=true
             val listener=object:LocationListener{
-                override fun onLocationChanged(location:Location){callback(location.latitude,location.longitude);requested=false}
+                override fun onLocationChanged(location:Location){if(!active)return;active=false;callback(location.latitude,location.longitude);requested=false}
                 override fun onProviderEnabled(provider:String){}
                 override fun onProviderDisabled(provider:String){}
                 @Deprecated("platform") override fun onStatusChanged(provider:String?,status:Int,extras:Bundle?){}
@@ -37,9 +38,9 @@ import kotlinx.coroutines.delay
                 val provider=if(manager.isProviderEnabled(LocationManager.GPS_PROVIDER))LocationManager.GPS_PROVIDER else LocationManager.NETWORK_PROVIDER
                 manager.requestSingleUpdate(provider,listener,Looper.getMainLooper())
             }catch(_:Exception){requested=false;failed=true}
-            val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP){manager.removeUpdates(listener);requested=false}}
+            val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP){active=false;manager.removeUpdates(listener);requested=false}}
             lifecycle.addObserver(observer)
-            onDispose{lifecycle.removeObserver(observer);manager.removeUpdates(listener)}
+            onDispose{active=false;lifecycle.removeObserver(observer);manager.removeUpdates(listener)}
         }
         LaunchedEffect(Unit){delay(20000);requested=false;failed=true}
     }

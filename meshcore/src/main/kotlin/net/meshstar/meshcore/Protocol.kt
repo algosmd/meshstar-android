@@ -2,18 +2,18 @@ package net.meshstar.meshcore
 
 /** Companion frames: one UART write/notification per frame, no stream delimiters. */
 class NodeError(val code: Code, val detail: Int = 0) : Exception(code.name) {
-    enum class Code { OFFLINE, TIMEOUT, FRAME, MTU, REJECTED, OCCUPIED, SECRET, STORAGE, CHANNEL_NAME, CHANNEL_FULL, CHANNEL_CHANGED }
+    enum class Code { OFFLINE, TIMEOUT, FRAME, MTU, REJECTED, OCCUPIED, SECRET, STORAGE, CHANNEL_NAME, CHANNEL_FULL, CHANNEL_CHANGED, RADIO_TIMEOUT, LOGIN_FAILED, READ_ONLY, AMBIGUOUS, BUSY }
 }
 internal fun valid(value: Boolean) { if (!value) throw NodeError(NodeError.Code.FRAME) }
 internal fun ByteArray.u(i: Int) = this[i].toInt() and 255
 internal fun ByteArray.word(i: Int): Long { valid(size >= i + 4); return (0..3).fold(0L) { n, j -> n or (u(i+j).toLong() shl (8*j)) } }
 internal fun ByteArray.text(a: Int, b: Int = size) = copyOfRange(a,b).takeWhile { it != 0.toByte() }.toByteArray().toString(Charsets.UTF_8)
 fun little(value: Long) = ByteArray(4) { (value shr (8*it)).toByte() }
-data class NodeContact(val key: ByteArray, val name: String, val type: Int, val flags: Int, val modified: Long) {
+data class NodeContact(val key: ByteArray, val name: String, val type: Int, val flags: Int, val modified: Long,val pathLength:Int=255) {
     // Location fields from firmware are deliberately not decoded, retained or displayed.
     companion object { fun parse(b: ByteArray): NodeContact {
         valid(b.size == 148 && b.u(0) in setOf(3,0x8a))
-        return NodeContact(b.copyOfRange(1,33), b.text(100,132), b.u(33), b.u(34), b.word(144))
+        return NodeContact(b.copyOfRange(1,33), b.text(100,132), b.u(33), b.u(34), b.word(144),b.u(35))
     } }
 }
 data class Channel(val index: Int, val name: String, val secret: ByteArray, val fingerprint: ByteArray = java.security.MessageDigest.getInstance("SHA-256").digest(name.toByteArray() + byteArrayOf(0) + secret), val vacant: Boolean = name.isEmpty() && secret.all { it == 0.toByte() }) {

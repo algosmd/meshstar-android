@@ -5,6 +5,31 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    admin_title(R.string.ms_admin_title),
+    admin_wait(R.string.ms_admin_wait),
+    admin_timeout(R.string.ms_admin_timeout),
+    admin_failed(R.string.ms_admin_failed),
+    admin_read_only(R.string.ms_admin_read_only),
+    admin_ambiguous(R.string.ms_admin_ambiguous),
+    admin_password(R.string.ms_admin_password),
+    admin_login(R.string.ms_admin_login),
+    admin_forget(R.string.ms_admin_forget),
+    admin_waiting(R.string.ms_admin_waiting),
+    admin_time(R.string.ms_admin_time),
+    admin_version(R.string.ms_admin_version),
+    admin_neighbors(R.string.ms_admin_neighbors),
+    admin_read_radio(R.string.ms_admin_read_radio),
+    admin_read_name(R.string.ms_admin_read_name),
+    admin_status(R.string.ms_admin_status),
+    admin_sync(R.string.ms_admin_sync),
+    admin_reboot(R.string.ms_admin_reboot),
+    admin_command(R.string.ms_admin_command),
+    admin_confirm(R.string.ms_admin_confirm),
+    admin_console(R.string.ms_admin_console),
+    admin_redacted(R.string.ms_admin_redacted),
+    admin_reboot_sent(R.string.ms_admin_reboot_sent),
+    path_title(R.string.ms_path_title),
+
     radio_refresh(R.string.ms_radio_refresh),
 
     radio_settings(R.string.ms_radio_settings),
