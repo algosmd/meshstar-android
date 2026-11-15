@@ -234,4 +234,5 @@
     <string name="ms_map_unavailable">harta indisponibilă; marcajele nodurilor rămân</string>
     <string name="ms_map_nodes">noduri pe hartă</string>
     <string name="ms_location_unavailable">poziție indisponibilă; verifică permisiunea și reîncearcă</string>
+    <string name="ms_radio_saved">salvat și verificat</string>
 </resources>

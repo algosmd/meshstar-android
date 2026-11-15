@@ -234,4 +234,5 @@
     <string name="ms_map_unavailable">kartenkacheln nicht verfügbar; knotenmarker bleiben sichtbar</string>
     <string name="ms_map_nodes">knoten auf der karte</string>
     <string name="ms_location_unavailable">position nicht verfügbar; standortberechtigung prüfen und erneut versuchen</string>
+    <string name="ms_radio_saved">gespeichert und geprüft</string>
 </resources>

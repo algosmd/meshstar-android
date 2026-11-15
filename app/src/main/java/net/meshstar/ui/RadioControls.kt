@@ -39,29 +39,46 @@ import java.util.Locale
     var name by remember(settings.name){mutableStateOf(settings.name)}
     var lat by remember(settings.latitude){mutableStateOf(settings.latitude.toString())}
     var lon by remember(settings.longitude){mutableStateOf(settings.longitude.toString())}
-    var confirm by remember{mutableStateOf<NodeChange?>(null)}
     MeshCard {
         RadioParametersEditor(radio){radio=it}
         Text(tr(T.radio_warning),fontSize=12.sp,fontWeight=FontWeight.Bold)
-        MeshButton(tr(T.radio_apply),enabled=radio.valid){confirm=NodeChange.Radio(radio)}
+        NodeChangeButton(tr(T.radio_apply),NodeChange.Radio(radio),enabled=radio.valid,action=action)
     }
     MeshCard {
         Secondary(tr(T.radio_power)+" ${power.toInt()} dBm",size=12)
         Slider(power,{power=it},valueRange=-9f..settings.maxPower.coerceAtLeast(-8).toFloat(),steps=(settings.maxPower+8).coerceAtLeast(0))
         RadioPreset.all.firstOrNull{it.radio==radio}?.limit?.let{Secondary(tr(T.radio_limit)+" $it dBm",size=10)}
-        MeshButton(tr(T.save)){confirm=NodeChange.Power(power.toInt())}
+        NodeChangeButton(tr(T.save),NodeChange.Power(power.toInt()),action=action)
     }
     MeshCard { CompactField(name,{name=it},tr(T.nickname));MeshButton(tr(T.save)){act(UiAction.ChangeNode(NodeChange.Name(name)))} }
     MeshCard {
         CompactField(lat,{lat=it},tr(T.radio_latitude));CompactField(lon,{lon=it},tr(T.radio_longitude))
-        MeshButton(tr(T.radio_coordinates),enabled=lat.toDoubleOrNull()!=null&&lon.toDoubleOrNull()!=null){confirm=NodeChange.Coordinates(lat.toDouble(),lon.toDouble())}
-        PhoneCoordinates { a,b->lat=a.toString();lon=b.toString();confirm=NodeChange.Coordinates(a,b) }
+        val coordinates=NodeChange.Coordinates(lat.toDoubleOrNull()?:Double.NaN,lon.toDoubleOrNull()?:Double.NaN)
+        NodeChangeButton(tr(T.radio_coordinates),coordinates,enabled=coordinates.latitude.isFinite()&&coordinates.longitude.isFinite(),action=action)
+        PhoneCoordinates { a,b->lat=a.toString();lon=b.toString() }
         MeshButton(tr(T.radio_hide)+if(settings.advertPolicy==1)" ✓" else ""){act(UiAction.ChangeNode(NodeChange.AdvertPolicy(if(settings.advertPolicy==1)0 else 1)))}
     }
     MeshCard {MeshButton(tr(T.node_advertise)){act(UiAction.NodeAdvert(false))};MeshButton(tr(T.radio_flood)){act(UiAction.NodeAdvert(true))};Secondary(tr(T.radio_flood_hint),size=10)}
-    confirm?.let { change -> MeshCard {
-        Secondary(tr(T.radio_confirm),size=12)
-        MeshButton(tr(T.channel_confirm)){act(UiAction.ChangeNode(change));confirm=null}
-        MeshButton(tr(T.back)){confirm=null}
-    } }
+}
+
+/** Confirmation replaces the initiating control, so it stays visible on a small screen. */
+@Composable private fun NodeChangeButton(label:String,change:NodeChange,enabled:Boolean=true,action:suspend(UiAction)->Boolean) {
+    val scope=rememberCoroutineScope()
+    var pending by remember(change){mutableStateOf(false)}
+    var saving by remember{mutableStateOf(false)}
+    var result by remember(change){mutableStateOf<Boolean?>(null)}
+    if(pending){
+        Row {
+            MeshButton(tr(T.channel_confirm),enabled=!saving){
+                saving=true
+                scope.launch {
+                    try { result=action(UiAction.ChangeNode(change));pending=false }
+                    finally { saving=false }
+                }
+            }
+            MeshButton(tr(T.back),enabled=!saving){pending=false}
+        }
+    } else MeshButton(label,enabled=enabled&&!saving){result=null;pending=true}
+    if(saving)Secondary(tr(T.admin_waiting),size=10)
+    else result?.let{Secondary(tr(if(it)T.radio_saved else T.failed),size=10)}
 }

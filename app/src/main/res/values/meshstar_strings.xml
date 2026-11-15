@@ -234,4 +234,5 @@
     <string name="ms_map_unavailable">map tiles unavailable; node markers remain available</string>
     <string name="ms_map_nodes">nodes on map</string>
     <string name="ms_location_unavailable">position unavailable; check location permission and try again</string>
+    <string name="ms_radio_saved">saved and verified</string>
 </resources>

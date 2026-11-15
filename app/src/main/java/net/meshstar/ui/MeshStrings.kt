@@ -71,6 +71,7 @@ enum class T(val resource: Int) {
     radio_preset(R.string.ms_radio_preset),
     radio_custom(R.string.ms_radio_custom),
     radio_warning(R.string.ms_radio_warning),
+    radio_saved(R.string.ms_radio_saved),
     radio_apply(R.string.ms_radio_apply),
     radio_power(R.string.ms_radio_power),
     radio_limit(R.string.ms_radio_limit),

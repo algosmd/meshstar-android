@@ -234,4 +234,5 @@
     <string name="ms_map_unavailable">тайлы карты недоступны; маркеры нод остаются</string>
     <string name="ms_map_nodes">ноды на карте</string>
     <string name="ms_location_unavailable">положение недоступно; проверьте разрешение геолокации и повторите</string>
+    <string name="ms_radio_saved">сохранено и проверено</string>
 </resources>

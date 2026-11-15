@@ -234,4 +234,5 @@
     <string name="ms_map_unavailable">tuiles indisponibles ; marqueurs des nœuds conservés</string>
     <string name="ms_map_nodes">nœuds sur la carte</string>
     <string name="ms_location_unavailable">position indisponible ; vérifier l’autorisation et réessayer</string>
+    <string name="ms_radio_saved">enregistré et vérifié</string>
 </resources>
