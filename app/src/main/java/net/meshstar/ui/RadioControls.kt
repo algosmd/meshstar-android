@@ -15,7 +15,8 @@ import java.util.Locale
     LaunchedEffect(value.frequency){if(value.frequency.isFinite() && frequency.replace(',','.').toDoubleOrNull()!=value.frequency)frequency=value.frequency.toString()}
     var presets by remember { mutableStateOf(false) }
     MeshButton(tr(T.radio_preset)){presets=!presets}
-    if(presets)MeshCard { RadioPreset.all.forEach { preset->MeshButton(preset.name){change(preset.radio);presets=false} };Secondary(tr(T.radio_custom),size=10) }
+    val region by net.meshstar.compliance.RegionPolicy.get(androidx.compose.ui.platform.LocalContext.current).state.collectAsState()
+    if(presets)MeshCard { RegionalRules.presets(region.country).filter{RegionalRules.permits(it.radio,region.country)}.forEach { preset->MeshButton(preset.name){change(preset.radio);presets=false} };Secondary(tr(T.radio_custom),size=10) }
     CompactField(frequency,{frequency=it;change(value.copy(frequency=it.replace(',','.').toDoubleOrNull()?:Double.NaN))},"MHz")
     var bw by remember { mutableStateOf(false) }
     MeshButton("${value.bandwidth} kHz"){bw=!bw}

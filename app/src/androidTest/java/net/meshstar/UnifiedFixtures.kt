@@ -18,5 +18,7 @@ fun unifiedFixture(): UiSnapshot {
         UiMessage("m3", "Alice", "✓", 180000, false, Route.SATELLITE, true, Delivery.DELIVERED, true, "alice"))),
         listOf(UiMessage("p1", "Alice", "Hello", 60000, false, peer = "alice"), UiMessage("p2", "Alex", "Hello, MeshStar", 120000, true)),
         myQr = me.qr, myFingerprint = me.fingerprint, myAddress = me.address, pointOnline = true, boxStatus = "Box available",
-        mailStatus = "Internet server available", bleReady = true)
+        mailStatus = "Internet server available", bleReady = true,
+        region = net.meshstar.compliance.RegionPolicy.State(country="MD",preset="eu_narrow",reconfirm=false,nodes=setOf("synthetic"),hint="MD"),
+        nodeConfig=net.meshstar.meshcore.NodeConfiguration("synthetic","Synthetic",7))
 }

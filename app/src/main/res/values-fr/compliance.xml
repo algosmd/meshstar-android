@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ms_compliance_title">Région radio</string>
+    <string name="ms_compliance_hint">Choisissez le pays où vous utiliserez le nœud. La SIM ou la langue ne sont que des suggestions ; le GPS n’est pas utilisé.</string>
+    <string name="ms_compliance_country">Pays / région</string>
+    <string name="ms_compliance_search">Chercher un pays</string>
+    <string name="ms_compliance_suggested">Suggestion</string>
+    <string name="ms_compliance_change">Changer de pays</string>
+    <string name="ms_compliance_confirm">Confirmer le profil</string>
+    <string name="ms_compliance_apply">Appliquer le profil confirmé</string>
+    <string name="ms_compliance_apply_hint">Le profil confirmé sera appliqué au nœud connecté. Vérifiez les règles locales et les limites du matériel avant d’émettre.</string>
+    <string name="ms_compliance_required">Confirmez le pays et le profil du nœud avant d’envoyer une annonce.</string>
+    <string name="ms_compliance_reconfirm">Le pays de la SIM a changé ou la région reste à confirmer. Confirmez votre pays actuel.</string>
+    <string name="ms_compliance_unavailable">Aucun profil communautaire disponible. Créez un profil dans la bande indiquée.</string>
+    <string name="ms_compliance_satellite">Dans ce pays, un terminal satellite nécessite une licence.</string>
+    <string name="ms_compliance_custom">Profil personnalisé</string>
+    <string name="ms_compliance_band_error">Le canal entier doit tenir dans une bande indiquée. Saisissez les paramètres de votre communauté locale.</string>
+</resources>

@@ -1,0 +1,2016 @@
+{
+  "version": 1,
+  "presets": [
+    {
+      "id": "eu_narrow",
+      "name": "MeshStar EU/UK narrow",
+      "radio": {
+        "frequency": 869.618,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": 27,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "anz_medium",
+      "name": "Australia",
+      "radio": {
+        "frequency": 915.8,
+        "bandwidth": 250.0,
+        "spreadingFactor": 10,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "AU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "australia_narrow",
+      "name": "Australia (Narrow)",
+      "radio": {
+        "frequency": 916.575,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "AU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "australia_mid",
+      "name": "Australia (Mid)",
+      "radio": {
+        "frequency": 915.075,
+        "bandwidth": 125.0,
+        "spreadingFactor": 9,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "AU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "australia_sa_wa_qld",
+      "name": "Australia SA, WA, QLD",
+      "radio": {
+        "frequency": 923.125,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "AU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "czech_republic",
+      "name": "Czech Republic",
+      "radio": {
+        "frequency": 869.432,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CZ",
+      "ham": false,
+      "countries": [
+        "CZ"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "eu_433mhz",
+      "name": "EU 433MHz",
+      "radio": {
+        "frequency": 433.65,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "eu_uk_long_range",
+      "name": "EU/UK (Long Range)",
+      "radio": {
+        "frequency": 869.525,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "eu_medium",
+      "name": "EU/UK (Medium Range)",
+      "radio": {
+        "frequency": 869.525,
+        "bandwidth": 250.0,
+        "spreadingFactor": 10,
+        "codingRate": 5
+      },
+      "regulatoryMax": 14,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16",
+      "limit_note": "Existing MeshStar conservative power ceiling retained; not inferred from community txPower."
+    },
+    {
+      "id": "eu_uk_narrow",
+      "name": "EU/UK (Narrow)",
+      "radio": {
+        "frequency": 869.618,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "new_zealand",
+      "name": "New Zealand",
+      "radio": {
+        "frequency": 917.375,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "NZ"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "new_zealand_narrow",
+      "name": "New Zealand (Narrow)",
+      "radio": {
+        "frequency": 917.375,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "NZ"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "portugal_433",
+      "name": "Portugal 433",
+      "radio": {
+        "frequency": 433.375,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "PT"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "portugal_869",
+      "name": "Portugal 869",
+      "radio": {
+        "frequency": 869.618,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "PT"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_artyom_vvo",
+      "name": "Russia Artyom (VVO)",
+      "radio": {
+        "frequency": 864.281,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_biysk_bsk",
+      "name": "Russia Biysk (BSK)",
+      "radio": {
+        "frequency": 869.0,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_chelyabinsk_cek",
+      "name": "Russia Chelyabinsk (CEK)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_cherepovets_cee",
+      "name": "Russia Cherepovets (CEE)",
+      "radio": {
+        "frequency": 868.57,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_irkutsk_ikt",
+      "name": "Russia Irkutsk (IKT)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_ivanovo_iwa",
+      "name": "Russia Ivanovo (IWA)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_izhevsk_ijk",
+      "name": "Russia Izhevsk (IJK)",
+      "radio": {
+        "frequency": 868.732,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_kaluga_klf",
+      "name": "Russia Kaluga (KLF)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_kazan_kzn",
+      "name": "Russia Kazan (KZN)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_khabarovsk_khv",
+      "name": "Russia Khabarovsk (KHV)",
+      "radio": {
+        "frequency": 864.281,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_kirov_kvx",
+      "name": "Russia Kirov (KVX)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_lipetsk_lpk",
+      "name": "Russia Lipetsk (LPK)",
+      "radio": {
+        "frequency": 868.95,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_moscow_mow",
+      "name": "Russia Moscow (MOW)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_nizhny_novgorod_goj",
+      "name": "Russia Nizhny Novgorod (GOJ)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_novosibirsk_ovb",
+      "name": "Russia Novosibirsk (OVB)",
+      "radio": {
+        "frequency": 869.0,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_rostov_on_don_rov",
+      "name": "Russia Rostov-on-Don (ROV)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_ryazan_rzn",
+      "name": "Russia Ryazan (RZN)",
+      "radio": {
+        "frequency": 868.88,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_samara_kuf",
+      "name": "Russia Samara (KUF)",
+      "radio": {
+        "frequency": 864.281,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_saratov_gsv",
+      "name": "Russia Saratov (GSV)",
+      "radio": {
+        "frequency": 864.281,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_st_petersburg_led",
+      "name": "Russia St. Petersburg (LED)",
+      "radio": {
+        "frequency": 868.856,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_tambov_tbw",
+      "name": "Russia Tambov (TBW)",
+      "radio": {
+        "frequency": 868.95,
+        "bandwidth": 62.5,
+        "spreadingFactor": 10,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_tula_tya",
+      "name": "Russia Tula (TYA)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_tver_kld",
+      "name": "Russia Tver (KLD)",
+      "radio": {
+        "frequency": 869.169,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_ufa_ufa",
+      "name": "Russia Ufa (UFA)",
+      "radio": {
+        "frequency": 868.732,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_volgograd_vog",
+      "name": "Russia Volgograd (VOG)",
+      "radio": {
+        "frequency": 869.525,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_voronezh_voz",
+      "name": "Russia Voronezh (VOZ)",
+      "radio": {
+        "frequency": 868.731,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 6
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "russia_yekaterinburg_svx",
+      "name": "Russia Yekaterinburg (SVX)",
+      "radio": {
+        "frequency": 869.046,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 7
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "RU",
+      "ham": false,
+      "countries": [
+        "RU"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "switzerland",
+      "name": "Switzerland",
+      "radio": {
+        "frequency": 869.618,
+        "bandwidth": 62.5,
+        "spreadingFactor": 8,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "CH"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "usa_arizona",
+      "name": "USA Arizona",
+      "radio": {
+        "frequency": 908.205,
+        "bandwidth": 62.5,
+        "spreadingFactor": 9,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 22,
+      "region": "US",
+      "ham": false,
+      "countries": [
+        "US"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "usa_philly",
+      "name": "USA Philly",
+      "radio": {
+        "frequency": 902.25,
+        "bandwidth": 500.0,
+        "spreadingFactor": 11,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 22,
+      "region": "US",
+      "ham": false,
+      "countries": [
+        "US"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "us_medium",
+      "name": "USA/Canada",
+      "radio": {
+        "frequency": 910.525,
+        "bandwidth": 62.5,
+        "spreadingFactor": 7,
+        "codingRate": 5
+      },
+      "regulatoryMax": 30,
+      "sourcePower": 22,
+      "region": "US",
+      "ham": false,
+      "countries": [
+        "US",
+        "CA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16",
+      "limit_note": "Existing MeshStar conservative power ceiling retained; not inferred from community txPower."
+    },
+    {
+      "id": "vietnam",
+      "name": "Vietnam",
+      "radio": {
+        "frequency": 920.25,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 5
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AS923",
+      "ham": false,
+      "countries": [
+        "VN"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "off_grid_433",
+      "name": "Off-Grid 433",
+      "radio": {
+        "frequency": 433.0,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "off_grid_869",
+      "name": "Off-Grid 869",
+      "radio": {
+        "frequency": 869.495,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 14,
+      "region": "CEPT",
+      "ham": false,
+      "countries": [
+        "AL",
+        "AD",
+        "AT",
+        "BE",
+        "BA",
+        "BG",
+        "HR",
+        "CY",
+        "CZ",
+        "DK",
+        "EE",
+        "FI",
+        "FR",
+        "DE",
+        "GR",
+        "HU",
+        "IS",
+        "IE",
+        "IT",
+        "LV",
+        "LI",
+        "LT",
+        "LU",
+        "MT",
+        "MD",
+        "MC",
+        "ME",
+        "NL",
+        "MK",
+        "NO",
+        "PL",
+        "PT",
+        "RO",
+        "SM",
+        "RS",
+        "SK",
+        "SI",
+        "ES",
+        "SE",
+        "CH",
+        "TR",
+        "GB",
+        "VA"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "id": "off_grid_918",
+      "name": "Off-Grid 918",
+      "radio": {
+        "frequency": 918.0,
+        "bandwidth": 250.0,
+        "spreadingFactor": 11,
+        "codingRate": 8
+      },
+      "regulatoryMax": null,
+      "sourcePower": 20,
+      "region": "AU-NZ",
+      "ham": false,
+      "countries": [
+        "AU",
+        "NZ"
+      ],
+      "source": "https://github.com/zjs81/meshcore-open/blob/34ea0cb/lib/models/radio_settings.dart",
+      "checked_at": "2026-11-16"
+    }
+  ],
+  "bands": [
+    {
+      "country": "AL",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AL",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AD",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AD",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AT",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AT",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BE",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BE",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BA",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BA",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BG",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BG",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "HR",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "HR",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CY",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CY",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CZ",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CZ",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "DK",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "DK",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "EE",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "EE",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "FI",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "FI",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "FR",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "FR",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "DE",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "DE",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "GR",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "GR",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "HU",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "HU",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IS",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IS",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IE",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IE",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IT",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IT",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LV",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LV",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LI",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LI",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LT",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LT",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LU",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "LU",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MT",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MT",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MD",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MD",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MC",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MC",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "ME",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "ME",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "NL",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "NL",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MK",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MK",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "NO",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "NO",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "PL",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "PL",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "PT",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "PT",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RO",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RO",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SM",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SM",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RS",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RS",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SK",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SK",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SI",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SI",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "ES",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "ES",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SE",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SE",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CH",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CH",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "TR",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "TR",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "GB",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "GB",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "VA",
+      "lower": 433.05,
+      "upper": 434.79,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "VA",
+      "lower": 863,
+      "upper": 870,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "US",
+      "lower": 902,
+      "upper": 928,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CA",
+      "lower": 902,
+      "upper": 928,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AU",
+      "lower": 915,
+      "upper": 928,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "NZ",
+      "lower": 915,
+      "upper": 928,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BR",
+      "lower": 902,
+      "upper": 907.5,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BR",
+      "lower": 915,
+      "upper": 928,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IN",
+      "lower": 865,
+      "upper": 868,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "KR",
+      "lower": 917,
+      "upper": 923.5,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "UA",
+      "lower": 863,
+      "upper": 868.6,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "JP",
+      "lower": 920.5,
+      "upper": 928.1,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "VN",
+      "lower": 918,
+      "upper": 923,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RU",
+      "lower": 864,
+      "upper": 865,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RU",
+      "lower": 866,
+      "upper": 868,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RU",
+      "lower": 868.7,
+      "upper": 869.2,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CN",
+      "lower": 470,
+      "upper": 510,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CN",
+      "lower": 779,
+      "upper": 787,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "ID",
+      "lower": 920,
+      "upper": 923,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IL",
+      "lower": 917,
+      "upper": 920,
+      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
+      "checked_at": "2026-11-16"
+    }
+  ],
+  "satelliteRestricted": [
+    {
+      "country": "IN",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "CN",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "RU",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "IR",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "PK",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "BD",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "EG",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "MM",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "SD",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    },
+    {
+      "country": "AF",
+      "source": "https://github.com/algosmd/meshstar/blob/master/docs/compliance.md",
+      "checked_at": "2026-11-16"
+    }
+  ]
+}

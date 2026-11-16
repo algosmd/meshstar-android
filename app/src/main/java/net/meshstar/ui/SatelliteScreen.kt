@@ -56,6 +56,10 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 @Composable private fun ConnectedScreen(engine: SatEngine, runtime: SatRuntime, incoming: String, consumeLink: () -> Unit,
     initialPeer: String, initialDraft: String, ble: ChatViewModel?, bleReady: Boolean, language: String, appearance: String,
     onPreferences: (UiAction) -> Unit) {
+    val regionContext=LocalContext.current
+    val regionPolicy=remember { net.meshstar.compliance.RegionPolicy.get(regionContext) }
+    LaunchedEffect(Unit){regionPolicy.checkHint()}
+    val region by regionPolicy.state.collectAsState()
     val state by engine.state.collectAsState()
     val nodeRuntime by runtime.node.collectAsState()
     val node = nodeRuntime?.state?.collectAsState()?.value ?: net.meshstar.meshcore.NodeState()
@@ -66,7 +70,9 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     val admin=nodeRuntime?.admin?.collectAsState()?.value?:net.meshstar.meshcore.AdminState()
     val adminLifecycle=androidx.lifecycle.compose.LocalLifecycleOwner.current.lifecycle
     DisposableEffect(nodeRuntime,adminLifecycle){
-        val observer=androidx.lifecycle.LifecycleEventObserver{_,event->if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP){nodeRuntime?.closeAdmin();nodeRuntime?.pathClose()}}
+        val observer=androidx.lifecycle.LifecycleEventObserver{_,event->
+            if(event==androidx.lifecycle.Lifecycle.Event.ON_START)regionPolicy.checkHint()
+            else if(event==androidx.lifecycle.Lifecycle.Event.ON_STOP){nodeRuntime?.closeAdmin();nodeRuntime?.pathClose()}}
         adminLifecycle.addObserver(observer)
         onDispose{adminLifecycle.removeObserver(observer);nodeRuntime?.closeAdmin();nodeRuntime?.pathClose()}
     }
@@ -138,7 +144,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         mapOf(ChatTab.BLUETOOTH to (blePeers.sumOf { it.unread } + publicMessages.count { it.timestamp.time > publicRead && it.senderPeerID != ble?.myPeerID && it.sender != bleNickname }),
             ChatTab.LORA to (state.messages.count{!it.outgoing&&it.route==Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}+channelPeers.sumOf{it.unread}+nativePeers.sumOf{it.unread}),
             ChatTab.SATELLITE to state.messages.count{!it.outgoing&&it.route!=Route.LORA&&it.at>(state.readThrough[it.peer]?:0)}),
-        node,nodeDevices,nodeStatus,nodeRssi,state.node,nodeConflict,state.box?.transportId!=null,admin,pathState)
+        node,nodeDevices,nodeStatus,nodeRssi,state.node,nodeConflict,state.box?.transportId!=null,admin,pathState,region)
     val scope = rememberCoroutineScope()
     var feedback by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
@@ -154,7 +160,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                 is UiAction.SendVoice -> {
                     if(event.path==PathChoice.RELAY) {feedback=context.getString(T.voice_relay.resource);return false}
                     val peer=peers.firstOrNull { it.id==event.peer }
-                    val choice=resolvePath(event.path,false,currentState.internet.isNotEmpty(),currentState.box!=null,node.ready,false)
+                    val choice=resolvePath(event.path,false,currentState.internet.isNotEmpty(),currentState.box!=null && regionPolicy.state.value.satelliteAllowed,node.ready,false)
                     if(choice==null){feedback=context.getString(T.route_unavailable.resource);return false}
                     busy=true
                     withContext(Dispatchers.IO){engine.sendVoice(peer?.rns?:error("Add RNS contact"),event.codec,when(choice){"lora"->Route.LORA;"internet"->Route.INTERNET;else->Route.SATELLITE})}
@@ -181,7 +187,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                             ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null,node.ready,currentState.box?.transportId!=null)
+                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null && regionPolicy.state.value.satelliteAllowed,node.ready,currentState.box?.transportId!=null)
                     if (choice == null) { feedback = context.getString(T.route_unavailable.resource); return false }
                     if (choice == "bluetooth") {
                         check(ble != null); ble.startPrivateChat(peer?.ble ?: error("Unknown peer"))
@@ -244,6 +250,12 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                 is UiAction.AdminRun -> nodeRuntime?.adminRun(event.text,event.wait)
                 is UiAction.AdminStatus -> nodeRuntime?.adminStatus(event.wait)
                 UiAction.AdminForget -> nodeRuntime?.forgetAdmin()
+                is UiAction.RegionCountry -> regionPolicy.chooseCountry(event.code)
+                is UiAction.RegionConfirm -> {
+                    regionPolicy.confirm(event.id,event.custom)
+                    if(node.companion)nodeRuntime?.applyRegionalPreset()
+                }
+                UiAction.RegionApply -> nodeRuntime?.applyRegionalPreset()
                 UiAction.NodeSettings -> nodeRuntime?.settings()
                 UiAction.NodeTelemetry -> nodeRuntime?.telemetry()
                 is UiAction.ChangeNode -> nodeRuntime?.changeSettings(event.change)
@@ -271,6 +283,9 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
+        status == "compliance.required" -> T.compliance_required
+        status == "compliance.satellite" -> T.compliance_satellite
+        status == "compliance.band_error" -> T.compliance_band_error
         status == "HTTPS required for public servers" -> T.https_required
         status == "Node:CHANNEL_NAME" -> T.channel_name_error
         status == "Node:CHANNEL_FULL" -> T.channel_full

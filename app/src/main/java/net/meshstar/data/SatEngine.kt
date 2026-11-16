@@ -98,7 +98,9 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         val endpoint = if (url.isBlank()) "" else CarrierHttp.endpoint(url).toString().trimEnd('/')
         change { it.internet = endpoint }
     }
+    var satelliteAllowed: ()->Boolean = { true }
     suspend fun send(peer: String, text: String, route: Route): String {
+        check(route!=Route.SATELLITE||satelliteAllowed()){ "compliance.satellite" }
         require(text.isNotBlank()) { "Enter a message" }
         val s = state.value
         val contact = s.contacts.firstOrNull { it.address == peer } ?: error("Add the contact first")
@@ -119,6 +121,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         return packet.hash.hex()
     }
     suspend fun sendVoice(peer: String, codec: ByteArray, route: Route): String {
+        check(route!=Route.SATELLITE||satelliteAllowed()){ "compliance.satellite" }
         require(route != Route.RELAY) { "Voice cannot use Relay" }
         require(codec.size in 6..net.meshstar.voice.VoiceInbox.MAX_BYTES && codec.size % 6 == 0)
         val s = state.value
@@ -156,13 +159,14 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         }
     }
     suspend fun flushOutgoing(route: Route) {
+        if(route==Route.SATELLITE&&!satelliteAllowed())return
         val s = state.value
         val carrier = if (route == Route.SATELLITE) s.box?.address ?: return else s.internet.takeIf { it.isNotEmpty() }?.let(::carrierId) ?: return
         for (message in s.messages.filter { it.outgoing && !it.submitted && it.route == route && it.carrier == carrier }) {
             if (message.voice != null) {
                 for (index in message.voice.submittedParts until message.voice.frames.size) {
                     val raw = message.voice.frames[index].unhex()
-                    val id = if (route == Route.SATELLITE) BoxTransport(s.box!!, http).sendVoice(raw) else {
+                    val id = if (route == Route.SATELLITE) { if(!satelliteAllowed())return; BoxTransport(s.box!!, http).sendVoice(raw) } else {
                         val contact = s.contacts.firstOrNull { it.address == message.peer } ?: error("Unknown contact")
                         MailboxTransport(s.internet, http).drop(raw, mailboxTo(contact), "voice")
                     }
@@ -176,7 +180,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
                 continue
             }
             val packet = Packet(message.raw.unhex())
-            val id = if (route == Route.SATELLITE) BoxTransport(s.box!!, http).send(packet) else {
+            val id = if (route == Route.SATELLITE) { if(!satelliteAllowed())return; BoxTransport(s.box!!, http).send(packet) } else {
                 val contact = s.contacts.firstOrNull { it.address == message.peer } ?: continue
                 MailboxTransport(s.internet, http).drop(packet.raw, mailboxTo(contact))
             }

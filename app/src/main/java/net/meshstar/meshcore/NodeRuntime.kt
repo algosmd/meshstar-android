@@ -9,6 +9,7 @@ import net.meshstar.rnslite.unhex
 
 /** Shares the existing foreground-service owner; no radio work outlives a stopped runtime. */
 class NodeRuntime(context:Context,private val engine:SatEngine) {
+    private val region=net.meshstar.compliance.RegionPolicy.get(context)
     private val scope=CoroutineScope(SupervisorJob()+Dispatchers.Main.immediate)
     private val radio=MeshCoreBle(context.applicationContext,scope)
     private val files=net.meshstar.identity.EncryptedFiles(context.applicationContext)
@@ -60,7 +61,7 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                 try{
                     failure=null;flushPending()
                     status.value="node_connecting";radio.connect(initial.device)
-                    val s=Session(this,radio::write,{failure=NodeError(NodeError.Code.OFFLINE);radio.disconnect()},
+                    val s=Session(this,{frame->if(frame.firstOrNull()==7.toByte())requireRegion();radio.write(frame)},{failure=NodeError(NodeError.Code.OFFLINE);radio.disconnect()},
                         save={withContext(Dispatchers.IO){engine.saveNode(it)}},
                         packet={raw,reception->deliver(Pending.Packet(raw,reception,engine.state.value.node?.publicKey?:throw NodeError(NodeError.Code.OFFLINE)))},
                         foreign={text->deliver(Pending.Text(text))},
@@ -74,6 +75,8 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
                     pathUpdates=launch{s.paths.state.collect{pathState.value=it}}
                     status.value="node_reading"
                     s.initialize(engine.state.value.node?:initial,consent);consent=false
+                    s.refreshSettings()
+                    if(region.state.value.selected!=null&&!region.mayAdvertise(initial.device))applyRegionalPreset()
                     status.value=if(s.state.value.ready)"node_ready"else "node_text_only";backoff=2000
                     while(isActive){
                         failure?.let{throw it}
@@ -107,9 +110,23 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
     suspend fun adminStatus(wait:Int){session?.admin?.status(wait)?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun settings(){session?.refreshSettings()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun telemetry(){session?.refreshTelemetry()?:throw NodeError(NodeError.Code.OFFLINE)}
-    suspend fun changeSettings(change:NodeChange){session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}
-    suspend fun sendAdvert(flood:Boolean){session?.sendAdvert(flood)?:throw NodeError(NodeError.Code.OFFLINE)}
-    suspend fun advertise(){session?.advertise()?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun changeSettings(change:NodeChange){if(change is NodeChange.Radio)require(RegionalRules.permits(change.value,region.state.value.country)){"compliance.band_error"};session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}
+    private fun requireRegion(){
+        val radio=state.value.settings?.radio
+        check(region.mayAdvertise(engine.state.value.node?.device)&&radio!=null&&RegionalRules.permits(radio,region.state.value.country)){"compliance.required"}
+    }
+    suspend fun applyRegionalPreset(){
+        val before=region.state.value;val preset=before.selected?:error("compliance.required")
+        check(!before.reconfirm)
+        val id=engine.state.value.node?.device?:error("Node not connected")
+        changeSettings(NodeChange.Radio(preset.radio))
+        val current=session?.state?.value?.settings?:error("Node not connected")
+        preset.limit?.let{if(current.power>it)changeSettings(NodeChange.Power(minOf(it,current.maxPower)))}
+        check(region.state.value==before&&engine.state.value.node?.device==id){"compliance.required"}
+        region.approve(id)
+    }
+    suspend fun sendAdvert(flood:Boolean){requireRegion();session?.sendAdvert(flood)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun advertise(){requireRegion();session?.advertise()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun refresh(){session?.refreshContacts()?:throw NodeError(NodeError.Code.OFFLINE)}
     private var lastTextTimestamp=0L
     private fun nextTimestamp():Long = maxOf(System.currentTimeMillis()/1000,lastTextTimestamp+1).also{lastTextTimestamp=it}

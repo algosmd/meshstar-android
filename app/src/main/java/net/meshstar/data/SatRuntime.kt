@@ -34,7 +34,7 @@ class SatRuntime private constructor(private val context: Context) {
     private val initialized = scope.async {
         try {
             val files = EncryptedFiles(context.applicationContext)
-            SatEngine(files.identity(), EncryptedStateStore(files)).also { it.initializeReadTracking(); engineValue.value = it }
+            SatEngine(files.identity(), EncryptedStateStore(files)).also { it.satelliteAllowed={net.meshstar.compliance.RegionPolicy.get(context).state.value.satelliteAllowed}; it.initializeReadTracking(); engineValue.value = it }
         } catch (e: Exception) { startupError.value = "Keystore / storage unavailable. Identity was not replaced."; throw e }
     }
     @Synchronized fun attach(owner: Any) {
@@ -101,7 +101,7 @@ class SatRuntime private constructor(private val context: Context) {
     }
 }
 
-fun safeFailure(error: Throwable): String = when (error) {
+fun safeFailure(error: Throwable): String = if(error.message in setOf("compliance.required","compliance.satellite","compliance.band_error"))error.message!! else when (error) {
     is net.meshstar.box.CleartextEndpointRejected -> "HTTPS required for public servers"
     is net.meshstar.meshcore.NodeError -> "Node:"+error.code.name
     is HttpFailure -> when (error.code) {

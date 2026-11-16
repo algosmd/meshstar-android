@@ -114,6 +114,7 @@ import java.util.Locale
                 Secondary(tr(T.miui_hint),size=10)
                 Row{MeshButton(tr(T.app_settings)){appSettings()};MeshButton(tr(T.done)){showPowerHint=false;uiPrefs.edit().putBoolean("miuiHintSeen",true).apply()}}
             }
+            if(!model.region.satelliteAllowed)Secondary(tr(T.compliance_satellite),size=12)
             if (feedback != null) Secondary(feedback, size = 12)
             if (copied) Secondary(tr(T.copied))
             if (busy) LinearProgressIndicator(Modifier.fillMaxWidth().height(2.dp))
@@ -231,13 +232,13 @@ import java.util.Locale
                         }
                     }
                     if(model.node.companion) MeshButton(model.node.name + " · LoRa · " + (model.nodeRssi?.let { "$it dBm · " } ?: "") + "#${model.node.slot}") { navigate("node") }
-                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
+                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
                     LazyColumn(Modifier.weight(1f).testTag("meshstar.timeline"), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message, if(selected.startsWith("channel:")) { tag -> hashtag=tag;navigate("channels") } else null, { inspectedMessage=message;nodeKey=selected.removePrefix("native:").takeIf{selected.startsWith("native:")}.orEmpty();navigate("messagepath") }) }
                     }
                     if (selected != "public" && peer?.rns != null) {
                         if (routes) MeshCard {
-                            PathChoice.entries.forEach { choice ->
+                            PathChoice.entries.filter{it!=PathChoice.SATELLITE || model.region.satelliteAllowed}.forEach { choice ->
                                 Row(Modifier.fillMaxWidth().heightIn(min = 44.dp).clickable {
                                     path = choice; routes = false
                                 }.semantics { role = Role.RadioButton; this.selected = choice == path }, verticalAlignment = Alignment.CenterVertically) {
@@ -253,7 +254,7 @@ import java.util.Locale
                     }
                     if ((path == PathChoice.LORA || path == PathChoice.RELAY) && !model.node.ready) Secondary(tr(T.radio_unavailable), size = 10)
                     val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { net.meshstar.meshcore.Hashtag.id(it.name)==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
-                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(),model.node.ready,model.relayAvailable) != null
+                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable) != null
                     val voiceRoute = resolvePath(path, false, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(), model.node.ready, false)
                     val voiceEnabled = !busy && peer?.rns != null && voiceRoute != null && path != PathChoice.RELAY
                     if (peer?.rns != null) {
@@ -328,7 +329,11 @@ import java.util.Locale
                     }
                     Secondary(tr(T.background_hint), size = 10)
                 }
+                "region" -> ScrollPage { RegionControls(model.region,onAction) }
                 "node" -> ScrollPage {
+                    if(model.region.reconfirm || model.region.selected==null || (model.node.companion && model.nodeConfig?.device !in model.region.nodes)){RegionControls(model.region,onAction);return@ScrollPage}
+                    MeshButton(tr(T.compliance_country)){navigate("region")}
+                    if(model.node.companion && model.nodeConfig?.device !in model.region.nodes)MeshButton(tr(T.compliance_apply)){act(UiAction.RegionApply)}
                     Text(tr(T.node));Secondary(nodeStatusText(model.nodeStatus))
                     if(model.node.companion)Secondary(model.node.name+" · "+(model.nodeRssi?.let { "$it dBm · " }?:"")+"#${model.node.slot}")
                     MeshCard {
@@ -368,6 +373,7 @@ import java.util.Locale
                 }
                 else -> ScrollPage {
                     Text(tr(T.settings))
+                    MeshButton(tr(T.compliance_country)){navigate("region")}
                     MeshCard { MeshButton(tr(T.box_settings), Modifier.fillMaxWidth()) { navigate("box") }; MeshButton(tr(T.node), Modifier.fillMaxWidth()) { navigate("node") } }
                     MeshCard {
                         Text(tr(T.appearance))

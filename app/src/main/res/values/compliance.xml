@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ms_compliance_title">Radio region</string>
+    <string name="ms_compliance_hint">Choose the country where you will use this node. The SIM or locale is only a suggestion; GPS is not used.</string>
+    <string name="ms_compliance_country">Country / region</string>
+    <string name="ms_compliance_search">Find country</string>
+    <string name="ms_compliance_suggested">Suggested</string>
+    <string name="ms_compliance_change">Change country</string>
+    <string name="ms_compliance_confirm">Confirm preset</string>
+    <string name="ms_compliance_apply">Apply confirmed preset</string>
+    <string name="ms_compliance_apply_hint">The confirmed preset will be applied to the connected node. Review local rules and your hardware limits before transmitting.</string>
+    <string name="ms_compliance_required">Confirm the country and node preset before sending an advert.</string>
+    <string name="ms_compliance_reconfirm">SIM country changed or region confirmation is incomplete. Confirm your current country.</string>
+    <string name="ms_compliance_unavailable">No community preset is available. Use a custom preset within a listed band.</string>
+    <string name="ms_compliance_satellite">In this country, a satellite terminal requires a licence.</string>
+    <string name="ms_compliance_custom">Custom preset</string>
+    <string name="ms_compliance_band_error">The whole channel must fit within a listed band. Enter your local community’s parameters.</string>
+</resources>

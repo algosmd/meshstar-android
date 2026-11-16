@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ms_compliance_title">Funkregion</string>
+    <string name="ms_compliance_hint">Wähle das Land, in dem du den Knoten nutzt. SIM oder Sprache liefern nur einen Vorschlag; GPS wird nicht verwendet.</string>
+    <string name="ms_compliance_country">Land / Region</string>
+    <string name="ms_compliance_search">Land suchen</string>
+    <string name="ms_compliance_suggested">Vorschlag</string>
+    <string name="ms_compliance_change">Land ändern</string>
+    <string name="ms_compliance_confirm">Profil bestätigen</string>
+    <string name="ms_compliance_apply">Bestätigtes Profil anwenden</string>
+    <string name="ms_compliance_apply_hint">Das bestätigte Profil wird auf den verbundenen Knoten angewendet. Prüfe vor dem Senden lokale Regeln und Hardwaregrenzen.</string>
+    <string name="ms_compliance_required">Bestätige Land und Knotenprofil vor dem Senden einer Ankündigung.</string>
+    <string name="ms_compliance_reconfirm">Das SIM-Land hat sich geändert oder die Region ist unbestätigt. Bestätige dein aktuelles Land.</string>
+    <string name="ms_compliance_unavailable">Kein Community-Profil verfügbar. Erstelle ein eigenes Profil im angegebenen Band.</string>
+    <string name="ms_compliance_satellite">In diesem Land benötigt ein Satellitenterminal eine Lizenz.</string>
+    <string name="ms_compliance_custom">Eigenes Profil</string>
+    <string name="ms_compliance_band_error">Der gesamte Kanal muss in einem aufgeführten Band liegen. Gib die Parameter deiner lokalen Community ein.</string>
+</resources>

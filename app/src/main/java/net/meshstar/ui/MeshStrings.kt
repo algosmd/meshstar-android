@@ -5,6 +5,22 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    compliance_title(R.string.ms_compliance_title),
+    compliance_hint(R.string.ms_compliance_hint),
+    compliance_country(R.string.ms_compliance_country),
+    compliance_search(R.string.ms_compliance_search),
+    compliance_suggested(R.string.ms_compliance_suggested),
+    compliance_change(R.string.ms_compliance_change),
+    compliance_confirm(R.string.ms_compliance_confirm),
+    compliance_apply(R.string.ms_compliance_apply),
+    compliance_apply_hint(R.string.ms_compliance_apply_hint),
+    compliance_required(R.string.ms_compliance_required),
+    compliance_reconfirm(R.string.ms_compliance_reconfirm),
+    compliance_unavailable(R.string.ms_compliance_unavailable),
+    compliance_satellite(R.string.ms_compliance_satellite),
+    compliance_custom(R.string.ms_compliance_custom),
+    compliance_band_error(R.string.ms_compliance_band_error),
+
     location_unavailable(R.string.ms_location_unavailable),
 
     map_title(R.string.ms_map_title),

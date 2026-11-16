@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ms_compliance_title">Регион радио</string>
+    <string name="ms_compliance_hint">Выберите страну использования ноды. SIM или локаль — только подсказка; GPS не используется.</string>
+    <string name="ms_compliance_country">Страна / регион</string>
+    <string name="ms_compliance_search">Найти страну</string>
+    <string name="ms_compliance_suggested">Предложено</string>
+    <string name="ms_compliance_change">Изменить страну</string>
+    <string name="ms_compliance_confirm">Подтвердить пресет</string>
+    <string name="ms_compliance_apply">Применить подтверждённый пресет</string>
+    <string name="ms_compliance_apply_hint">Подтверждённый пресет будет применён к подключённой ноде. Перед передачей проверьте местные правила и ограничения оборудования.</string>
+    <string name="ms_compliance_required">Подтвердите страну и пресет ноды перед отправкой анонса.</string>
+    <string name="ms_compliance_reconfirm">Страна SIM изменилась или регион ещё не подтверждён. Подтвердите текущую страну.</string>
+    <string name="ms_compliance_unavailable">Нет пресета сообщества. Задайте свой пресет в указанной полосе.</string>
+    <string name="ms_compliance_satellite">В этой стране спутниковый терминал требует лицензии.</string>
+    <string name="ms_compliance_custom">Свой пресет</string>
+    <string name="ms_compliance_band_error">Весь канал должен помещаться в указанную полосу. Введите параметры местного сообщества.</string>
+</resources>

@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="ms_compliance_title">Regiune radio</string>
+    <string name="ms_compliance_hint">Alegeți țara în care veți folosi nodul. SIM-ul sau limba oferă doar o sugestie; GPS nu este utilizat.</string>
+    <string name="ms_compliance_country">Țară / regiune</string>
+    <string name="ms_compliance_search">Caută țara</string>
+    <string name="ms_compliance_suggested">Sugestie</string>
+    <string name="ms_compliance_change">Schimbă țara</string>
+    <string name="ms_compliance_confirm">Confirmă presetarea</string>
+    <string name="ms_compliance_apply">Aplică presetarea confirmată</string>
+    <string name="ms_compliance_apply_hint">Presetarea confirmată va fi aplicată nodului conectat. Verificați regulile locale și limitele echipamentului înainte de transmisie.</string>
+    <string name="ms_compliance_required">Confirmați țara și presetarea nodului înainte de a trimite un anunț.</string>
+    <string name="ms_compliance_reconfirm">Țara SIM s-a schimbat sau regiunea nu este confirmată. Confirmați țara actuală.</string>
+    <string name="ms_compliance_unavailable">Nu există o presetare comunitară. Introduceți una proprie în banda indicată.</string>
+    <string name="ms_compliance_satellite">În această țară, terminalul prin satelit necesită o licență.</string>
+    <string name="ms_compliance_custom">Presetare proprie</string>
+    <string name="ms_compliance_band_error">Întregul canal trebuie să încapă într-o bandă listată. Introduceți parametrii comunității locale.</string>
+</resources>

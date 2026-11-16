@@ -56,3 +56,8 @@
 
 -keep class net.meshstar.data.VoiceNote { *; }
 -keep class net.meshstar.data.VoiceParts { *; }
+
+# Bundled regional JSON and persisted consent are reflection-serialized.
+-keep class net.meshstar.meshcore.RegionalRules$* { *; }
+-keep class net.meshstar.meshcore.RadioParameters { *; }
+-keep class net.meshstar.compliance.RegionPolicy$State { *; }

@@ -18,13 +18,10 @@ data class RadioParameters(val frequency:Double,val bandwidth:Double,val sf:Int,
     }
     companion object { val bandwidths=listOf(7.8,10.4,15.6,20.8,31.25,41.7,62.5,125.0,250.0,500.0) }
 }
-data class RadioPreset(val id:String,val name:String,val radio:RadioParameters,val limit:Int?) {
-    companion object { val all=listOf(
-        RadioPreset("eu_narrow","EU/UK narrow (MeshStar default)",RadioParameters(869.618,62.5,8,8),27),
-        RadioPreset("eu_medium","EU/UK medium",RadioParameters(869.525,250.0,10,5),14),
-        RadioPreset("us_medium","US/CA medium",RadioParameters(910.525,62.5,7,5),30),
-        RadioPreset("anz_medium","AU/NZ medium",RadioParameters(915.8,250.0,10,5),null)) }
+data class RadioPreset(val id:String,val name:String,val radio:RadioParameters,val limit:Int?,val region:String="CEPT",val ham:Boolean=false,val countries:Set<String> = emptySet()) {
+    companion object { val all get()=RegionalRules.presets }
 }
+
 data class NodeSettings(val name:String,val key:ByteArray,val radio:RadioParameters,val power:Int,val maxPower:Int,
     val latitude:Double,val longitude:Double,val advertPolicy:Int,val telemetry:Int,val manualContacts:Int,val multiAcks:Int,
     val firmware:String="",val repeat:Boolean?=null,val batteryMV:Int?=null,val measurements:Map<String,Double> = emptyMap()) {

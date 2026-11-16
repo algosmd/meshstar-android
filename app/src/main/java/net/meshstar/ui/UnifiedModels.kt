@@ -20,8 +20,11 @@ data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = e
     val node: net.meshstar.meshcore.NodeState = net.meshstar.meshcore.NodeState(),
     val nodeDevices: List<net.meshstar.meshcore.NodeDevice> = emptyList(), val nodeStatus:String="node_off",
     val nodeRssi:Int?=null, val nodeConfig: net.meshstar.meshcore.NodeConfiguration?=null, val nodeConflict:Boolean=false,
-    val relayAvailable:Boolean=false,val admin:net.meshstar.meshcore.AdminState=net.meshstar.meshcore.AdminState(),val pathState:net.meshstar.meshcore.PathState=net.meshstar.meshcore.PathState())
+    val relayAvailable:Boolean=false,val admin:net.meshstar.meshcore.AdminState=net.meshstar.meshcore.AdminState(),val pathState:net.meshstar.meshcore.PathState=net.meshstar.meshcore.PathState(),val region:net.meshstar.compliance.RegionPolicy.State=net.meshstar.compliance.RegionPolicy.State())
 sealed interface UiAction {
+    data class RegionCountry(val code:String):UiAction
+    data class RegionConfirm(val id:String,val custom:net.meshstar.meshcore.RadioParameters?=null):UiAction
+    data object RegionApply:UiAction
     data class Send(val peer: String, val text: String, val path: PathChoice): UiAction
     data class SendVoice(val peer: String, val codec: ByteArray, val path: PathChoice): UiAction
     data class VisiblePeer(val peer: String?): UiAction
