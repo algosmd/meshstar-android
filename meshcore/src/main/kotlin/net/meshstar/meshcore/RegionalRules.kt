@@ -4,7 +4,7 @@ import com.google.gson.Gson
 
 /** Bundled, versioned policy: preset facts, frequency bands and route restrictions are separate. */
 object RegionalRules {
-    data class Band(val country:String,val lower:Double,val upper:Double)
+    data class Band(val country:String,val lower:Double,val upper:Double,val source:String)
     private data class Restriction(val country:String)
     private data class Radio(val frequency:Double,val bandwidth:Double,val spreadingFactor:Int,val codingRate:Int)
     private data class Preset(val id:String,val name:String,val radio:Radio,val regulatoryMax:Int?,val region:String,val ham:Boolean,val countries:Set<String>)

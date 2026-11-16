@@ -101,7 +101,7 @@ class SatRuntime private constructor(private val context: Context) {
     }
 }
 
-fun safeFailure(error: Throwable): String = if(error.message in setOf("compliance.required","compliance.satellite","compliance.band_error"))error.message!! else when (error) {
+fun safeFailure(error: Throwable): String = if(error.message in setOf("compliance.required","compliance.satellite","compliance.band_error","compliance.community_required"))error.message!! else when (error) {
     is net.meshstar.box.CleartextEndpointRejected -> "HTTPS required for public servers"
     is net.meshstar.meshcore.NodeError -> "Node:"+error.code.name
     is HttpFailure -> when (error.code) {

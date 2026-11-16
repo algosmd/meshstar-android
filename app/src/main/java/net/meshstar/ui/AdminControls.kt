@@ -17,6 +17,9 @@ import net.meshstar.meshcore.*
     var waitMenu by remember{mutableStateOf(false)}
     var pending by remember{mutableStateOf<String?>(null)}
     var radio by remember{mutableStateOf(RadioPreset.all.first().radio)}
+    val region by net.meshstar.compliance.RegionPolicy.get(androidx.compose.ui.platform.LocalContext.current).state.collectAsState()
+    var radioPreset by remember(region.country){mutableStateOf<String?>(null)}
+    var pendingWarning by remember{mutableStateOf<String?>(null)}
     var radioVisible by remember{mutableStateOf(false)}
     LaunchedEffect(state.contact?.key?.toList()){action(UiAction.AdminPassword{password=it})}
     Text(tr(T.admin_title)+" · "+state.contact?.name.orEmpty())
@@ -45,13 +48,19 @@ import net.meshstar.meshcore.*
             Secondary("RSSI ${s.rssi} dBm · noise ${s.noise} dBm",size=12)
         }}
         MeshButton(tr(T.radio_settings)){radioVisible=!radioVisible}
-        if(radioVisible)MeshCard{RadioParametersEditor(radio){radio=it};MeshButton(tr(T.radio_apply),enabled=radio.valid&&!state.busy){pending=AdminProtocol.radio(radio)}}
+        if(radioVisible)MeshCard{
+            RadioParametersEditor(radio,onPreset={radioPreset=it.id;radio=it.radio}){radio=it;radioPreset=null}
+            val warning=if(radioPreset!=null&&!RegionalRules.permits(radio,region.country))communityWarning(region.country)else null
+            if(radioPreset==null&&!RegionalRules.permits(radio,region.country))Secondary(tr(T.compliance_band_error),size=12)
+            MeshButton(tr(T.radio_apply),enabled=radio.valid&&!state.busy&&(radioPreset!=null||RegionalRules.permits(radio,region.country))){pending=AdminProtocol.radio(radio);pendingWarning=warning}
+        }
         MeshCard{CompactField(name,{name=it},tr(T.nickname));MeshButton(tr(T.save),enabled=name.isNotBlank()&&!state.busy){runCatching{AdminProtocol.name(name)}.getOrNull()?.let{pending=it}}}
         CompactField(command,{command=it},tr(T.admin_command))
-        MeshButton(tr(T.send),enabled=command.isNotBlank()&&!state.busy){if(AdminProtocol.confirm(command))pending=command else{act(UiAction.AdminRun(command,wait));command=""}}
+        MeshButton(tr(T.send),enabled=command.isNotBlank()&&!state.busy){if(AdminProtocol.confirm(command)){pendingWarning=null;pending=command} else{act(UiAction.AdminRun(command,wait));command=""}}
     }
     pending?.let{raw->MeshCard{
         Secondary(tr(T.admin_confirm),size=12)
+        if(raw.startsWith("set radio "))pendingWarning?.let{Secondary(it,size=12)}
         if(!AdminProtocol.sensitive(raw))Text(raw,fontSize=12.sp)
         MeshButton(tr(T.channel_confirm),enabled=!state.busy){act(UiAction.AdminRun(raw,wait));pending=null;command=""}
         MeshButton(tr(T.back)){pending=null}

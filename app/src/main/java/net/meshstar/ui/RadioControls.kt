@@ -10,13 +10,13 @@ import net.meshstar.meshcore.*
 import kotlinx.coroutines.launch
 import java.util.Locale
 
-@Composable fun RadioParametersEditor(value:RadioParameters,change:(RadioParameters)->Unit) {
+@Composable fun RadioParametersEditor(value:RadioParameters,showPresets:Boolean=true,onPreset:((RadioPreset)->Unit)?=null,change:(RadioParameters)->Unit) {
     var frequency by remember { mutableStateOf(value.frequency.toString()) }
     LaunchedEffect(value.frequency){if(value.frequency.isFinite() && frequency.replace(',','.').toDoubleOrNull()!=value.frequency)frequency=value.frequency.toString()}
     var presets by remember { mutableStateOf(false) }
-    MeshButton(tr(T.radio_preset)){presets=!presets}
+    if(showPresets)MeshButton(tr(T.radio_preset)){presets=!presets}
     val region by net.meshstar.compliance.RegionPolicy.get(androidx.compose.ui.platform.LocalContext.current).state.collectAsState()
-    if(presets)MeshCard { RegionalRules.presets(region.country).filter{RegionalRules.permits(it.radio,region.country)}.forEach { preset->MeshButton(preset.name){change(preset.radio);presets=false} };Secondary(tr(T.radio_custom),size=10) }
+    if(presets)MeshCard { RegionalRules.presets(region.country).forEach { preset->MeshButton(preset.name){if(onPreset!=null)onPreset(preset)else change(preset.radio);presets=false} };Secondary(tr(T.radio_custom),size=10) }
     CompactField(frequency,{frequency=it;change(value.copy(frequency=it.replace(',','.').toDoubleOrNull()?:Double.NaN))},"MHz")
     var bw by remember { mutableStateOf(false) }
     MeshButton("${value.bandwidth} kHz"){bw=!bw}
@@ -36,14 +36,16 @@ import java.util.Locale
     Secondary(settings.firmware+" · "+(settings.batteryPercent?.let{"≈$it% · "}?:"")+(settings.batteryMV?.let{"${it/1000.0} V"}?:""),size=10)
     settings.measurements.forEach{(unit,value)->Secondary("$value $unit",size=10)}
     var radio by remember(settings.radio){mutableStateOf(settings.radio)}
+    val region by net.meshstar.compliance.RegionPolicy.get(androidx.compose.ui.platform.LocalContext.current).state.collectAsState()
+    var selectedPreset by remember(settings.radio,region.country){mutableStateOf<String?>(null)}
     var power by remember(settings.power){mutableFloatStateOf(settings.power.toFloat())}
     var name by remember(settings.name){mutableStateOf(settings.name)}
     var lat by remember(settings.latitude){mutableStateOf(settings.latitude.toString())}
     var lon by remember(settings.longitude){mutableStateOf(settings.longitude.toString())}
     MeshCard {
-        RadioParametersEditor(radio){radio=it}
+        RadioParametersEditor(radio,onPreset={selectedPreset=it.id;radio=it.radio}){radio=it;selectedPreset=null}
         Text(tr(T.radio_warning),fontSize=12.sp,fontWeight=FontWeight.Bold)
-        NodeChangeButton(tr(T.radio_apply),NodeChange.Radio(radio),enabled=radio.valid,action=action)
+        NodeChangeButton(tr(T.radio_apply),NodeChange.Radio(radio),enabled=radio.valid&&(selectedPreset!=null||RegionalRules.permits(radio,region.country)),action=action,communityPresetID=selectedPreset,warning=if(selectedPreset!=null&&!RegionalRules.permits(radio,region.country))communityWarning(region.country)else null,country=region.country)
     }
     MeshCard {
         Secondary(tr(T.radio_power)+" ${power.toInt()} dBm",size=12)
@@ -63,17 +65,18 @@ import java.util.Locale
 }
 
 /** Confirmation replaces the initiating control, so it stays visible on a small screen. */
-@Composable private fun NodeChangeButton(label:String,change:NodeChange,enabled:Boolean=true,action:suspend(UiAction)->Boolean) {
+@Composable private fun NodeChangeButton(label:String,change:NodeChange,enabled:Boolean=true,action:suspend(UiAction)->Boolean,communityPresetID:String?=null,warning:String?=null,country:String="") {
     val scope=rememberCoroutineScope()
-    var pending by remember(change){mutableStateOf(false)}
+    var pending by remember(change,communityPresetID,country){mutableStateOf(false)}
     var saving by remember{mutableStateOf(false)}
     var result by remember(change){mutableStateOf<Boolean?>(null)}
     if(pending){
+        if(warning!=null)Secondary(warning,size=12)
         Row {
             MeshButton(tr(T.channel_confirm),enabled=!saving){
                 saving=true
                 scope.launch {
-                    try { result=action(UiAction.ChangeNode(change));pending=false }
+                    try { result=action(UiAction.ChangeNode(change,communityPresetID,warning!=null));pending=false }
                     finally { saving=false }
                 }
             }

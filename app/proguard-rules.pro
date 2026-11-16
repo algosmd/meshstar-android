@@ -61,3 +61,4 @@
 -keep class net.meshstar.meshcore.RegionalRules$* { *; }
 -keep class net.meshstar.meshcore.RadioParameters { *; }
 -keep class net.meshstar.compliance.RegionPolicy$State { *; }
+-keep class net.meshstar.compliance.RegionPolicy$CommunityConsent { *; }

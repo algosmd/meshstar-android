@@ -15,4 +15,7 @@
     <string name="ms_compliance_satellite">În această țară, terminalul prin satelit necesită o licență.</string>
     <string name="ms_compliance_custom">Presetare proprie</string>
     <string name="ms_compliance_band_error">Întregul canal trebuie să încapă într-o bandă listată. Introduceți parametrii comunității locale.</string>
+    <string name="ms_compliance_community_warning">În afara tabelului de benzi pentru %1$s. Presetare comunitară; o folosiți pe propria răspundere.</string>
+    <string name="ms_compliance_accept_warning">Confirmă și aplică</string>
+    <string name="ms_compliance_community_required">Confirmați avertismentul presetării comunitare înainte de aplicare.</string>
 </resources>

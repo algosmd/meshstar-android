@@ -5,6 +5,10 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    compliance_community_warning(R.string.ms_compliance_community_warning),
+    compliance_accept_warning(R.string.ms_compliance_accept_warning),
+    compliance_community_required(R.string.ms_compliance_community_required),
+
     compliance_title(R.string.ms_compliance_title),
     compliance_hint(R.string.ms_compliance_hint),
     compliance_country(R.string.ms_compliance_country),

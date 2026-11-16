@@ -15,4 +15,7 @@
     <string name="ms_compliance_satellite">In this country, a satellite terminal requires a licence.</string>
     <string name="ms_compliance_custom">Custom preset</string>
     <string name="ms_compliance_band_error">The whole channel must fit within a listed band. Enter your local community’s parameters.</string>
+    <string name="ms_compliance_community_warning">Outside the band table for %1$s. This is a community preset; use it at your own responsibility.</string>
+    <string name="ms_compliance_accept_warning">Confirm and apply</string>
+    <string name="ms_compliance_community_required">Confirm the community preset warning before applying it.</string>
 </resources>

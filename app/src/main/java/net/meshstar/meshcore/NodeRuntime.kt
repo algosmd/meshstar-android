@@ -110,16 +110,16 @@ class NodeRuntime(context:Context,private val engine:SatEngine) {
     suspend fun adminStatus(wait:Int){session?.admin?.status(wait)?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun settings(){session?.refreshSettings()?:throw NodeError(NodeError.Code.OFFLINE)}
     suspend fun telemetry(){session?.refreshTelemetry()?:throw NodeError(NodeError.Code.OFFLINE)}
-    suspend fun changeSettings(change:NodeChange){if(change is NodeChange.Radio)require(RegionalRules.permits(change.value,region.state.value.country)){"compliance.band_error"};session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}
+    suspend fun changeSettings(change:NodeChange,communityPresetID:String?=null){if(change is NodeChange.Radio)require(region.state.value.canApply(change.value,communityPresetID)){"compliance.band_error"};session?.changeSettings(change)?:throw NodeError(NodeError.Code.OFFLINE)}
     private fun requireRegion(){
         val radio=state.value.settings?.radio
-        check(region.mayAdvertise(engine.state.value.node?.device)&&radio!=null&&RegionalRules.permits(radio,region.state.value.country)){"compliance.required"}
+        check(region.mayAdvertise(engine.state.value.node?.device)&&radio!=null&&region.state.value.permitsAdvertRadio(radio)){"compliance.required"}
     }
     suspend fun applyRegionalPreset(){
         val before=region.state.value;val preset=before.selected?:error("compliance.required")
         check(!before.reconfirm)
         val id=engine.state.value.node?.device?:error("Node not connected")
-        changeSettings(NodeChange.Radio(preset.radio))
+        changeSettings(NodeChange.Radio(preset.radio),preset.id.takeUnless{it=="custom"})
         val current=session?.state?.value?.settings?:error("Node not connected")
         preset.limit?.let{if(current.power>it)changeSettings(NodeChange.Power(minOf(it,current.maxPower)))}
         check(region.state.value==before&&engine.state.value.node?.device==id){"compliance.required"}

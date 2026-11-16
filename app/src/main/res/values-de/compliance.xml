@@ -15,4 +15,7 @@
     <string name="ms_compliance_satellite">In diesem Land benötigt ein Satellitenterminal eine Lizenz.</string>
     <string name="ms_compliance_custom">Eigenes Profil</string>
     <string name="ms_compliance_band_error">Der gesamte Kanal muss in einem aufgeführten Band liegen. Gib die Parameter deiner lokalen Community ein.</string>
+    <string name="ms_compliance_community_warning">Außerhalb der Bandtabelle für %1$s. Community-Profil; Nutzung auf eigene Verantwortung.</string>
+    <string name="ms_compliance_accept_warning">Bestätigen und anwenden</string>
+    <string name="ms_compliance_community_required">Bestätige vor dem Anwenden den Hinweis zum Community-Profil.</string>
 </resources>

@@ -43,6 +43,32 @@ class RegionalComplianceTest {
         restored.observeSim("fixture-b","IN","GB")
         assertEquals("MD",restored.state.value.country);assertFalse(restored.mayAdvertise("fixture"));assertNull(restored.state.value.selected)
     }
+    @Test fun communityWarningMustBeConfirmedAndCannotAuthorizeCustomEdits() {
+        val p=policy();p.chooseCountry("RU")
+        val preset=RegionalRules.presets("RU").first{it.name=="Russia Moscow (MOW)"}
+        assertFalse(RegionalRules.permits(preset.radio,"RU"))
+        assertTrue(runCatching{p.confirm(preset.id)}.isFailure)
+        assertNull(p.state.value.selected)
+        p.confirm(preset.id,acknowledgeWarning=true)
+        assertEquals(preset.id,p.state.value.selected?.id)
+        assertTrue(p.state.value.canApply(preset.radio,preset.id))
+        assertFalse(p.state.value.canApply(preset.radio))
+        assertTrue(runCatching{p.confirm("custom",preset.radio,acknowledgeWarning=true)}.isFailure)
+        val restored=RegionPolicy(ApplicationProvider.getApplicationContext<Application>())
+        assertTrue(restored.state.value.canApply(preset.radio,preset.id))
+        assertFalse(restored.state.value.canApply(preset.radio.copy(cr=5),preset.id))
+        restored.observeSim("a","RU",null);restored.observeSim("b","MD",null)
+        assertNull(restored.state.value.selected)
+        assertFalse(restored.state.value.permitsAdvertRadio(preset.radio))
+        restored.chooseCountry("MD")
+        assertTrue(runCatching{restored.confirm(preset.id,acknowledgeWarning=true)}.isFailure)
+        val offgrid=RegionalRules.presets("MD").first{it.name=="Off-Grid 433"}
+        assertTrue(runCatching{restored.confirm(offgrid.id)}.isFailure)
+        restored.confirm(offgrid.id,acknowledgeWarning=true)
+        assertTrue(restored.state.value.permitsAdvertRadio(offgrid.radio))
+        assertEquals(listOf(864.0 to 865.0,866.0 to 868.0,868.7 to 869.2),RegionalRules.bands("RU").map{it.lower to it.upper})
+        assertTrue(RegionalRules.bands("RU").all{it.source.contains("internet-law.ru")})
+    }
     @Test fun customProfileMustFitWholeChannelAndKnownCountryBand() {
         val p=policy();p.chooseCountry("IN")
         assertTrue(runCatching{p.confirm("eu_narrow")}.isFailure)

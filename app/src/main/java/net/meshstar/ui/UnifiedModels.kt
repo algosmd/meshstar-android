@@ -23,7 +23,7 @@ data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = e
     val relayAvailable:Boolean=false,val admin:net.meshstar.meshcore.AdminState=net.meshstar.meshcore.AdminState(),val pathState:net.meshstar.meshcore.PathState=net.meshstar.meshcore.PathState(),val region:net.meshstar.compliance.RegionPolicy.State=net.meshstar.compliance.RegionPolicy.State())
 sealed interface UiAction {
     data class RegionCountry(val code:String):UiAction
-    data class RegionConfirm(val id:String,val custom:net.meshstar.meshcore.RadioParameters?=null):UiAction
+    data class RegionConfirm(val id:String,val custom:net.meshstar.meshcore.RadioParameters?=null,val acknowledgeWarning:Boolean=false):UiAction
     data object RegionApply:UiAction
     data class Send(val peer: String, val text: String, val path: PathChoice): UiAction
     data class SendVoice(val peer: String, val codec: ByteArray, val path: PathChoice): UiAction
@@ -55,7 +55,7 @@ sealed interface UiAction {
     data object AdminForget:UiAction
     data object NodeSettings:UiAction
     data object NodeTelemetry:UiAction
-    data class ChangeNode(val change:net.meshstar.meshcore.NodeChange):UiAction
+    data class ChangeNode(val change:net.meshstar.meshcore.NodeChange,val communityPresetID:String?=null,val acknowledgeWarning:Boolean=false):UiAction
     data class NodeAdvert(val flood:Boolean):UiAction
     data object ScanNode:UiAction
     data class ConfigureNode(val id:String,val name:String,val slot:Int,val secret:String,val replace:Boolean=false):UiAction

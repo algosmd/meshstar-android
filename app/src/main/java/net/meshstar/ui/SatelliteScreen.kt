@@ -252,13 +252,19 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                 UiAction.AdminForget -> nodeRuntime?.forgetAdmin()
                 is UiAction.RegionCountry -> regionPolicy.chooseCountry(event.code)
                 is UiAction.RegionConfirm -> {
-                    regionPolicy.confirm(event.id,event.custom)
+                    regionPolicy.confirm(event.id,event.custom,event.acknowledgeWarning)
                     if(node.companion)nodeRuntime?.applyRegionalPreset()
                 }
                 UiAction.RegionApply -> nodeRuntime?.applyRegionalPreset()
                 UiAction.NodeSettings -> nodeRuntime?.settings()
                 UiAction.NodeTelemetry -> nodeRuntime?.telemetry()
-                is UiAction.ChangeNode -> nodeRuntime?.changeSettings(event.change)
+                is UiAction.ChangeNode -> {
+                    if(event.change is net.meshstar.meshcore.NodeChange.Radio && event.communityPresetID!=null){
+                        check(net.meshstar.meshcore.RegionalRules.presets(regionPolicy.state.value.country).any{it.id==event.communityPresetID&&it.radio==event.change.value})
+                        regionPolicy.confirm(event.communityPresetID,acknowledgeWarning=event.acknowledgeWarning)
+                        nodeRuntime?.applyRegionalPreset()
+                    } else nodeRuntime?.changeSettings(event.change)
+                }
                 is UiAction.NodeAdvert -> nodeRuntime?.sendAdvert(event.flood)
                 UiAction.ScanNode -> { if(!bleReady)onPreferences(UiAction.BluetoothSetup)else nodeRuntime?.scan() }
                 is UiAction.ConfigureNode -> nodeRuntime?.configure(event.id,event.name,event.slot,event.secret,event.replace)
@@ -283,6 +289,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
+        status == "compliance.community_required" -> T.compliance_community_required
         status == "compliance.required" -> T.compliance_required
         status == "compliance.satellite" -> T.compliance_satellite
         status == "compliance.band_error" -> T.compliance_band_error

@@ -1915,22 +1915,25 @@
       "country": "RU",
       "lower": 864,
       "upper": 865,
-      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
-      "checked_at": "2026-11-16"
+      "source": "https://internet-law.ru/documents/dop_documents/11/gost_92756/0/reshe.html",
+      "checked_at": "2026-11-16",
+      "source_document": "GKRCh 07-20-03-001, Appendix 1, revision 2023-09-27"
     },
     {
       "country": "RU",
       "lower": 866,
       "upper": 868,
-      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
-      "checked_at": "2026-11-16"
+      "source": "https://internet-law.ru/documents/dop_documents/11/gost_92756/0/reshe.html",
+      "checked_at": "2026-11-16",
+      "source_document": "GKRCh 07-20-03-001, Appendix 1, revision 2023-09-27"
     },
     {
       "country": "RU",
       "lower": 868.7,
       "upper": 869.2,
-      "source": "https://resources.lora-alliance.org/technical-specifications/rp002-1-0-5-lorawan-regional-parameters",
-      "checked_at": "2026-11-16"
+      "source": "https://internet-law.ru/documents/dop_documents/11/gost_92756/0/reshe.html",
+      "checked_at": "2026-11-16",
+      "source_document": "GKRCh 07-20-03-001, Appendix 1, revision 2023-09-27"
     },
     {
       "country": "CN",

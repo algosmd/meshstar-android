@@ -15,4 +15,7 @@
     <string name="ms_compliance_satellite">В этой стране спутниковый терминал требует лицензии.</string>
     <string name="ms_compliance_custom">Свой пресет</string>
     <string name="ms_compliance_band_error">Весь канал должен помещаться в указанную полосу. Введите параметры местного сообщества.</string>
+    <string name="ms_compliance_community_warning">Выходит за таблицу полос для %1$s. Пресет сообщества; ответственность ваша.</string>
+    <string name="ms_compliance_accept_warning">Подтвердить и применить</string>
+    <string name="ms_compliance_community_required">Подтвердите предупреждение о пресете сообщества перед применением.</string>
 </resources>
