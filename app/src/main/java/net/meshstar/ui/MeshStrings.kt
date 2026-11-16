@@ -5,6 +5,8 @@ import androidx.compose.ui.platform.LocalContext
 import com.bitchat.android.R
 
 enum class T(val resource: Int) {
+    recipient_offline(R.string.ms_recipient_offline),
+    voice_point(R.string.ms_voice_point),
     compliance_community_warning(R.string.ms_compliance_community_warning),
     compliance_accept_warning(R.string.ms_compliance_accept_warning),
     compliance_community_required(R.string.ms_compliance_community_required),

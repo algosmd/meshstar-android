@@ -232,7 +232,7 @@ import java.util.Locale
                         }
                     }
                     if(model.node.companion) MeshButton(model.node.name + " · LoRa · " + (model.nodeRssi?.let { "$it dBm · " } ?: "") + "#${model.node.slot}") { navigate("node") }
-                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
+                    if (model.pointOnline && peer?.rns != null && resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable,peer.mailboxKnown,peer.heardRadio) == "satellite") Secondary("🌐 " + tr(T.via_point), size = 10)
                     LazyColumn(Modifier.weight(1f).testTag("meshstar.timeline"), reverseLayout = true, verticalArrangement = Arrangement.spacedBy(5.dp)) {
                         items(timeline.asReversed(), key = { it.id }) { message -> MessageRow(message, if(selected.startsWith("channel:")) { tag -> hashtag=tag;navigate("channels") } else null, { inspectedMessage=message;nodeKey=selected.removePrefix("native:").takeIf{selected.startsWith("native:")}.orEmpty();navigate("messagepath") }) }
                     }
@@ -254,8 +254,9 @@ import java.util.Locale
                     }
                     if ((path == PathChoice.LORA || path == PathChoice.RELAY) && !model.node.ready) Secondary(tr(T.radio_unavailable), size = 10)
                     val enabled = !busy && input.isNotBlank() && if(selected.startsWith("channel:")) model.node.companion && model.node.channels.any { net.meshstar.meshcore.Hashtag.id(it.name)==selected && !it.transport } else if(selected.startsWith("native:")) model.node.companion && model.node.contacts.any { "native:"+it.key.hex()==selected } else if (selected == "public" || peer?.rns == null) model.bleReady else
-                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable) != null
-                    val voiceRoute = resolvePath(path, false, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty(), model.node.ready, false)
+                        resolvePath(path, peer.nearby && model.bleReady, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed,model.node.ready,model.relayAvailable,peer.mailboxKnown,peer.heardRadio) != null
+                    val voiceRoute = resolvePath(path, false, model.internet.isNotEmpty(), model.boxUrl.isNotEmpty() && model.region.satelliteAllowed, model.node.ready, false,peer?.mailboxKnown==true,peer?.heardRadio==true,voice=true)
+                    if(peer?.rns!=null && path==PathChoice.AUTO && voiceRoute==null)Secondary(tr(T.voice_point),size=10)
                     val voiceEnabled = !busy && peer?.rns != null && voiceRoute != null && path != PathChoice.RELAY
                     if (peer?.rns != null) {
                         if(path==PathChoice.RELAY) Secondary(tr(T.voice_relay),size=10)
@@ -456,7 +457,7 @@ import java.util.Locale
             }
         }
         if(message.fromBox)Secondary(tr(T.from_box),size=10)
-        if (message.outgoing && message.showDelivery) Secondary(tr(when (message.delivery) { Delivery.QUEUED -> T.queued; Delivery.SENT -> T.sent; Delivery.DELIVERED -> T.delivered }), size = 10)
+        if (message.outgoing && message.showDelivery) Secondary(tr(if(message.mailboxUnavailable && message.delivery!=Delivery.DELIVERED)T.recipient_offline else when (message.delivery) { Delivery.QUEUED -> T.queued; Delivery.SENT -> T.sent; Delivery.DELIVERED -> T.delivered }), size = 10)
     }
 }
 private fun time(at: Long): String = SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(at))

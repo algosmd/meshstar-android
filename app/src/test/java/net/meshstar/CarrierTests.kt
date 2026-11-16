@@ -273,4 +273,61 @@ class CarrierTests {
             assertTrue(job.isCancelled)
         }
     }
+    @Test fun batch22HttpPointTextAndVoiceDoNotEstablishRadioOrMailbox() = runBlocking {
+        MockWebServer().use { server ->
+            server.start();val store=store(server,true);val engine=SatEngine(alice,store,now={instant})
+            server.enqueue(response("""{"addr":"${bridge.lxmfAddress.hex()}","link":{"online":true}}"""));engine.refreshBoxStatus()
+            val packet=LXMessage.create(bob,alice,"via point".toByteArray(),1.0).packet(alice)
+            val voice=VoiceFrame.frames(bob,alice,1,ByteArray(6)).single().frame
+            server.enqueue(response("[]"))
+            server.enqueue(response("""[{"id":1,"kind":"data","raw":"${packet.raw.hex()}"},{"id":2,"kind":"voice","raw":"${voice.hex()}"}]"""))
+            server.enqueue(response(receipt(packet.prove(alice))))
+            server.enqueue(response(receipt(VoiceFrame.proof(voice,alice))))
+            engine.pollBox()
+            assertEquals(2,engine.state.value.messages.size)
+            assertTrue(engine.state.value.messages.all{it.viaPoint})
+            assertFalse(engine.state.value.heardRadio(bob.lxmfAddress.hex(),instant.toEpochMilli()))
+            assertFalse(engine.state.value.knowsMailbox(bob.lxmfAddress.hex()))
+            assertTrue(SatEngine(alice,store).state.value.messages.all{it.viaPoint})
+        }
+    }
+    @Test fun batch22MailboxTimeoutStopsDropAndLateSignedProofLearnsCapability() = runBlocking {
+        MockWebServer().use { server ->
+            server.start();val store=store(server);var clock=instant;val engine=SatEngine(alice,store,now={clock})
+            assertFalse(engine.state.value.knowsMailbox(bob.lxmfAddress.hex()))
+            assertTrue(runCatching{engine.send(bob.lxmfAddress.hex(),"auto",Route.INTERNET,automatic=true)}.isFailure)
+            val hash=engine.send(bob.lxmfAddress.hex(),"explicit first",Route.INTERNET)
+            val raw=engine.state.value.messages.single().raw
+            clock=clock.plusSeconds(601);engine.expireMailboxQueue()
+            assertTrue(engine.state.value.messages.single().mailboxUnavailable)
+            engine.flushOutgoing(Route.INTERNET);assertEquals(0,server.requestCount)
+            val proof=Packet(raw.unhex()).prove(bob)
+            val mailbox=Mailbox.address(bob,alice,alice.lxmfAddress,clock.atZone(java.time.ZoneOffset.UTC).toLocalDate()).hex()
+            server.enqueue(response(pickup(proof,mailbox)));server.enqueue(response("""{"deleted":1}"""))
+            engine.pollMailbox(0)
+            assertEquals(hash,engine.state.value.messages.single().hash)
+            assertEquals(Delivery.DELIVERED,engine.state.value.messages.single().delivery)
+            assertFalse(engine.state.value.messages.single().mailboxUnavailable)
+            assertTrue(SatEngine(alice,store).state.value.knowsMailbox(bob.lxmfAddress.hex()))
+        }
+    }
+    @Test fun batch22ExpiredAutoMailboxUsesSameCiphertextOnRecentRadioOnly() = runBlocking {
+        var clock=instant
+        val node=net.meshstar.meshcore.NodeConfiguration("synthetic","node",7,"07".repeat(16),"09".repeat(32))
+        val state=SatState(node=node,internet="http://localhost",contacts=mutableListOf(Contact.of(bob,"peer")),mailboxPeers=mutableSetOf(bob.lxmfAddress.hex()))
+        val store=MemoryStore(state);val engine=SatEngine(alice,store,now={clock})
+        val hash=engine.send(bob.lxmfAddress.hex(),"same bytes",Route.INTERNET,automatic=true)
+        val raw=engine.state.value.messages.single().raw
+        clock=clock.plusSeconds(601)
+        val incoming=LXMessage.create(bob,alice,"radio".toByteArray(),1.0).packet(alice)
+        engine.receiveRadio(incoming.raw,net.meshstar.meshcore.Reception(4.0,0))
+        engine.expireMailboxQueue(radioReady=true)
+        val moved=engine.state.value.messages.first{it.hash==hash}
+        assertEquals(Route.LORA,moved.route);assertEquals(raw,moved.raw)
+        val sent=mutableListOf<ByteArray>();engine.flushRadio{sent.add(it)}
+        assertTrue(sent.any{it.contentEquals(raw.unhex())})
+        clock=clock.plusSeconds(301)
+        assertFalse(engine.state.value.heardRadio(bob.lxmfAddress.hex(),clock.toEpochMilli()))
+    }
+
 }

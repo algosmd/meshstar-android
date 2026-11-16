@@ -7,10 +7,10 @@ enum class PathChoice(val title: T) { AUTO(T.auto), LORA(T.lora), RELAY(T.relay)
 data class UiPeer(val id: String, val name: String, val fingerprint: String = "", val rns: String? = null,
                   val ble: String? = null, val bleFingerprint: String? = null, val nearby: Boolean = false,
                   val verified: Boolean = false, val preview: String = "", val unread: Int = 0,
-                  val paths: Set<ChatTab> = emptySet(), val at: Long = 0, val qr: String = "")
+                  val paths: Set<ChatTab> = emptySet(), val at: Long = 0, val qr: String = "", val mailboxKnown:Boolean=false, val heardRadio:Boolean=false)
 data class UiMessage(val id: String, val name: String, val text: String, val at: Long, val outgoing: Boolean,
                      val route: Route? = null, val viaPoint: Boolean = false, val delivery: Delivery = Delivery.SENT,
-                     val signature: Boolean? = null, val peer: String = "", val showDelivery: Boolean = route != null, val snr:Double? = null, val hops:Int? = null, val fromBox:Boolean = false, val voice:ByteArray? = null)
+                     val signature: Boolean? = null, val peer: String = "", val showDelivery: Boolean = route != null, val snr:Double? = null, val hops:Int? = null, val fromBox:Boolean = false, val voice:ByteArray? = null, val mailboxUnavailable:Boolean=false)
 data class UiSnapshot(val name: String = "MeshStar", val peers: List<UiPeer> = emptyList(),
     val messages: Map<String, List<UiMessage>> = emptyMap(), val publicMessages: List<UiMessage> = emptyList(),
     val unreadPublic: Int = 0, val myQr: String = "", val myFingerprint: String = "", val myAddress: String = "",
@@ -65,9 +65,9 @@ sealed interface UiAction {
     data object DisableBox: UiAction
     data object BluetoothSetup: UiAction
 }
-/** Auto prefers available free paths; Relay requires explicit selection. */
-fun resolvePath(choice: PathChoice, bluetooth: Boolean, internet: Boolean, satellite: Boolean, lora:Boolean=false, relay:Boolean=false): String? = when (choice) {
-    PathChoice.AUTO -> when { bluetooth -> "bluetooth"; lora -> "lora"; internet -> "internet"; satellite -> "satellite"; else -> null }
+/** Auto requires peer-specific radio/mailbox evidence. Manual routes remain selectable. */
+fun resolvePath(choice: PathChoice, bluetooth: Boolean, internet: Boolean, satellite: Boolean, lora:Boolean=false, relay:Boolean=false, mailboxKnown:Boolean=false, heardRadio:Boolean=false, voice:Boolean=false): String? = when (choice) {
+    PathChoice.AUTO -> when { bluetooth -> "bluetooth"; lora&&heardRadio -> "lora"; internet&&mailboxKnown -> "internet"; !voice&&lora&&relay -> "relay"; satellite -> "satellite"; else -> null }
     PathChoice.INTERNET -> if (internet) "internet" else null
     PathChoice.SATELLITE -> if (satellite) "satellite" else null
     PathChoice.LORA -> if(lora) "lora" else null

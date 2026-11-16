@@ -7,7 +7,7 @@ import net.meshstar.rnslite.*
 object VoiceInbox {
     const val MAX_BYTES = 4788
     private const val TTL = 7 * 24 * 60 * 60 * 1000L
-    fun consume(state: SatState, raw: ByteArray, me: Identity, at: Long, route: Route, carrier: String) {
+    fun consume(state: SatState, raw: ByteArray, me: Identity, at: Long, route: Route, carrier: String, viaPoint:Boolean=false, reception:net.meshstar.meshcore.Reception?=null) {
         if (raw.size !in 133..1400 || !raw.copyOfRange(0, 5).contentEquals(VoiceFrame.magic) ||
             !raw.copyOfRange(5, 21).contentEquals(me.lxmfAddress)) return
         val hash = Hash.sha256(raw).hex()
@@ -18,7 +18,7 @@ object VoiceInbox {
             if (state.messages.none { it.hash == hash }) {
                 require(state.messages.size < 10_000)
                 state.messages.add(ChatMessage(hash, src, false, "", raw.hex(), route, carrier, at,
-                    Delivery.DELIVERED, false, true, voice = VoiceNote(listOf(raw.hex()), "")))
+                    Delivery.DELIVERED, false, true, viaPoint=viaPoint, voice = VoiceNote(listOf(raw.hex()), "")))
             }
             if (contact == null) {
                 require(state.pendingVoice.size < 1000 || hash in state.pendingVoice)
@@ -27,6 +27,12 @@ object VoiceInbox {
             return
         }
         if (frame.mode != 1200 || frame.codec2.isEmpty() || (frame.part?.total ?: 1) > 4) return
+        if(route==Route.INTERNET)state.observeMailbox(src)
+        if(route==Route.LORA&&reception?.snr?.isFinite()==true){
+            val recent=state.radioObservations.getOrPut(src){mutableMapOf()}
+            recent.entries.removeAll{it.value>at||at-it.value>=300_000};recent[hash]=at
+            while(recent.size>32)recent.remove(recent.minBy{it.value}.key)
+        }
         val complete = state.messages.firstOrNull { !it.outgoing && it.verified && it.voice?.frames?.contains(raw.hex()) == true }
         if (complete != null) {
             if (!complete.voice!!.noProof) enqueue(state, complete.raw.unhex(), src, me, route, carrier)
@@ -58,7 +64,7 @@ object VoiceInbox {
         val lastHash = Hash.sha256(result.lastFrame).hex()
         if (state.messages.none { it.hash == lastHash }) state.messages.add(ChatMessage(lastHash, src, false, "",
             result.lastFrame.hex(), route, carrier, existing?.started ?: at, Delivery.DELIVERED, true, true,
-            voice = VoiceNote(frames, result.codec2.hex(), result.noProof)))
+            viaPoint=viaPoint, voice = VoiceNote(frames, result.codec2.hex(), result.noProof)))
         state.voiceParts.remove(key)
         frames.forEach { val h = Hash.sha256(it.unhex()).hex(); if (h !in state.seen) state.seen.add(h) }
         while (state.seen.size > 5000) state.seen.removeAt(0)

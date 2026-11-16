@@ -18,4 +18,6 @@
     <string name="ms_compliance_community_warning">Hors du tableau des bandes pour %1$s. Profil communautaire ; utilisation sous votre responsabilité.</string>
     <string name="ms_compliance_accept_warning">Confirmer et appliquer</string>
     <string name="ms_compliance_community_required">Confirmez l’avertissement du profil communautaire avant de l’appliquer.</string>
+    <string name="ms_recipient_offline">destinataire absent sur Internet · choisissez un autre trajet</string>
+    <string name="ms_voice_point">la voix vers ce contact nécessite le boîtier par Wi-Fi ou une boîte Internet confirmée</string>
 </resources>

@@ -100,7 +100,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
         UiPeer("rns:${c.address}", c.name, contactFingerprints.getValue(c.address), rns = c.address,
             verified = state.verifiedKeys[c.address] == c.key, preview = history.lastOrNull()?.let { if(it.voice!=null)context.getString(T.voice_preview.resource)else it.text }.orEmpty(),
             unread = history.count { !it.outgoing && it.at > (state.readThrough[c.address] ?: 0) },
-            paths = setOf(ChatTab.SATELLITE) + if(node.ready) setOf(ChatTab.LORA) else emptySet(), at = history.lastOrNull()?.at ?: 0, qr = c.qr)
+            paths = setOf(ChatTab.SATELLITE) + if(node.ready) setOf(ChatTab.LORA) else emptySet(), at = history.lastOrNull()?.at ?: 0, qr = c.qr, mailboxKnown=state.knowsMailbox(c.address),heardRadio=state.heardRadio(c.address,System.currentTimeMillis()))
     } + state.messages.map { it.peer }.distinct().filter { p -> state.contacts.none { it.address == p } }.map { p ->
         val history = histories[p].orEmpty()
         UiPeer("rns:$p", p.take(12), rns = p, preview = history.lastOrNull()?.text.orEmpty(),
@@ -132,7 +132,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
     val timelines = peers.associate { peer -> peer.id to (
         histories[peer.rns].orEmpty().map { m -> UiMessage(m.hash, if (m.outgoing) nickname else peer.name,
             if(m.voice!=null && !m.verified) context.getString(T.voice_unverified.resource) else m.text, m.at, m.outgoing, m.route, m.viaPoint, m.delivery,
-            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops, voice=m.voice?.codec?.takeIf{it.isNotEmpty()}?.unhex()) } +
+            if (m.outgoing) { if (m.delivery == Delivery.DELIVERED) true else null } else m.verified, peer.id, snr=m.radioSnr,hops=m.radioHops, voice=m.voice?.codec?.takeIf{it.isNotEmpty()}?.unhex(),mailboxUnavailable=m.mailboxUnavailable) } +
             peer.ble?.let { privateChats[it]?.map(::bleMessage) }.orEmpty() +
             (if(peer.id.startsWith("channel:")||peer.id.startsWith("native:"))state.channelTexts.filter { (net.meshstar.meshcore.Hashtag.id(it.channel)==peer.id)||("native:"+it.channel.removePrefix("direct:")==peer.id) }.map {
                 UiMessage(it.id,if(it.outgoing)node.name else peer.name,it.text,it.receivedAt,it.outgoing,Route.LORA,showDelivery=false,snr=it.snr,hops=it.hops,fromBox=it.fromBox)
@@ -160,10 +160,10 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                 is UiAction.SendVoice -> {
                     if(event.path==PathChoice.RELAY) {feedback=context.getString(T.voice_relay.resource);return false}
                     val peer=peers.firstOrNull { it.id==event.peer }
-                    val choice=resolvePath(event.path,false,currentState.internet.isNotEmpty(),currentState.box!=null && regionPolicy.state.value.satelliteAllowed,node.ready,false)
-                    if(choice==null){feedback=context.getString(T.route_unavailable.resource);return false}
+                    val choice=resolvePath(event.path,false,currentState.internet.isNotEmpty(),currentState.box!=null && regionPolicy.state.value.satelliteAllowed,node.ready,false,currentState.knowsMailbox(peer?.rns.orEmpty()),currentState.heardRadio(peer?.rns.orEmpty(),System.currentTimeMillis()),voice=true)
+                    if(choice==null){feedback=context.getString(if(event.path==PathChoice.AUTO)T.voice_point.resource else T.route_unavailable.resource);return false}
                     busy=true
-                    withContext(Dispatchers.IO){engine.sendVoice(peer?.rns?:error("Add RNS contact"),event.codec,when(choice){"lora"->Route.LORA;"internet"->Route.INTERNET;else->Route.SATELLITE})}
+                    withContext(Dispatchers.IO){engine.sendVoice(peer?.rns?:error("Add RNS contact"),event.codec,when(choice){"lora"->Route.LORA;"internet"->Route.INTERNET;else->Route.SATELLITE},automatic=event.path==PathChoice.AUTO)}
                 }
                 is UiAction.Send -> {
                     if(event.peer.startsWith("native:")) {
@@ -187,7 +187,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                             ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null && regionPolicy.state.value.satelliteAllowed,node.ready,currentState.box?.transportId!=null)
+                    val choice = resolvePath(event.path, peer?.nearby == true && bleReady, currentState.internet.isNotEmpty(), currentState.box != null && regionPolicy.state.value.satelliteAllowed,node.ready,currentState.box?.transportId!=null,currentState.knowsMailbox(peer?.rns.orEmpty()),currentState.heardRadio(peer?.rns.orEmpty(),System.currentTimeMillis()))
                     if (choice == null) { feedback = context.getString(T.route_unavailable.resource); return false }
                     if (choice == "bluetooth") {
                         check(ble != null); ble.startPrivateChat(peer?.ble ?: error("Unknown peer"))
@@ -195,7 +195,7 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
                             ble.sendMessage(event.text) { accepted -> if (continuation.isActive) continuation.resume(accepted, null) }
                         }
                     }
-                    withContext(Dispatchers.IO) { engine.send(peer?.rns ?: error("Add RNS contact"), event.text, when(choice){"internet"->Route.INTERNET;"lora"->Route.LORA;"relay"->Route.RELAY;else->Route.SATELLITE}) }
+                    withContext(Dispatchers.IO) { engine.send(peer?.rns ?: error("Add RNS contact"), event.text, when(choice){"internet"->Route.INTERNET;"lora"->Route.LORA;"relay"->Route.RELAY;else->Route.SATELLITE},automatic=event.path==PathChoice.AUTO) }
                 }
                 is UiAction.Read -> {
                     if(event.peer.startsWith("channel:")||event.peer.startsWith("native:"))withContext(Dispatchers.IO){engine.markRead(event.peer)}
@@ -289,6 +289,8 @@ fun SatelliteScreen(runtime: SatRuntime, incoming: String, consumeLink: () -> Un
 
 fun localizedFailure(context: Context, status: String): String {
     val key = when {
+        status == "routing.recipient_offline" -> T.recipient_offline
+        status == "routing.voice_point" -> T.voice_point
         status == "compliance.community_required" -> T.compliance_community_required
         status == "compliance.required" -> T.compliance_required
         status == "compliance.satellite" -> T.compliance_satellite

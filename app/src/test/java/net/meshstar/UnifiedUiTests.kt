@@ -29,7 +29,12 @@ class UnifiedUiTests {
     }
     @Test fun autoPrioritizesAvailableFreePathsAndManualNeverFallsBack() {
         assertEquals("bluetooth", resolvePath(PathChoice.AUTO, true, true, true))
-        assertEquals("internet", resolvePath(PathChoice.AUTO, false, true, true))
+        assertEquals("satellite", resolvePath(PathChoice.AUTO, false, true, true))
+        assertEquals("internet", resolvePath(PathChoice.AUTO, false, true, true,mailboxKnown=true))
+        assertEquals("satellite", resolvePath(PathChoice.AUTO,false,true,true,lora=true,relay=true,voice=true))
+        assertEquals("relay", resolvePath(PathChoice.AUTO,false,true,true,lora=true,relay=true))
+        assertEquals("lora", resolvePath(PathChoice.AUTO,false,true,true,lora=true,heardRadio=true,voice=true))
+        assertNull(resolvePath(PathChoice.AUTO,false,true,false,lora=true,relay=true,voice=true))
         assertEquals("satellite", resolvePath(PathChoice.AUTO, false, false, true))
         assertNull(resolvePath(PathChoice.AUTO, false, false, false))
         assertNull(resolvePath(PathChoice.LORA, true, true, true))

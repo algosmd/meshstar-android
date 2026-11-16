@@ -99,10 +99,12 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         change { it.internet = endpoint }
     }
     var satelliteAllowed: ()->Boolean = { true }
-    suspend fun send(peer: String, text: String, route: Route): String {
+    suspend fun send(peer: String, text: String, route: Route, automatic: Boolean = false): String {
         check(route!=Route.SATELLITE||satelliteAllowed()){ "compliance.satellite" }
         require(text.isNotBlank()) { "Enter a message" }
         val s = state.value
+        if(automatic&&route==Route.INTERNET)require(s.knowsMailbox(peer)){"routing.recipient_offline"}
+        if(automatic&&route==Route.LORA)require(s.heardRadio(peer,now().toEpochMilli())){"routing.voice_point"}
         val contact = s.contacts.firstOrNull { it.address == peer } ?: error("Add the contact first")
         val carrier = when (route) {
             Route.LORA, Route.RELAY -> s.node?.publicKey ?: error("Configure the node first")
@@ -116,15 +118,17 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         change {
             require(it.messages.count { m -> m.outgoing && !m.submitted } < 1000) { "Outbox is full" }
             require(it.messages.size < 10_000) { "History is full" }
-            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli(), viaPoint = route in setOf(Route.SATELLITE,Route.RELAY) && point.value, relayTransportId=relayId))
+            it.messages.add(ChatMessage(packet.hash.hex(), peer, true, text, packet.raw.hex(), route, carrier, now().toEpochMilli(), viaPoint = route in setOf(Route.SATELLITE,Route.RELAY) && point.value, relayTransportId=relayId,automatic=automatic))
         }
         return packet.hash.hex()
     }
-    suspend fun sendVoice(peer: String, codec: ByteArray, route: Route): String {
+    suspend fun sendVoice(peer: String, codec: ByteArray, route: Route, automatic: Boolean = false): String {
         check(route!=Route.SATELLITE||satelliteAllowed()){ "compliance.satellite" }
         require(route != Route.RELAY) { "Voice cannot use Relay" }
         require(codec.size in 6..net.meshstar.voice.VoiceInbox.MAX_BYTES && codec.size % 6 == 0)
         val s = state.value
+        if(automatic&&route==Route.INTERNET)require(s.knowsMailbox(peer)){"routing.recipient_offline"}
+        if(automatic&&route==Route.LORA)require(s.heardRadio(peer,now().toEpochMilli())){"routing.voice_point"}
         val contact = s.contacts.firstOrNull { it.address == peer } ?: error("Add the contact first")
         val carrier = when (route) {
             Route.LORA -> s.node?.publicKey ?: error("Configure the node first")
@@ -141,7 +145,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             require(it.messages.size < 10_000 && it.messages.count { m -> m.outgoing && !m.submitted } < 1000)
             it.messages.add(ChatMessage(hash, peer, true, "", last.hex(), route, carrier, now().toEpochMilli(),
                 viaPoint = route == Route.SATELLITE && point.value,
-                voice = VoiceNote(frames.map { frame -> frame.frame.hex() }, codec.hex())))
+                voice = VoiceNote(frames.map { frame -> frame.frame.hex() }, codec.hex()),automatic=automatic))
         }
         return hash
     }
@@ -158,19 +162,35 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             }
         }
     }
+    suspend fun expireMailboxQueue(radioReady:Boolean=false) {
+        val at=now().toEpochMilli()
+        if(state.value.messages.none{it.outgoing&&it.route==Route.INTERNET&&it.delivery!=Delivery.DELIVERED&&!it.mailboxUnavailable&&it.voice?.noProof!=true&&at-it.at>600_000})return
+        change { next ->
+            for(i in next.messages.indices){
+                val m=next.messages[i]
+                if(!m.outgoing||m.route!=Route.INTERNET||m.delivery==Delivery.DELIVERED||m.mailboxUnavailable||m.voice?.noProof==true||at-m.at<=600_000)continue
+                val node=next.node?.publicKey
+                next.messages[i]=if(m.automatic&&radioReady&&node!=null&&next.heardRadio(m.peer,at))
+                    m.copy(route=Route.LORA,carrier=node,submitted=false,serverId=0,delivery=Delivery.QUEUED,viaPoint=false,voice=m.voice?.copy(submittedParts=0))
+                else m.copy(mailboxUnavailable=true)
+            }
+        }
+    }
     suspend fun flushOutgoing(route: Route) {
         if(route==Route.SATELLITE&&!satelliteAllowed())return
         val s = state.value
         val carrier = if (route == Route.SATELLITE) s.box?.address ?: return else s.internet.takeIf { it.isNotEmpty() }?.let(::carrierId) ?: return
-        for (message in s.messages.filter { it.outgoing && !it.submitted && it.route == route && it.carrier == carrier }) {
+        for (message in s.messages.filter { it.outgoing && !it.submitted && !it.mailboxUnavailable && it.route == route && it.carrier == carrier }) {
+            if(state.value.messages.none{it.hash==message.hash&&it.route==route&&!it.mailboxUnavailable&&it.delivery!=Delivery.DELIVERED})continue
             if (message.voice != null) {
                 for (index in message.voice.submittedParts until message.voice.frames.size) {
+                    if(state.value.messages.none{it.hash==message.hash&&it.route==route&&!it.mailboxUnavailable&&it.delivery!=Delivery.DELIVERED})break
                     val raw = message.voice.frames[index].unhex()
                     val id = if (route == Route.SATELLITE) { if(!satelliteAllowed())return; BoxTransport(s.box!!, http).sendVoice(raw) } else {
                         val contact = s.contacts.firstOrNull { it.address == message.peer } ?: error("Unknown contact")
                         MailboxTransport(s.internet, http).drop(raw, mailboxTo(contact), "voice")
                     }
-                    change { next -> next.messages.firstOrNull { it.hash == message.hash }?.let {
+                    change { next -> next.messages.firstOrNull { it.hash == message.hash && it.route == route && !it.mailboxUnavailable }?.let {
                         it.voice!!.submittedParts = index + 1
                         if (it.serverId == 0L) it.serverId = id
                         it.submitted = index == it.voice.frames.lastIndex
@@ -184,7 +204,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
                 val contact = s.contacts.firstOrNull { it.address == message.peer } ?: continue
                 MailboxTransport(s.internet, http).drop(packet.raw, mailboxTo(contact))
             }
-            change { next -> next.messages.firstOrNull { it.hash == message.hash }?.let {
+            change { next -> next.messages.firstOrNull { it.hash == message.hash && it.route == route && !it.mailboxUnavailable }?.let {
                 it.submitted = true; it.serverId = id
                 if (route == Route.SATELLITE) it.viaPoint = point.value
                 if (route == Route.INTERNET && it.delivery != Delivery.DELIVERED) it.delivery = Delivery.SENT
@@ -261,7 +281,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
         // Invalid carrier rows are consumed without confirmation, not retried forever.
         val raw = runCatching { hex.unhex() }.getOrNull() ?: return
         if (kind == "voice") {
-            net.meshstar.voice.VoiceInbox.consume(state, raw, identity, now().toEpochMilli(), route, carrier)
+            net.meshstar.voice.VoiceInbox.consume(state, raw, identity, now().toEpochMilli(), route, carrier, viaPoint=route==Route.SATELLITE&&point.value, reception=reception)
             return
         }
         val packet = runCatching { Packet(raw) }.getOrNull() ?: return
@@ -270,11 +290,12 @@ class SatEngine(val identity: Identity, private val store: StateStore,
                 val contact = state.contacts.firstOrNull { it.address == message.peer } ?: continue
                 if (if (message.voice != null) VoiceFrame.validateProof(packet, message.raw.unhex(), contact.identity) else Packet(message.raw.unhex()).validateProof(packet, contact.identity)) {
                     if(message.delivery!=Delivery.DELIVERED && route==Route.LORA && message.route==Route.LORA) {
-                        val recent=state.radioObservations[message.peer].orEmpty()
-                        message.viaPoint=point.value && recent.none { (hash,at)->hash!=packet.hash.hex()&&at<=now().toEpochMilli()&&now().toEpochMilli()-at<300000 }
+                        message.viaPoint=point.value && !state.heardRadio(message.peer,now().toEpochMilli(),packet.hash.hex())
                         if(!message.viaPoint)observeRadio(state,message.peer,packet.hash.hex(),reception)
                     }
                     if(route==Route.LORA){message.radioSnr=reception?.snr;message.radioHops=reception?.hops}
+                    if(route==Route.INTERNET)state.observeMailbox(message.peer)
+                    message.mailboxUnavailable=false
                     message.delivery = Delivery.DELIVERED
                 }
             }
@@ -292,6 +313,7 @@ class SatEngine(val identity: Identity, private val store: StateStore,
             }.getOrNull() ?: return
         }
         val hash = packet.hash.hex()
+        if(decoded.third && route==Route.INTERNET)state.observeMailbox(decoded.first)
         if(decoded.third && route==Route.LORA)observeRadio(state,decoded.first,hash,reception)
         if (hash !in state.seen && state.messages.none { it.hash == hash }) {
             val text = runCatching {

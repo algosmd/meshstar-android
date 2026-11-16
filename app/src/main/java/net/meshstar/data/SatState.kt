@@ -16,6 +16,7 @@ data class ChatMessage(
     val relayTransportId: String? = null,
     var radioSnr: Double? = null, var radioHops: Int? = null,
     val voice: VoiceNote? = null,
+    val automatic: Boolean = false, var mailboxUnavailable: Boolean = false,
 )
 data class VoiceNote(val frames: List<String>, val codec: String, val noProof: Boolean = false,
     var submittedParts: Int = 0) {
@@ -48,6 +49,7 @@ data class SatState(
     val channelNames: MutableMap<Int,String> = mutableMapOf(),
     val channelTexts: MutableList<ChannelText> = mutableListOf(),
     val channelCursors: MutableMap<String,Double> = mutableMapOf(),
+    var mailboxPeers: MutableSet<String>? = null,
     val radioObservations: MutableMap<String,MutableMap<String,Long>> = mutableMapOf(),
 
 )
@@ -57,3 +59,7 @@ class EncryptedStateStore(private val files: EncryptedFiles) : StateStore {
     override fun load(): SatState = files.read("state")?.let { gson.fromJson(it.toString(Charsets.UTF_8), SatState::class.java) } ?: SatState()
     override fun save(state: SatState) = files.write("state", gson.toJson(state).toByteArray())
 }
+
+fun SatState.heardRadio(peer:String,at:Long,excluding:String=""):Boolean = radioObservations[peer].orEmpty().any { (hash,time)->hash!=excluding&&time<=at&&at-time<300_000 }
+fun SatState.knowsMailbox(peer:String):Boolean = mailboxPeers?.contains(peer)==true || messages.any{!it.outgoing&&it.peer==peer&&it.verified&&it.route==Route.INTERNET}
+fun SatState.observeMailbox(peer:String){if(contacts.none{it.address==peer})return;if(mailboxPeers==null)mailboxPeers=mutableSetOf();mailboxPeers!!.add(peer)}

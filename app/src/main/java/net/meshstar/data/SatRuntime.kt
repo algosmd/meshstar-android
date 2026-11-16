@@ -54,7 +54,7 @@ class SatRuntime private constructor(private val context: Context) {
                     engine.refreshBoxStatus(); engine.flushOutgoing(Route.SATELLITE); engine.pollBox(); boxStatus.value = "Box available"
                 } }
                 launch { loop(MutableStateFlow(""), 30_000) { engine.pollChannelHistory() } }
-                launch { loop(mailStatus, 2_000) { engine.flushOutgoing(Route.INTERNET) } }
+                launch { loop(mailStatus, 2_000) { engine.expireMailboxQueue(node.value?.state?.value?.ready==true); engine.flushOutgoing(Route.INTERNET) } }
                 launch { loop(mailStatus, 500) {
                     if (engine.state.value.internet.isEmpty()) { mailStatus.value = "Internet server disabled"; delay(2_000); return@loop }
                     if (engine.state.value.contacts.isEmpty()) { mailStatus.value = "Add a contact to receive"; delay(2_000); return@loop }
@@ -101,7 +101,7 @@ class SatRuntime private constructor(private val context: Context) {
     }
 }
 
-fun safeFailure(error: Throwable): String = if(error.message in setOf("compliance.required","compliance.satellite","compliance.band_error","compliance.community_required"))error.message!! else when (error) {
+fun safeFailure(error: Throwable): String = if(error.message in setOf("routing.voice_point","routing.recipient_offline","compliance.required","compliance.satellite","compliance.band_error","compliance.community_required"))error.message!! else when (error) {
     is net.meshstar.box.CleartextEndpointRejected -> "HTTPS required for public servers"
     is net.meshstar.meshcore.NodeError -> "Node:"+error.code.name
     is HttpFailure -> when (error.code) {

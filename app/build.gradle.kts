@@ -39,7 +39,7 @@ android {
         // Retain upstream protocol sources without enabling hidden relay services.
         buildConfigField("boolean", "ENABLE_NOSTR", "false")
         buildConfigField("boolean", "ENABLE_APK_DOWNLOAD", "false")
-        versionCode = 15
+        versionCode = 16
         versionName = "0.4.0"
         buildConfigField(
             "String",
